@@ -1,0 +1,196 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum
+from typing import Tuple, Union
+
+from flasgger import swag_from
+from flask import Blueprint, request, jsonify
+from marshmallow import Schema, fields, ValidationError
+from marshmallow_enum import EnumField
+
+# Blueprint for pathfinding routes
+pathfinding_blueprint = Blueprint('pathfinding', __name__)
+
+
+@pathfinding_blueprint.route('/pathfinding', methods=['POST'])
+@swag_from({
+    'parameters': [
+        {
+            'name': 'body',
+            'in': 'body',
+            'required': 'true',
+            'schema': {
+                'id': 'Obstacle',
+                'required': ['direction', 'south_west', 'north_east'],
+                'properties': {
+                    'direction': {
+                        'type': 'string',
+                        'enum': ['NORTH', 'EAST', 'SOUTH', 'WEST']
+                    },
+                    'south_west': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'integer'
+                        },
+                        'minItems': 2,
+                        'maxItems': 2
+                    },
+                    'north_east': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'integer'
+                        },
+                        'minItems': 2,
+                        'maxItems': 2
+                    }
+                }
+            }
+        }
+    ],
+    'responses': {
+        '200': {
+            'description': 'Successful operation',
+            'schema': {
+                'id': 'ResponseBody',
+                'properties': {
+                    'distance': {
+                        'type': 'number',
+                        'format': 'float'
+                    },
+                    'instructions': {
+                        'type': 'array',
+                        'items': {
+                            'oneOf': [
+                                {
+                                    'type': 'object',
+                                    'properties': {
+                                        'instruction': {
+                                            'type': 'string',
+                                            'enum': ['RESET_GYROSCOPE', 'STOP', 'CAPTURE_IMAGE']
+                                        }
+                                    },
+                                    'required': ['instruction']
+                                },
+                                {
+                                    'type': 'object',
+                                    'properties': {
+                                        'move': {
+                                            'type': 'string',
+                                            'enum': ['FORWARD', 'FORWARD_LEFT', 'FORWARD_RIGHT', 'BACKWARD',
+                                                     'BACKWARD_LEFT', 'BACKWARD_RIGHT']
+                                        },
+                                        'amount': {
+                                            'type': 'integer'
+                                        }
+                                    },
+                                    'required': ['move', 'amount']
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        '400': {
+            'description': 'Invalid input',
+        }
+    }
+})
+def pathfinding():
+    try:
+        data = RequestBodySchema().load(request.json)
+        # TODO: add actual pathfinding algorithm
+
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+
+
+@dataclass
+class RequestBody:
+    """
+    Represents a pathfinding request.
+
+    Attributes:
+        obstacles (List[PathfindingRequestObstacle]): The obstacles that the pathfinding algorithm needs to avoid.
+                                                      Ordering does not matter.
+    """
+    obstacles: [Obstacle]
+
+
+@dataclass
+class Obstacle:
+    """
+    Represents an obstacle in a pathfinding request.
+
+    Attributes:
+        direction (Direction): The direction of the image on the obstacle.
+        south_west (Tuple[int, int]): The coordinates of the south-west corner of the obstacle.
+        north_east (Tuple[int, int]): The coordinates of the north-east corner of the obstacle.
+    """
+    direction: Direction
+    south_west: Tuple[int, int]
+    north_east: Tuple[int, int]
+
+
+class Direction(Enum):
+    NORTH = 1
+    EAST = 2
+    SOUTH = 3
+    WEST = 4
+
+
+@dataclass
+class ObstacleSchema(Schema):
+    direction = EnumField(Direction)
+    south_west = fields.Tuple((fields.Int(), fields.Int()))
+    north_east = fields.Tuple((fields.Int(), fields.Int()))
+
+
+@dataclass
+class RequestBodySchema(Schema):
+    obstacles = fields.List(fields.Nested(ObstacleSchema()))
+
+
+@dataclass
+class ResponseBody:
+    """
+    Represents the response body for a pathfinding request.
+
+    Attributes:
+        distance (float): The total distance of the calculated path.
+        instructions (List[Union[ConstantInstruction, MoveInstruction]]): The instructions for traversing the obstacles
+            in the given request.
+    """
+    distance: float
+    instructions: [Union[ConstantInstruction, MoveInstruction]]
+
+
+class ConstantInstruction(Enum):
+    RESET_GYROSCOPE = 1
+    STOP = 2
+    CAPTURE_IMAGE = 3
+
+
+@dataclass
+class MoveInstruction:
+    move: Move
+    amount: int
+
+
+class Move(Enum):
+    FORWARD = 1
+    FORWARD_LEFT = 2
+    FORWARD_RIGHT = 3
+    BACKWARD = 4
+    BACKWARD_LEFT = 5
+    BACKWARD_RIGHT = 6
+
+
+class ConstantInstructionSchema(Schema):
+    instruction = EnumField(ConstantInstruction)
+
+
+class MoveInstructionSchema(Schema):
+    move = EnumField(Move)
+    amount = fields.Int()
