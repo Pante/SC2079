@@ -22,3 +22,5 @@ gradle-app.setting
 .classpath
 
 **/__pycache__/
+
+*.iml
