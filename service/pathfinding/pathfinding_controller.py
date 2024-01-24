@@ -9,6 +9,8 @@ from flask import Blueprint, request, jsonify
 from marshmallow import Schema, fields, ValidationError
 from marshmallow_enum import EnumField
 
+from grid import Obstacle, Direction
+
 # Blueprint for pathfinding routes
 pathfinding_blueprint = Blueprint('pathfinding', __name__)
 
@@ -99,7 +101,7 @@ pathfinding_blueprint = Blueprint('pathfinding', __name__)
 })
 def pathfinding():
     try:
-        data = RequestBodySchema().load(request.json)
+        data: RequestBody = RequestBodySchema().load(request.json)
         # TODO: add actual pathfinding algorithm
 
     except ValidationError as err:
@@ -116,28 +118,6 @@ class RequestBody:
                                                       Ordering does not matter.
     """
     obstacles: [Obstacle]
-
-
-@dataclass
-class Obstacle:
-    """
-    Represents an obstacle in a pathfinding request.
-
-    Attributes:
-        direction (Direction): The direction of the image on the obstacle.
-        south_west (Tuple[int, int]): The coordinates of the south-west corner of the obstacle.
-        north_east (Tuple[int, int]): The coordinates of the north-east corner of the obstacle.
-    """
-    direction: Direction
-    south_west: Tuple[int, int]
-    north_east: Tuple[int, int]
-
-
-class Direction(Enum):
-    NORTH = 1
-    EAST = 2
-    SOUTH = 3
-    WEST = 4
 
 
 @dataclass
