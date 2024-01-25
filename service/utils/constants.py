@@ -3,16 +3,19 @@ from enum import Enum
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
+
 class Direction(Enum):
     NORTH = 1
     EAST = 2
     SOUTH = 3
     WEST = 4
 
+
 class ConstantInstruction(Enum):
     RESET_GYROSCOPE = 1
     STOP = 2
     CAPTURE_IMAGE = 3
+
 
 class Move(Enum):
     FORWARD = 1
@@ -22,10 +25,12 @@ class Move(Enum):
     BACKWARD_LEFT = 5
     BACKWARD_RIGHT = 6
 
+
 @dataclass
 class MoveInstruction:
     move: Move
     amount: int
+
 
 class ConstantInstructionSchema(Schema):
     instruction = EnumField(ConstantInstruction)
@@ -34,6 +39,7 @@ class ConstantInstructionSchema(Schema):
 class MoveInstructionSchema(Schema):
     move = EnumField(Move)
     amount = fields.Int()
+
 
 # Angle constants
 NORTH = 0
