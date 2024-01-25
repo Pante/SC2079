@@ -4,32 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Tuple
 
-
-class Grid:
-    """
-    Attributes:
-        width (int): The grid's width (x-axis).
-        height (int): The grid's height (y-axis).
-        __cells (dict[Tuple[int, int], Entity]): The south-west corners of the entities in the grid.
-    """
-    width: int
-    height: int
-    __cells: dict[Tuple[int, int], Entity]
-
-    def __init__(self, width: int, height: int, robot: Robot, obstacles: [Obstacle]):
-        assert 0 <= robot.north_east[0] < width
-        assert 0 <= robot.north_east[1] < height
-
-        self.width = width
-        self.height = height
-        self.__cells = {robot.south_west: robot}
-
-        for obstacle in obstacles:
-            assert 0 <= obstacle.north_east[0] < width
-            assert 0 <= obstacle.north_east[1] < height
-
-            self.__cells[obstacle.south_west] = obstacle
-
+from service.utils.constants import Direction
 
 @dataclass
 class Entity:
@@ -54,13 +29,7 @@ class Entity:
 
     def center_y(self) -> int:
         return (self.north_east[1] - self.south_west[1]) // 2
-
-
-@dataclass
-class Robot(Entity):
-    pass
-
-
+    
 @dataclass
 class Objective(Entity):
     """
@@ -70,6 +39,10 @@ class Objective(Entity):
 
     def __post_init__(self):
         assert 1 <= self.image_id < 36
+
+@dataclass
+class Robot(Entity):
+    pass
 
 
 @dataclass
@@ -131,9 +104,28 @@ class Obstacle(Entity):
                     self.image_id
                 )
 
+class Grid:
+    """
+    Attributes:
+        width (int): The grid's width (x-axis).
+        height (int): The grid's height (y-axis).
+        __cells (dict[Tuple[int, int], Entity]): The south-west corners of the entities in the grid.
+    """
+    width: int
+    height: int
+    __cells: dict[Tuple[int, int], Entity]
 
-class Direction(Enum):
-    NORTH = 1
-    EAST = 2
-    SOUTH = 3
-    WEST = 4
+    def __init__(self, width: int, height: int, robot: Robot, obstacles: [Obstacle]):
+        assert 0 <= robot.north_east[0] < width
+        assert 0 <= robot.north_east[1] < height
+
+        self.width = width
+        self.height = height
+        self.__cells = {robot.south_west: robot}
+
+        for obstacle in obstacles:
+            assert 0 <= obstacle.north_east[0] < width
+            assert 0 <= obstacle.north_east[1] < height
+
+            self.__cells[obstacle.south_west] = obstacle
+

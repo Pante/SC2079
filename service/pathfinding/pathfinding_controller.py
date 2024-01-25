@@ -10,6 +10,7 @@ from marshmallow import Schema, fields, ValidationError
 from marshmallow_enum import EnumField
 
 from grid import Obstacle, Direction
+from service.utils.constants import ConstantInstruction, MoveInstruction
 
 # Blueprint for pathfinding routes
 pathfinding_blueprint = Blueprint('pathfinding', __name__)
@@ -145,32 +146,3 @@ class ResponseBody:
     distance: float
     instructions: [Union[ConstantInstruction, MoveInstruction]]
 
-
-class ConstantInstruction(Enum):
-    RESET_GYROSCOPE = 1
-    STOP = 2
-    CAPTURE_IMAGE = 3
-
-
-@dataclass
-class MoveInstruction:
-    move: Move
-    amount: int
-
-
-class Move(Enum):
-    FORWARD = 1
-    FORWARD_LEFT = 2
-    FORWARD_RIGHT = 3
-    BACKWARD = 4
-    BACKWARD_LEFT = 5
-    BACKWARD_RIGHT = 6
-
-
-class ConstantInstructionSchema(Schema):
-    instruction = EnumField(ConstantInstruction)
-
-
-class MoveInstructionSchema(Schema):
-    move = EnumField(Move)
-    amount = fields.Int()
