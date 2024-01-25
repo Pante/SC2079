@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 from flasgger import Swagger
 from flask import Flask
-
 from pathfinding.pathfinding_controller import pathfinding_blueprint
 
 app = Flask(__name__)
