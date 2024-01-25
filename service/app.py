@@ -16,7 +16,7 @@ def image_prediction():
     return 'Hello World!'
 
 
-@app.route('/image/stitch', methods=['POST'])
+@app.route('/image/stitch', methods=['GET'])
 def image_stitch():
     return 'Hello World!'
 
