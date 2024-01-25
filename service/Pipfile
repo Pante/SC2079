@@ -9,6 +9,7 @@ flasgger = "*"
 jinja2 = "*"
 marshmallow = "*"
 marshmallow_enum="*"
+numpy = "*"
 
 [dev-packages]
 
