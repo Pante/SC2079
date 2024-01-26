@@ -1,0 +1,6 @@
+../Core/Src/motion.c:18:6:motion_init	16	static
+../Core/Src/motion.c:24:6:read_gyroZ	16	static
+../Core/Src/motion.c:29:6:read_accel	24	static
+../Core/Src/motion.c:34:7:read_mag	24	static
+../Core/Src/motion.c:40:6:read_heading	16	static
+../Core/Src/motion.c:45:6:init_bias	16	static

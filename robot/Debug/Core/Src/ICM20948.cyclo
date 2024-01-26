@@ -1,0 +1,14 @@
+../Core/Src/ICM20948.c:25:19:_ICM20948_SelectUserBank	2
+../Core/Src/ICM20948.c:42:19:_ICM20948_WriteByte	2
+../Core/Src/ICM20948.c:58:19:_ICM20948_ReadByte	2
+../Core/Src/ICM20948.c:74:19:_ICM20948_BrustRead	2
+../Core/Src/ICM20948.c:90:19:_AK09916_WriteByte	1
+../Core/Src/ICM20948.c:105:19:_AK09916_ReadByte	1
+../Core/Src/ICM20948.c:120:19:_AK09916_BrustRead	1
+../Core/Src/ICM20948.c:135:9:ICM20948_isI2cAddress1	2
+../Core/Src/ICM20948.c:145:9:ICM20948_isI2cAddress2	2
+../Core/Src/ICM20948.c:155:6:ICM20948_init	1
+../Core/Src/ICM20948.c:235:7:movingAvg	2
+../Core/Src/ICM20948.c:249:6:ICM20948_readGyroscope_Z	5
+../Core/Src/ICM20948.c:273:6:ICM20948_readAccelerometer_all	5
+../Core/Src/ICM20948.c:310:6:ICM20948_readMagnetometer_XY	2
