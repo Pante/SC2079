@@ -9,8 +9,7 @@ from flask import Blueprint, request, jsonify
 from marshmallow import Schema, fields, ValidationError
 from marshmallow_enum import EnumField
 
-from grid import Obstacle, Direction
-from service.utils.constants import ConstantInstruction, MoveInstruction
+from entities import Obstacle, Direction
 
 # Blueprint for pathfinding routes
 pathfinding_blueprint = Blueprint('pathfinding', __name__)

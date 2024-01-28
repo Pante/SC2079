@@ -1,0 +1,4 @@
+../Core/Src/display_status.c:5:6:write_arr	64	static
+../Core/Src/display_status.c:11:6:write_motion	48	static
+../Core/Src/display_status.c:18:6:write_motors	32	static
+../Core/Src/display_status.c:28:6:display_init	8	static

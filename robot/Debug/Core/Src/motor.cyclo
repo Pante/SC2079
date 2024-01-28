@@ -1,0 +1,9 @@
+../Core/Src/motor.c:28:6:timer_reset	1
+../Core/Src/motor.c:32:6:setPwmLR	3
+../Core/Src/motor.c:42:6:resetPwmParams	1
+../Core/Src/motor.c:48:6:pwmCorrection	3
+../Core/Src/motor.c:75:6:triggerPwmCorrection	3
+../Core/Src/motor.c:87:6:motor_init	1
+../Core/Src/motor.c:100:6:setDriveDir	2
+../Core/Src/motor.c:121:6:setDriveSpeed	2
+../Core/Src/motor.c:131:6:getMotorVals	1

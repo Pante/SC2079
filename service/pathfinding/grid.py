@@ -129,3 +129,4 @@ class Grid:
 
             self.__cells[obstacle.south_west] = obstacle
 
+
