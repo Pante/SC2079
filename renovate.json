@@ -2,7 +2,6 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "dependencyDashboard": true,
   "addLabels": ["dependencies"],
-  "prCreation": "not-pending",
 
   "packageRules": [
     {
