@@ -1,6 +1,29 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
+  "dependencyDashboard": true,
+  "addLabels": ["dependencies"],
+  "prCreation": "not-pending",
+
+  "packageRules": [
+    {
+      "groupName": "GitHub Actions",
+      "matchPaths": [".github/**"],
+      "matchUpdateTypes": ["major", "minor", "patch", "pin", "digest"],
+      "automerge": true
+    },
+
+
+    {
+      "groupName": "Java - Major Revisions",
+      "matchPaths": ["android/**"],
+      "matchUpdateTypes": ["major"]
+    },
+
+    {
+      "groupName": "Java - Minor Revisions",
+      "matchPaths": ["android/**"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    }
   ]
 }
