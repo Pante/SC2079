@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView
+        android:id="@+id/label_dialog_bluetooth_title"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:text="@string/bluetooth_connection"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorLabelDialogTitle"
+        android:background="@color/colorAppTheme"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btconn_instructions"
+            android:layout_marginTop="15dp"
+            android:text="@string/bluetooth_disconnect_prompt"
+            android:textSize="16sp"
+            android:gravity="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/listview_border">
+            <ListView
+                android:id="@+id/listView_devices"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_marginBottom="8dp"
+                android:divider="#e0e0e0"
+                android:dividerHeight="1dp"
+                android:fadeScrollbars="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_scan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:background="@color/colorAppTheme"
+            android:textColor="@color/colorButtonTextTheme"
+            android:text="@string/button_scan_devices"
+            app:layout_constraintStart_toStartOf="parent" />
+        <Button
+            android:id="@+id/button_bluetooth_server_listen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@color/colorAppTheme"
+            android:textColor="@color/colorButtonTextTheme"
+            android:text="@string/start_bt_server"
+            app:layout_constraintStart_toStartOf="parent" />
+    </LinearLayout>
+</LinearLayout>

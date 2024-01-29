@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="colorAppTheme">#F08080</color>
+    <color name="colorAppThemeDark">#ff6060</color>
+    <color name="colorYellow">#ffbf00</color>
+    <color name="colorSecondaryTheme">#FF8C00</color>
+    <!-->
+    <color name="colorSecondaryTheme">#3A96C2</color>
+    <color name="colorAppTheme">#3f51b5</color>
+    <!-->
+
+    <color name="colorButtonTextTheme">#FFFFFF</color>
+    <color name="colorLabelNotConnected">#d32f2f</color>
+    <color name="colorLabelConnected">#388e3c</color>
+    <color name="colorLabelDialogTitle">#FAFAFA</color>
+</resources>
