@@ -67,6 +67,17 @@ class World:
                     if self.grid[x, y] == -1:
                         return clearance
 
+    def can_contain(self, entity: Entity) -> bool:
+        if not self.__inside(entity):
+            return False
+
+        for x in range(entity.south_west.x, entity.north_east.x):
+            for y in range(entity.south_west.y, entity.north_east.y):
+                if self.grid[x, y] == -1:
+                    return False
+
+        return True
+
 
 @dataclass
 class Entity:
