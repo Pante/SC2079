@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import List
 
 from pathfinding.world.world import Entity, World, Obstacle, Direction, Point
 
@@ -18,7 +19,7 @@ The maximum distance (in grid cells) between the obstacle and objective, exclusi
 MAXIMUM_GAP = 5
 
 
-def generate_objectives(world: World) -> [Objective]:
+def generate_objectives(world: World) -> List[Objective]:
     return [
         objective for obstacle in world.obstacles if (objective := __generate_objective(world, obstacle)) is not None
     ]
