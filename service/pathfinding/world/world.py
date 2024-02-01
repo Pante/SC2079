@@ -35,26 +35,34 @@ class Direction(Enum):
     SOUTH = 3
     WEST = 4
 
-    def same_axis(self, direction: Direction) -> bool:
-        """
-        Determines if both directions are on the same axis, i.e. NORTH and SOUTH, EAST and WEST, or NORTH and NORTH.
 
-        :param direction: The other direction.
-        :return: True if both directions are on the same axis.
-        """
-        return self == direction or self == direction.opposite
+MOVE_DIRECTION = [
+    (1, 0, Direction.EAST),
+    (-1, 0, Direction.WEST),
+    (0, 1, Direction.NORTH),
+    (0, -1, Direction.SOUTH),
+]
 
-    @property
-    def opposite(self) -> Direction:
-        match self:
-            case Direction.NORTH:
-                return Direction.SOUTH
-            case Direction.EAST:
-                return Direction.WEST
-            case Direction.WEST:
-                return Direction.EAST
-            case Direction.SOUTH:
-                return Direction.NORTH
+def same_axis(self, direction: Direction) -> bool:
+    """
+    Determines if both directions are on the same axis, i.e. NORTH and SOUTH, EAST and WEST, or NORTH and NORTH.
+
+    :param direction: The other direction.
+    :return: True if both directions are on the same axis.
+    """
+    return self == direction or self == direction.opposite
+
+@property
+def opposite(self) -> Direction:
+    match self:
+        case Direction.NORTH:
+            return Direction.SOUTH
+        case Direction.EAST:
+            return Direction.WEST
+        case Direction.WEST:
+            return Direction.EAST
+        case Direction.SOUTH:
+            return Direction.NORTH
 
 
 class World:
@@ -69,7 +77,12 @@ class World:
     robot: Robot
     obstacles: [Obstacle]
 
-    def __init__(self, width: int, height: int, robot: Robot, obstacles: List[Obstacle]):
+    def __init__(
+    self,
+    width: int,
+    height: int,
+    robot: Robot,
+     obstacles: List[Obstacle]):
         assert self.__inside(robot)
         assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
 
@@ -91,7 +104,9 @@ class World:
     def __annotate_obstacles(self: World) -> None:
         for obstacle in self.obstacles:
             for x in range(obstacle.south_west.x, obstacle.north_east.x + 1):
-                for y in range(obstacle.south_west.y, obstacle.north_east.y + 1):
+                for y in range(
+    obstacle.south_west.y,
+     obstacle.north_east.y + 1):
                     self.grid[x, y] = -1
 
     def __annotate_true_clearance(self: World) -> None:

@@ -6,7 +6,12 @@ It exports
 ## Building/Running
 
 The module is created using Python 3.12 and Flask. It uses `pipenv` to manage dependencies. The following instructions
-assume you're in the service directory.
+assumes you're already in the service directory.
+
+Else, change to service directory:
+```shell
+cd service
+```
 
 To install dependencies:
 ```shell
