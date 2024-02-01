@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/app_menu_inspector"
+        android:title="Data Inspector"
+        android:icon="@drawable/ic_info"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/app_menu_chat"
+        android:title="Message Log"
+        android:icon="@drawable/ic_message"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/app_menu_bluetooth_config"
+        android:title="Bluetooth Configurations"
+        android:icon="@drawable/ic_bluetooth"
+        app:showAsAction="always">
+
+        <menu>
+            <item
+                android:id="@+id/app_menu_search_device"
+                android:title="Discover Device" />
+            <item
+                android:id="@+id/app_menu_disconnect_device"
+                android:title="Disconnect Device" />
+            <item
+                android:id="@+id/app_menu_reconnect_device"
+                android:title="Reconnect Device" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/app_menu_string_config"
+        android:icon="@drawable/ic_settings"
+        android:title="String Config"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/app_menu_export_mdf"
+        android:title="Export MDF String"
+        app:showAsAction="never" />
+</menu>

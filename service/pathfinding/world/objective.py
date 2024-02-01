@@ -1,90 +1,104 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import List
 
 from pathfinding.world.world import Entity, World, Obstacle, Direction, Point
 
+"""
+The minimum distance (in grid cells) between the obstacle and objective, inclusive.
+"""
+MINIMUM_GAP = 1
+"""
+The ideal distance (in grid cells) between the obstacle and objective.
+"""
+IDEAL_GAP = 3
+"""
+The maximum distance (in grid cells) between the obstacle and objective, exclusive.
+"""
+MAXIMUM_GAP = 5
 
-def __place_objective(world: World, obstacle: Obstacle) -> Objective:
-    # TODO: call __suggest_objective(...)
-    pass
 
-def __suggest_objective(world: World, obstacle: Obstacle, gap: int, left_align: bool) -> Objective:
+def generate_objectives(world: World) -> List[Objective]:
+    return [
+        objective for obstacle in world.obstacles if (objective := __generate_objective(world, obstacle)) is not None
+    ]
+
+
+def __generate_objective(world: World, obstacle: Obstacle) -> Objective | None:
+    """
+    Tries to place an objective in an ideal location. Failing that, iteratively tries to place the objective in a valid
+    location.
+
+    :param world: The world.
+    :param obstacle: The obstacle.
+    :return: An objective if one can be placed. None otherwise.
+    """
+    ideal = __suggest_objective(world, obstacle, IDEAL_GAP, world.robot.width // 2)
+    if world.can_contain(ideal):
+        return ideal
+
+    for alignment in range(0, world.robot.width):
+        for gap in range(MINIMUM_GAP, MAXIMUM_GAP):
+            objective = __suggest_objective(world, obstacle, gap, alignment)
+            if world.can_contain(objective):
+                return objective
+
+    return None
+
+
+def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: int) -> Objective:
     """
     Creates an objective from this obstacle.
 
     This function assumes that obstacles are always smaller than the robot. It does not check whether the objective 
-    collides with other obstacles. It left aligns the objective by default. 
+    collides with other obstacles.
     
     :param world: The world.
     :param obstacle: The obstacle.
-    :param gap: The minimum distance between the obstacle and objective.
-    :param left_align: True if the objective is left-aligned to the obstacle. False if it is right-aligned.
+    :param gap: The distance (in grid cells) between the obstacle and objective.
+    :param alignment: An alignment (in grid cells) to adjust the suggested objective's placement by.
     :return: An objective.
     """
-    robot = world.robot
-    match (obstacle.direction, left_align):
-        case (Direction.NORTH, True):
+    assert alignment < world.robot.width
+
+    width, height = world.robot.width, world.robot.height
+    match obstacle.direction:
+        case Direction.NORTH:
             north_west = obstacle.north_west
-            return Objective(
+            return Objective.from_obstacle(
                 Direction.SOUTH,
-                Point(north_west.x, north_west.y + gap),
-                Point(north_west.x + robot.width, north_west.y + gap + robot.height),
-                obstacle.image_id
-            )
-        case (Direction.NORTH, False):
-            return Objective(
-                Direction.SOUTH,
-                Point(obstacle.north_east.x - robot.width, obstacle.north_east.y + gap),
-                Point(obstacle.north_east.x, obstacle.north_east.y + gap + robot.height),
+                Point(north_west.x - alignment, north_west.y + gap),
+                width,
+                height,
                 obstacle.image_id
             )
 
-        case (Direction.EAST, True):
-            return Objective(
+        case Direction.EAST:
+            return Objective.from_obstacle(
                 Direction.WEST,
-                Point(obstacle.north_east.x + gap, obstacle.north_east.x - robot.height),
-                Point(obstacle.north_east.x + gap + robot.width, obstacle.north_east.y),
-                obstacle.image_id
-            )
-        case (Direction.EAST, False):
-            south_east = obstacle.south_east
-            return Objective(
-                Direction.WEST,
-                Point(south_east.x + gap, south_east.x),
-                Point(south_east.x + gap + robot.width, south_east.y + robot.height),
+                Point(obstacle.north_east.x + gap, obstacle.north_east.x - height + alignment),
+                width,
+                height,
                 obstacle.image_id
             )
 
-        case (Direction.SOUTH, True):
+        case Direction.SOUTH:
             south_east = obstacle.south_east
-            return Objective(
+            return Objective.from_obstacle(
                 Direction.NORTH,
-                Point(obstacle.north_east.x - robot.width, south_east.y - gap - robot.height),
-                Point(obstacle.north_east.x, south_east.y - gap),
-                obstacle.image_id
-            )
-        case (Direction.SOUTH, False):
-            return Objective(
-                Direction.WEST,
-                Point(obstacle.south_west.x, obstacle.south_west.y - gap - robot.height),
-                Point(obstacle.south_west.x + robot.width, obstacle.south_west.y - gap),
+                Point(obstacle.north_east.x - width + alignment, south_east.y - gap - height),
+                width,
+                height,
                 obstacle.image_id
             )
 
-        case (Direction.WEST, True):
-            return Objective(
+        case Direction.WEST:
+            return Objective.from_obstacle(
                 Direction.EAST,
-                Point(obstacle.south_west.x - gap - robot.width, obstacle.south_west.y),
-                Point(obstacle.south_west.x - gap, obstacle.south_west.y + robot.height),
-                obstacle.image_id
-            )
-        case (Direction.WEST, False):
-            north_west = obstacle.north_west
-            return Objective(
-                Direction.EAST,
-                Point(north_west.x - gap - robot.width, north_west.y - robot.height),
-                Point(north_west.x - gap, north_west.y),
+                Point(obstacle.south_west.x - gap - width, obstacle.south_west.y - alignment),
+                width,
+                height,
                 obstacle.image_id
             )
 
@@ -92,6 +106,22 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, left_align: 
 @dataclass
 class Objective(Entity):
     image_id: int
+
+    @classmethod
+    def from_obstacle(
+            cls,
+            direction: Direction,
+            south_west: Point,
+            width: int,
+            height: int,
+            image_id: int
+    ) -> Objective:
+        return cls(
+            direction,
+            south_west,
+            Point(south_west.x + width, south_west.y + height),
+            image_id
+        )
 
     def __post_init__(obstacle):
         assert 1 <= obstacle.image_id < 36
