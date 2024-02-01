@@ -15,6 +15,13 @@ class Direction(Enum):
     SOUTH = 3
     WEST = 4
 
+MOVE_DIRECTION = [
+    (1, 0, Direction.EAST),
+    (-1, 0, Direction.WEST),
+    (0, 1, Direction.NORTH),
+    (0, -1, Direction.SOUTH),
+]
+
 
 class World:
     """
