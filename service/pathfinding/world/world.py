@@ -3,10 +3,30 @@ from __future__ import annotations
 from collections import namedtuple
 from dataclasses import dataclass
 from enum import Enum
+from typing import List
 
 import numpy as np
 
-Point = namedtuple("Point", "x y")
+
+GRID_CELL_LENGTH = 5
+
+
+@dataclass
+class Point:
+    x: int
+    y: int
+
+    def direction(self, to: Point) -> Direction:
+        assert self.x != to.x ^ self.y != to.y
+        match (self.x, self.y):
+            case (0, y) if y < 0:
+                return Direction.NORTH
+            case (x, 0) if x < 0:
+                return Direction.EAST
+            case (x, 0) if x > 0:
+                return Direction.WEST
+            case (0, y) if y > 0:
+                return Direction.SOUTH
 
 
 class Direction(Enum):
@@ -14,6 +34,27 @@ class Direction(Enum):
     EAST = 2
     SOUTH = 3
     WEST = 4
+
+    def same_axis(self, direction: Direction) -> bool:
+        """
+        Determines if both directions are on the same axis, i.e. NORTH and SOUTH, EAST and WEST, or NORTH and NORTH.
+
+        :param direction: The other direction.
+        :return: True if both directions are on the same axis.
+        """
+        return self == direction or self == direction.opposite
+
+    @property
+    def opposite(self) -> Direction:
+        match self:
+            case Direction.NORTH:
+                return Direction.SOUTH
+            case Direction.EAST:
+                return Direction.WEST
+            case Direction.WEST:
+                return Direction.EAST
+            case Direction.SOUTH:
+                return Direction.NORTH
 
 
 class World:
@@ -28,7 +69,7 @@ class World:
     robot: Robot
     obstacles: [Obstacle]
 
-    def __init__(self, width: int, height: int, robot: Robot, obstacles: [Obstacle]):
+    def __init__(self, width: int, height: int, robot: Robot, obstacles: List[Obstacle]):
         assert self.__inside(robot)
         assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
 
@@ -66,6 +107,17 @@ class World:
                 for box_y in range(y, y + size):
                     if self.grid[x, y] == -1:
                         return clearance
+
+    def can_contain(self, entity: Entity) -> bool:
+        if not self.__inside(entity):
+            return False
+
+        for x in range(entity.south_west.x, entity.north_east.x):
+            for y in range(entity.south_west.y, entity.north_east.y):
+                if self.grid[x, y] == -1:
+                    return False
+
+        return True
 
 
 @dataclass
