@@ -1,6 +1,7 @@
 from __future__ import annotations
 import time
 from flasgger import Swagger
+from dataclasses import dataclass
 from flask import Flask, jsonify, request
 from pathfinding.pathfinding_controller import pathfinding_blueprint
 
@@ -159,14 +160,47 @@ def nav_around_obstacle():
         "error": None
     })
 
-@app.route('/image/prediction', methods=['POST'])
-def image_prediction():
-    return 'Hello World!'
+@app.route('/image/prediction/task-1', methods=['POST'])
+def image_prediction_task1():
+    file, obstacle_id, signal = __parse(request)
+
+    ## TODO: Pass into model & return image id
+    image_id = 'Foo'
+
+    return jsonify({
+        "obstacle_id": obstacle_id,
+        "image_id": image_id
+    })
+
+
+@app.route('/image/prediction/task-2', methods=['POST'])
+def image_prediction_task2():
+    file, obstacle_id, signal = __parse(request)
+
+    ## TODO: Pass into model & return image id
+    image_id = 'Foo'
+
+    return jsonify({
+        "obstacle_id": obstacle_id,
+        "image_id": image_id
+    })
+
+
+def __parse(request: Request) -> (str, str, str):
+    file = request.files['file']
+    file.save(os.path.join('uploads', file.filename))
+    # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
+    constituents = file.filename.split("_")
+    obstacle_id = constituents[1]
+    signal = constituents[2].strip(".jpg")
+
+    return file.filename, obstacle_id, signal
 
 
 @app.route('/image/stitch', methods=['GET'])
-def image_stitch():
-    return 'Hello World!'
+def image_stitch() -> None:
+    # TODO: stitch images
+    pass
 
 
 if __name__ == '__main__':
