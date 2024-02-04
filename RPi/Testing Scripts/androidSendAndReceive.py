@@ -42,27 +42,29 @@ android.connect()
 # Try to send data over
 
 # Deciding whether to send or receive data
-user_input = input("1: Send a message, 2: Receive a message")
-
-if user_input == 1:
-	try:
-		action_type = input("Type of action:")
-		message_content = input("Enter message content: ")
-		android.send(AndroidMessage(action_type, message_content)
-		print("message sent")
-		time.sleep(20)
-		break
-	except OSError as e:
-		print("Error in sending data: {e}")
-		# ~ print("Disconnected")
-		# ~ reconnect_android()
-		# ~ android.send(AndroidMessage('general', "Reconnected."))
-else:
-	try:
-		android.receive()
-		break
-	except OSError as e:
-		print("Error in receiving data: {e}")
+# Initializing variables
+user_input = 0
+while user_input < 2:
+	user_input = input("1: Send a message, 2: Receive a message, 3: Break out of loop")
+	if user_input == 1:
+		try:
+			action_type = input("Type of action:")
+			message_content = input("Enter message content: ")
+			android.send(AndroidMessage(action_type, message_content)
+			print("message sent")
+			time.sleep(20)
+			break
+		except OSError as e:
+			print("Error in sending data: {e}")
+			# ~ print("Disconnected")
+			# ~ reconnect_android()
+			# ~ android.send(AndroidMessage('general', "Reconnected."))
+	else:
+		try:
+			android.receive()
+			break
+		except OSError as e:
+			print("Error in receiving data: {e}")
 # End connection.
 android.disconnect()
 
