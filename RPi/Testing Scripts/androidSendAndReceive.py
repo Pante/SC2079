@@ -60,7 +60,7 @@ if user_input == 1:
 else:
 	try:
 		android.receive()
-		break;
+		break
 	except OSError as e:
 		print("Error in receiving data: {e}")
 # End connection.
