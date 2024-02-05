@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Tuple
 
-from service.utils.constants import Direction
+from pathfinding.world.world import Direction
+
 
 class CellState:
     """Base class for all objects on the arena, such as cells, obstacles, etc"""

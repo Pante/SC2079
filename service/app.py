@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 import time
+
 from flasgger import Swagger
-from dataclasses import dataclass
 from flask import Flask, jsonify, request
+
+from pathfinding.algo import MazeSolver
 from pathfinding.pathfinding_controller import pathfinding_blueprint
 
 app = Flask(__name__)
@@ -62,7 +65,8 @@ def path_finding():
     #     optimal_path.extend(return_path)
         
     # Based on the shortest path, generate commands for the robot
-    commands = command_generator(optimal_path, obstacles)
+    commands = []
+    # commands = command_generator(optimal_path, obstacles)
     # print(commands)
     # print(len(optimal_path))
     # Get the starting location and add it to path_results
