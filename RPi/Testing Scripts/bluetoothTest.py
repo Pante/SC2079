@@ -2,6 +2,7 @@ import sys
 import bluetooth as bt
 import threading
 import socket
+import time
 from pathlib import Path
 from multiprocessing import Process, Manager
 path_root = Path(__file__).parents[2]
@@ -11,7 +12,7 @@ from RPi.Communication.android import Android, AndroidMessage
 class BluetoothConnectionTest:
 
 	def __init__(self):
-		self.android = Android()
+		#self.android = Android()
 		#self.android.connect()
 		print("Android processess successfully started yayay")
 		
@@ -19,8 +20,8 @@ class BluetoothConnectionTest:
 		android = Android()
 
 		# Connect to android
-		#android.connect()
-		#print("Android processess successfully started")
+		android.connect()
+		print("Android processess successfully started")
 
 		user_input = 0;
 
@@ -33,7 +34,7 @@ class BluetoothConnectionTest:
 					message_content = input("Enter message content: ")
 					android.send(AndroidMessage(action_type, message_content))
 					print("message sent")
-					time.sleep(10)
+					# time.sleep(10)
 				except OSError as e:
 					print("Error in sending data: {e}")
 			else:
@@ -47,10 +48,11 @@ class BluetoothConnectionTest:
 
 if __name__ == '__main__':
 	testingBluetooth = BluetoothConnectionTest() #init
+	testingBluetooth.bt_main()
 	threads = [] # Keeps track of the list of threads
-	thread = threading.Thread(target=testingBluetooth.bt_main)
-	threads.append(thread)
-	thread.start()
+	#thread = threading.Thread(target=testingBluetooth.bt_main)
+	#threads.append(thread)
+	#thread.start()
 	
 	# Waiting for all threads to finish
 	# ~ for thread in threads:
