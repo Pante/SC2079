@@ -13,7 +13,7 @@ class BluetoothConnectionTest:
 	def __init__(self):
 		self.android = Android()
 		#self.android.connect()
-		print("Android processess successfully started1234")
+		print("Android processess successfully started yayay")
 		
 	def bt_main(self):
 		android = Android()
@@ -33,7 +33,7 @@ class BluetoothConnectionTest:
 					message_content = input("Enter message content: ")
 					android.send(AndroidMessage(action_type, message_content))
 					print("message sent")
-					time.sleep(20)
+					time.sleep(10)
 				except OSError as e:
 					print("Error in sending data: {e}")
 			else:
@@ -44,6 +44,7 @@ class BluetoothConnectionTest:
 
 		# End the connection
 		android.disconnect()
+
 if __name__ == '__main__':
 	testingBluetooth = BluetoothConnectionTest() #init
 	threads = [] # Keeps track of the list of threads
