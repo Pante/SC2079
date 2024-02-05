@@ -144,11 +144,6 @@ class ResponseBody:
             in the given request.
     """
     distance: float
-    instructions: [Union[ConstantInstruction, MoveInstruction]]
-
-
-class ConstantInstructionSchema(Schema):
-    instruction = EnumField(ConstantInstruction)
 
 
 class MoveInstructionSchema(Schema):
