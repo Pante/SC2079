@@ -119,7 +119,7 @@ class Android(Link):
         # Initialize super class's init.
         super().__init__()
         self.hostId = "192.168.14.14"
-        # UUID to be generated - Bryan
+        # UUID to be generated, but can just use the default one - Bryan
         self.uuid = "00001101-0000-1000-8000-00805f9b34fb" #Default but should try generated
         self.connected = False
         self.client_socket = None
@@ -153,8 +153,8 @@ class Android(Link):
             self.connected = True
             
             # Start new thread to handle the receiving of data from Android
-            client_thread = threading.Thread(target=receive, args=(client_socket,))
-            client_thread.start()
+            #client_thread = threading.Thread(target=receive, args=(client_socket,))
+            #client_thread.start()
             
 			# END: Bluetooth socket codes
 			
@@ -208,7 +208,7 @@ class Android(Link):
     def repeatMessageTest(self):
         message = AndroidMessage("general", "Testing, hi from rpi")
         while True:
-            time.sleep(2) 
+            time.sleep(2)
             if(self.connected):
                 self.send(message)
             else:
