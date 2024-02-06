@@ -82,13 +82,13 @@ class World:
     width: int,
     height: int,
     robot: Robot,
-     obstacles: List[Obstacle]):
+    obstacles: List[Obstacle]):
         assert self.__inside(robot)
         assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
 
         self.width = width
         self.height = height
-        self.grid = np.zeros((0, 0), dtype=np.int32)
+        self.grid = np.zeros((40, 40), dtype=np.int32)
         self.robot = robot
         self.obstacles = obstacles
 
@@ -133,6 +133,12 @@ class World:
                     return False
 
         return True
+    
+    def add_obstacle(self, x: int, y: int, direction: Direction, obstacle_id: int):
+        # Create an obstacle object
+        obstacle = Obstacle(x, y, direction, obstacle_id)
+        # Add created obstacle to grid object
+        self.grid.add_obstacle(obstacle)
 
 
 @dataclass
