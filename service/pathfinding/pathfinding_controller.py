@@ -9,7 +9,7 @@ from flask import Blueprint, request, jsonify
 from marshmallow import Schema, fields, ValidationError
 from marshmallow_enum import EnumField
 
-from pathfinding.instruction_parser import Move, MoveInstruction
+from pathfinding.instruction_parser import MiscInstruction, TurnInstruction, Move, MoveInstruction
 from pathfinding.world.world import Obstacle, Direction
 
 # Blueprint for pathfinding routes
@@ -144,11 +144,6 @@ class ResponseBody:
             in the given request.
     """
     distance: float
-    # instructions: [Union[ConstantInstruction, MoveInstruction]]
-
-
-# class ConstantInstructionSchema(Schema):
-    # instruction = EnumField(ConstantInstruction)
 
 
 class MoveInstructionSchema(Schema):

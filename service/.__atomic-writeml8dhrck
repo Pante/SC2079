@@ -671,6 +671,5 @@
             "markers": "python_version >= '3.6'",
             "version": "==1.16.0"
         }
-    },
-    "develop": {}
+    }
 }

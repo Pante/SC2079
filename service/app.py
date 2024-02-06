@@ -1,7 +1,11 @@
 from __future__ import annotations
+
 import time
+
 from flasgger import Swagger
 from flask import Flask, jsonify, request
+
+from pathfinding.algo import MazeSolver
 from pathfinding.pathfinding_controller import pathfinding_blueprint
 
 app = Flask(__name__)
@@ -61,7 +65,8 @@ def path_finding():
     #     optimal_path.extend(return_path)
         
     # Based on the shortest path, generate commands for the robot
-    commands = command_generator(optimal_path, obstacles)
+    commands = []
+    # commands = command_generator(optimal_path, obstacles)
     # print(commands)
     # print(len(optimal_path))
     # Get the starting location and add it to path_results
@@ -159,14 +164,47 @@ def nav_around_obstacle():
         "error": None
     })
 
-@app.route('/image/prediction', methods=['POST'])
-def image_prediction():
-    return 'Hello World!'
+@app.route('/image/prediction/task-1', methods=['POST'])
+def image_prediction_task1():
+    file, obstacle_id, signal = __parse(request)
+
+    ## TODO: Pass into model & return image id
+    image_id = 'Foo'
+
+    return jsonify({
+        "obstacle_id": obstacle_id,
+        "image_id": image_id
+    })
+
+
+@app.route('/image/prediction/task-2', methods=['POST'])
+def image_prediction_task2():
+    file, obstacle_id, signal = __parse(request)
+
+    ## TODO: Pass into model & return image id
+    image_id = 'Foo'
+
+    return jsonify({
+        "obstacle_id": obstacle_id,
+        "image_id": image_id
+    })
+
+
+def __parse(request: Request) -> (str, str, str):
+    file = request.files['file']
+    file.save(os.path.join('uploads', file.filename))
+    # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
+    constituents = file.filename.split("_")
+    obstacle_id = constituents[1]
+    signal = constituents[2].strip(".jpg")
+
+    return file.filename, obstacle_id, signal
 
 
 @app.route('/image/stitch', methods=['GET'])
-def image_stitch():
-    return 'Hello World!'
+def image_stitch() -> None:
+    # TODO: stitch images
+    pass
 
 
 if __name__ == '__main__':
