@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import CustomButton from "./custom-button";
 import QueryAPI from "./query-api";
 
+//change accordingly to what we set in our algo
 const Direction = {
   NORTH: 0,
   EAST: 2,
