@@ -64,6 +64,49 @@ def rpi():
       return "Successful GET request, The action is: " + action + " and the description is: " + description + "."
 
     return 'Action performed successfully'
+  
+# Receiving image from RPi
+@app.route('/rpi_image', methods=['POST'])
+@swag_from({
+    'parameters': [
+        {
+            'name': 'image',
+            'description': 'Image file',
+            'in': 'formData',
+            'type': 'file',
+            'required': 'true',
+        }
+    ],
+    'responses': {
+        '200': {
+            'description': 'Successful response',
+        },
+        '400': {
+            'description': 'Bad request',
+        }
+    }
+})
+def rpi_image():
+    """
+    Endpoint to receive and display an image on the PC side.
+    ---
+    parameters:
+      - name: image
+        in: formData
+        type: file
+        required: true
+        description: The image file to display.
+    responses:
+      200:
+        description: Image received and displayed successfully.
+    """
+    image = request.files['image']
+    image.save('received_image.jpg')
+    # Display the image on the PC side
+    # $PLACEHOLDER$
+
+    return 'Image received and displayed successfully'
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
