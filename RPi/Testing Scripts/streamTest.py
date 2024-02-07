@@ -9,6 +9,11 @@ import socket
 import time
 from threading import Thread
 
+# Initialize the socket connection
+# server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# server_socket.bind(('0.0.0.0', 8000))
+# server_socket.listen(0)
+# client_socket, addr = server_socket.accept()
 
 class StreamTest:
     # START: Adapted from pc.py
@@ -18,6 +23,10 @@ class StreamTest:
             self.connected = False
             self.server_socket = None
             self.client_socket = None
+            
+            self.model = None
+            self.classes = []
+            self.camera = None
         
     def connect(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -61,11 +70,11 @@ class StreamTest:
     # END: Adapted from pc.py
 
     # Function to process the PiCamera feed
-    def process_camera_feed():
+    def process_camera_feed(self):
         # camera.start_preview() # Opens up the preview screen
         # camera.stop_preview() # Closes the preview screen
         while True:
-            ret, frame = camera.read()
+            ret, frame = self.camera.read()
             if not ret:
                 break
 
@@ -73,8 +82,8 @@ class StreamTest:
             blob = cv2.dnn.blobFromImage(frame, 1/255, (416, 416), (0, 0, 0), swapRB=True, crop=False)
 
             # Forward pass through the YOLOv5 model
-            model.setInput(blob)
-            outputs = model.forward(model.getUnconnectedOutLayersNames())
+            self.model.setInput(blob)
+            outputs = self.model.forward(self.model.getUnconnectedOutLayersNames())
 
             # Process the outputs
             boxes = []
@@ -104,7 +113,7 @@ class StreamTest:
                 i = i[0]
                 box = boxes[i]
                 left, top, width, height = box
-                label = f'{classes[class_ids[i]]}: {confidences[i]:.2f}'
+                label = f'{self.classes[class_ids[i]]}: {confidences[i]:.2f}'
                 cv2.rectangle(frame, (left, top), (left + width, top + height), (0, 255, 0), 2)
                 cv2.putText(frame, label, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
@@ -113,44 +122,50 @@ class StreamTest:
             frame_data = buffer.tobytes()
 
             # Send the frame data to the PC via the socket connection
-            client_socket.sendall(frame_data)
+            self.client_socket.sendall(frame_data)
+
+        def start(self):
+            # Define the YOLOv5 model and classes
+            self.model = cv2.dnn.readNet('yolov5.weights', 'yolov5.cfg')
+            self.classes = []
+            with open('coco.names', 'r') as f:
+                self.classes = [line.strip() for line in f.readlines()]
+
+            # Initialize the PiCamera
+            self.camera = cv2.VideoCapture(0)
+            # Start the camera feed processing in a separate thread
+            camera_thread = Thread(target=StreamTest.process_camera_feed)
+            camera_thread.start()
+
+            # Main loop to receive commands from the PC
+            while True:
+                command = self.client_socket.recv(1024).decode('utf-8')
+                if command == 'quit':
+                    break
+
+            # Clean up the resources
+            self.camera.release()
+            cv2.destroyAllWindows()
+            streamTest.disconnect()
+            # client_socket.close()
+            # server_socket.close()
     
 if __name__ == '__main__':
     streamTest = StreamTest() #init
     streamTest.connect()
-    # Define the YOLOv5 model and classes
-    model = cv2.dnn.readNet('yolov5.weights', 'yolov5.cfg')
-    classes = []
-    with open('coco.names', 'r') as f:
-        classes = [line.strip() for line in f.readlines()]
+    streamTest.start()
 
-    # Initialize the PiCamera
-    camera = cv2.VideoCapture(0)
+# Server side (PC):
+# import cv2
+# import numpy as np
+# import socket
+# import struct
 
-    # Initialize the socket connection
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('0.0.0.0', 8000))
-    server_socket.listen(0)
-    client_socket, addr = server_socket.accept()
+# # Create a socket
+# server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# server_socket.bind(('localhost', 8485))  # Replace with your host and port
+# server_socket.listen()
 
-    # Start the camera feed processing in a separate thread
-    camera_thread = Thread(target=streamTest.process_camera_feed)
-    camera_thread.start()
-
-    # Main loop to receive commands from the PC
-    while True:
-        command = client_socket.recv(1024).decode('utf-8')
-        if command == 'quit':
-            break
-
-    # Clean up the resources
-    camera.release()
-    cv2.destroyAllWindows()
-    client_socket.close()
-    server_socket.close()
-
-
-# To decode frames from the PC's side (Sockets must be connected first):
 # while True:
 #     client_socket, addr = server_socket.accept()
 #     data = b''
