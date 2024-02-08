@@ -6,7 +6,7 @@ class CustomError extends Error {
     this.content = content;
 
     // Set the name for the error
-    this.name = 'CustomError';
+    this.name = "CustomError";
 
     // Ensure that the custom error class captures a stack trace
     if (Error.captureStackTrace) {
@@ -15,7 +15,12 @@ class CustomError extends Error {
   }
 }
 
-export var methodType = {get : 'GET', post : 'POST', put : 'PUT', delete : 'DELETE'}
+export var methodType = {
+  get: "GET",
+  post: "POST",
+  put: "PUT",
+  delete: "DELETE",
+};
 
 export default class QueryAPI {
   constructor(baseUrl) {
@@ -75,26 +80,26 @@ export default class QueryAPI {
       robot_y: robotY,
       robot_dir: robotDir,
       retrying: false,
-    }
+    };
 
     this._post("path", data, {})
-      .then(responseData => {
+      .then((responseData) => {
         if (callback) {
-          console.log("POST Response:", responseData)
+          console.log("POST Response:", responseData);
           callback({
             data: responseData,
             error: null,
-          })
+          });
         }
       })
-      .catch(error => {
-        console.error("POST Request error:", error)
+      .catch((error) => {
+        console.error("POST Request error:", error);
         if (callback) {
           callback({
             data: data,
-            error: error
-          })
+            error: error,
+          });
         }
-      })
+      });
   }
 }
