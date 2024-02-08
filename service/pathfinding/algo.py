@@ -1,6 +1,5 @@
 from utils.constants import ITERATIONS, SAFE_COST
 from pathfinding.world.world import MOVE_DIRECTION, Direction, Robot
-from pathfinding.grid import CellState, Grid, Obstacle
 import heapq
 import math
 from typing import List

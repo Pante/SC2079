@@ -34,18 +34,18 @@ pathfinding_blueprint = Blueprint('pathfinding', __name__)
                     'south_west': {
                         'type': 'array',
                         'items': {
+                            'type': 'integer',
                             'type': 'integer'
                         },
-                        'minItems': 2,
-                        'maxItems': 2
+                        'example': [0, 0]
                     },
                     'north_east': {
                         'type': 'array',
                         'items': {
-                            'type': 'integer'
+                            'type': 'integer',
+                            'type': 'integer',
                         },
-                        'minItems': 2,
-                        'maxItems': 2
+                        'example': [0, 0]
                     }
                 }
             }
