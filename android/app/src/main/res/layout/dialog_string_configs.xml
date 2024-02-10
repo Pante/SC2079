@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content" xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/label_dialog_string_config_title"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:text="@string/strings_configuration"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorLabelDialogTitle"
+        android:background="@color/colorAppTheme"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/label_string1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginTop="15dp"
+            android:text="@string/string_1_config"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/textbox_string1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:hint="@string/string_1_hint"
+            android:autofillHints="@string/string_1_hint"
+            android:inputType="text"
+            android:ems="10"
+            android:text=""
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/label_string2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginTop="15dp"
+            android:text="@string/string_2_config"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/textbox_string2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:hint="@string/string_2_hint"
+            android:autofillHints="@string/string_2_hint"
+            android:inputType="text"
+            android:ems="10"
+            android:text=""
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_send_string1"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="5dp"
+                android:background="@color/colorAppTheme"
+                android:textColor="@color/colorButtonTextTheme"
+                android:text="@string/btn_send_string_1" />
+
+            <Button
+                android:id="@+id/button_send_string2"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:background="@color/colorAppTheme"
+                android:textColor="@color/colorButtonTextTheme"
+                android:text="@string/btn_send_string_2" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_save_string_config"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:background="@color/colorAppTheme"
+            android:textColor="@color/colorButtonTextTheme"
+            android:text="@string/btn_save_strings" />
+    </LinearLayout>
+</LinearLayout>
