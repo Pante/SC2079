@@ -1,484 +1,933 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/coordinatorlayout"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="550dp"
-        android:layout_marginBottom="264dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_height="wrap_content"
+        android:theme="@style/Theme.MDPAndroidController.AppBarOverlay">
 
-        <LinearLayout
-            android:layout_width="412.5dp"
-            android:layout_height="550dp"
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:layout_anchor="@+id/toolbar"
+        app:layout_anchorGravity="center"
+        app:popupTheme="@style/Theme.MDPAndroidController.PopupOverlay" />
+
+    <include
+        android:id="@+id/include"
+        layout="@layout/content_main" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <!--    Discoverable button-->
+
+        <!--    Get list of paired devices button-->
+
+
+
+        <Button
+            android:id="@+id/discoverableBtn"
+            style="@style/Base.Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="200dp"
+            android:text="Discoverable"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.853"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.803" />
+
+
+        <view
+            android:id="@+id/mapView"
+            class="com.example.mdpandroidcontroller.Map"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/robotcar"
+            android:layout_width="138px"
+            android:layout_height="138px"
+            android:background="#5FB6F3"
+            android:src="@drawable/robot"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Switch
+            android:id="@+id/reverse_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginBottom="264dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            android:layout_marginTop="10dp"
+            android:text="Reverse"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/arrowBack" />
 
-            <sg.edu.ntu.scse.mdp.g7.mdpkotlin.util.MapDrawer
-                android:id="@+id/canvas_gridmap"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:tag="tablet" />
-        </LinearLayout>
+        <ImageButton
+            android:id="@+id/arrowForward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="26dp"
+            android:adjustViewBounds="true"
+            android:background="@null"
+            android:clickable="true"
+            android:focusable="true"
+            android:maxWidth="40dp"
+            android:maxHeight="40dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/arrow_up"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.167"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mapView" />
 
-        <LinearLayout
-            android:layout_width="150dp"
-            android:layout_height="550dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginBottom="264dp"
-            android:orientation="vertical"
+        <ImageButton
+            android:id="@+id/arrowBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@null"
+            android:clickable="true"
+            android:focusable="true"
+            android:maxWidth="40dp"
+            android:maxHeight="40dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/arrow_back"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.167"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.80" />
+
+        <ImageButton
+            android:id="@+id/arrowLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:adjustViewBounds="true"
+            android:background="@null"
+            android:clickable="true"
+            android:focusable="true"
+            android:maxWidth="40dp"
+            android:maxHeight="40dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/arrow_left"
+            app:layout_constraintBottom_toBottomOf="@id/arrowBack"
+            app:layout_constraintEnd_toStartOf="@+id/arrowRight"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/arrowForward" />
+
+        <ImageButton
+            android:id="@+id/arrowRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@null"
+            android:clickable="true"
+            android:focusable="true"
+            android:maxWidth="40dp"
+            android:maxHeight="40dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/arrow_right"
+            app:layout_constraintBottom_toBottomOf="@id/arrowBack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.293"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/arrowForward" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/obstacle1Group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="85dp"
+            app:layout_constraintBottom_toBottomOf="@+id/mapView"
             app:layout_constraintStart_toStartOf="parent">
 
-            <TextView
-                android:id="@+id/label_bluetooth_section"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:background="@color/colorSecondaryTheme"
-                android:gravity="center"
-                android:text="@string/label_bluetooth"
-                android:textAlignment="center"
-                android:textColor="@android:color/background_light" />
+            <ImageView
+                android:id="@+id/obstacle1Box"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:layout_marginBottom="32dp"
+                android:src="@drawable/obstacle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/obstacle1Face"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:layout_marginBottom="32dp"
+                android:src="@drawable/obstacle_face"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/label_bluetooth_status"
-                android:layout_width="match_parent"
+                android:id="@+id/obstacle1ID"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="@string/not_connected"
-                android:textColor="@color/colorLabelNotConnected" />
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal|top"
+                android:text="@string/obstacle1ID_text"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/obstacle2Group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@+id/obstacle1Group"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/obstacle2Box"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:src="@drawable/obstacle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/obstacle2Face"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:layout_marginBottom="32dp"
+                android:src="@drawable/obstacle_face"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/label_bluetooth_connected_device"
-                android:layout_width="match_parent"
+                android:id="@+id/obstacle2ID"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="" />
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal|top"
+                android:text="@string/obstacle2ID_text"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/obstacle3Group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@+id/obstacle2Group"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/obstacle3Box"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:src="@drawable/obstacle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/obstacle3Face"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:layout_marginBottom="32dp"
+                android:src="@drawable/obstacle_face"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/label_time_section"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_marginTop="20dp"
-                android:background="@color/colorSecondaryTheme"
-                android:gravity="center"
-                android:text="@string/label_time"
-                android:textAlignment="center"
-                android:textColor="@android:color/background_light" />
-
-            <TextView
-                android:id="@+id/label_time_elapsed"
-                android:layout_width="match_parent"
+                android:id="@+id/obstacle3ID"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="@string/time_placeholder"
-                android:textAlignment="center"
-                android:textSize="20sp" />
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal|top"
+                android:text="@string/obstacle3ID_text"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/obstacle4Group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@+id/obstacle3Group"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/obstacle4Box"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:src="@drawable/obstacle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/obstacle4Face"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:layout_marginBottom="32dp"
+                android:src="@drawable/obstacle_face"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/label_status_section"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_marginTop="30dp"
-                android:background="@color/colorSecondaryTheme"
-                android:gravity="center"
-                android:text="@string/label_status"
-                android:textAlignment="center"
-                android:textColor="@android:color/background_light" />
+                android:id="@+id/obstacle4ID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal|top"
+                android:text="@string/obstacle4ID_text"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/obstacle5Group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@+id/obstacle4Group"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/obstacle5Box"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:src="@drawable/obstacle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/obstacle5Face"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:layout_marginBottom="32dp"
+                android:src="@drawable/obstacle_face"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/label_status_details"
-                android:layout_width="match_parent"
+                android:id="@+id/obstacle5ID"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:maxLines="1"
-                android:text="@string/idle_robot_state" />
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal|top"
+                android:text="@string/obstacle5ID_text"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/obstacle6Group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@+id/obstacle5Group"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/obstacle6Box"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:src="@drawable/obstacle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/obstacle6Face"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:layout_marginBottom="32dp"
+                android:src="@drawable/obstacle_face"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/label_position_section"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_marginTop="40dp"
-                android:background="@color/colorSecondaryTheme"
-                android:gravity="center"
-                android:text="@string/label_position"
-                android:textAlignment="center"
-                android:textColor="@android:color/background_light" />
+                android:id="@+id/obstacle6ID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal|top"
+                android:text="@string/obstacle6ID_text"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/obstacle7Group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@+id/obstacle6Group"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/obstacle7Box"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:src="@drawable/obstacle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/obstacle7Face"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:layout_marginBottom="32dp"
+                android:src="@drawable/obstacle_face"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/label_origin_coordinates_title"
-                android:layout_width="match_parent"
+                android:id="@+id/obstacle7ID"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:gravity="center"
-                android:text="@string/label_robot_position"
-                android:textStyle="bold" />
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal|top"
+                android:text="@string/obstacle7ID_text"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/obstacle8Group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@+id/obstacle7Group"
+            app:layout_constraintStart_toStartOf="parent">
 
-                <TextView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:background="@color/colorYellow"
-                    android:gravity="center"
-                    android:text="@string/x_coords"
-                    android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/obstacle8Box"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:src="@drawable/obstacle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/label_origin_coordinateX"
-                    android:layout_width="30dp"
-                    android:layout_height="20dp"
-                    android:background="@drawable/listview_border"
-                    android:gravity="center"
-                    android:text="@string/rp_placeholder" />
-
-                <TextView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@color/colorYellow"
-                    android:gravity="center"
-                    android:text="@string/y_coords"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/label_origin_coordinateY"
-                    android:layout_width="30dp"
-                    android:layout_height="20dp"
-                    android:background="@drawable/listview_border"
-                    android:gravity="center"
-                    android:text="@string/rp_placeholder" />
-
-            </LinearLayout>
+            <ImageView
+                android:id="@+id/obstacle8Face"
+                android:layout_width="34px"
+                android:layout_height="34px"
+                android:layout_marginBottom="32dp"
+                android:src="@drawable/obstacle_face"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/label_waypoint_coordinates_title"
-                android:layout_width="match_parent"
+                android:id="@+id/obstacle8ID"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:text="@string/label_waypoint"
-                android:textStyle="bold" />
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal|top"
+                android:text="@string/obstacle8ID_text"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center">
 
-                <TextView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:background="@color/colorYellow"
-                    android:gravity="center"
-                    android:text="@string/x_coords"
-                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/label_waypoint_coordinateX"
-                    android:layout_width="30dp"
-                    android:layout_height="20dp"
-                    android:background="@drawable/listview_border"
-                    android:gravity="center"
-                    android:text="@string/wp_x_placeholder" />
 
-                <TextView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@color/colorYellow"
-                    android:gravity="center"
-                    android:text="@string/y_coords"
-                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/label_waypoint_coordinateY"
-                    android:layout_width="30dp"
-                    android:layout_height="20dp"
-                    android:background="@drawable/listview_border"
-                    android:gravity="center"
-                    android:text="@string/wp_y_placeholder" />
-
-            </LinearLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/popup_window"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/rectangle_background"
+            app:layout_constraintBottom_toBottomOf="@+id/mapView"
+            app:layout_constraintEnd_toEndOf="@+id/mapView"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/mapView"
+            app:layout_constraintTop_toTopOf="@+id/mapView">
 
             <Button
-                android:id="@+id/button_reset_map"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/default_gap"
-                android:layout_marginBottom="@dimen/default_gap"
-                android:background="@color/colorAppTheme"
-                android:text="@string/button_reset_map"
-                android:textColor="@color/colorButtonTextTheme" />
-
-            <Button
-                android:id="@+id/button_start_phase"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@color/colorAppTheme"
-                android:text="@string/button_start"
-                android:textColor="@color/colorButtonTextTheme"
-                android:textStyle="bold" />
-
-
-        </LinearLayout>
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="584dp"
-        android:layout_height="250dp"
-        android:layout_marginBottom="4dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <LinearLayout
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/label_configurations_section"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:background="@color/colorSecondaryTheme"
-                android:gravity="center"
-                android:text="@string/label_configurations"
-                android:textAlignment="center"
-                android:textColor="@android:color/background_light" />
-
-            <info.hoang8f.android.segmented.SegmentedGroup
-                android:id="@+id/toggle_mode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal"
-                app:sc_border_width="1dp"
-                app:sc_corner_radius="1dp"
-                app:sc_tint_color="@color/colorAppTheme">
-
-                <RadioButton
-                    android:id="@+id/toggle_mode_exploration"
-                    style="@style/RadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="@string/option_exploration" />
-
-                <RadioButton
-                    android:id="@+id/toggle_mode_fastest_path"
-                    style="@style/RadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/option_fastest_path" />
-            </info.hoang8f.android.segmented.SegmentedGroup>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <info.hoang8f.android.segmented.SegmentedGroup
-                    android:id="@+id/toggle_update"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    app:sc_border_width="1dp"
-                    app:sc_corner_radius="1dp"
-                    app:sc_tint_color="@color/colorAppTheme">
-
-                    <RadioButton
-                        android:id="@+id/toggle_update_auto"
-                        style="@style/RadioButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/option_auto" />
-
-                    <RadioButton
-                        android:id="@+id/toggle_update_manual"
-                        style="@style/RadioButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/option_manual" />
-                </info.hoang8f.android.segmented.SegmentedGroup>
-
-                <Button
-                    android:id="@+id/button_refresh_phase"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="10dp"
-                    android:background="@color/colorAppTheme"
-                    android:text="@string/button_refresh"
-                    android:textColor="@color/colorButtonTextTheme"
-                    tools:ignore="RelativeOverlap" />
-
-            </RelativeLayout>
-
-
-            <Button
-                android:id="@+id/button_set_origin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@color/colorAppTheme"
-                android:text="@string/button_set_origin"
-                android:textColor="@color/colorButtonTextTheme" />
-
-            <Button
-                android:id="@+id/button_set_waypoint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:background="@color/colorAppTheme"
-                android:text="@string/button_set_waypoint"
-                android:textColor="@color/colorButtonTextTheme" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="325dp"
-            android:layout_height="250dp"
-            android:layout_marginStart="10dp"
-            android:orientation="horizontal">
-
-            <LinearLayout
+                android:id="@+id/face_north"
                 android:layout_width="115dp"
-                android:layout_height="match_parent"
-                android:background="@drawable/customborder"
-                android:orientation="vertical">
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:padding="5dp"
+                android:text="North"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_marginBottom="20dp"
-                    android:background="@color/colorSecondaryTheme"
-                    android:gravity="center"
-                    android:text="@string/label_image"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/background_light" />
+            <Button
+                android:id="@+id/face_east"
+                android:layout_width="30dp"
+                android:layout_height="115dp"
+                android:layout_marginRight="10dp"
+                android:padding="8dp"
+                android:text="East"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/label_imageDes"
-                    android:textStyle="bold" />
+            <Button
+                android:id="@+id/face_south"
+                android:layout_width="115dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="10dp"
+                android:padding="5dp"
+                android:text="South"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
 
-                <ImageView
-                    android:id="@+id/image_content"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/recognized_image"
-                    android:src="@drawable/img_0">
+            <Button
+                android:id="@+id/face_west"
+                android:layout_width="30dp"
+                android:layout_height="115dp"
+                android:layout_marginLeft="10dp"
+                android:padding="8dp"
+                android:text="West"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                </ImageView>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="200dp"
+            <TextView
+                android:id="@+id/obstacleFaceText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:background="@drawable/customborder"
-                android:orientation="vertical">
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal|top"
+                android:text="@string/obstacle_face_text"
+                android:textColor="#000000"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_marginBottom="40dp"
-                    android:background="@color/colorYellow"
-                    android:orientation="horizontal">
 
-                    <Switch
-                        android:id="@+id/switch_motion_control"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:switchPadding="10dp"
-                        android:text="@string/switch_motion"
-                        android:textColor="#616161" />
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/face_south"
+                app:layout_constraintEnd_toStartOf="@+id/face_east"
+                app:layout_constraintStart_toEndOf="@+id/face_west"
+                app:layout_constraintTop_toBottomOf="@+id/obstacleFaceText" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                </RelativeLayout>
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/popup_window_robot"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/rectangle_background"
+            app:layout_constraintBottom_toBottomOf="@+id/mapView"
+            app:layout_constraintEnd_toEndOf="@+id/mapView"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/mapView"
+            app:layout_constraintTop_toTopOf="@+id/mapView">
+
+            <Button
+                android:id="@+id/finalise_robot"
+                android:layout_width="90dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="10dp"
+                android:padding="5dp"
+                android:text="Confirm"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/remove_robot"
+                app:layout_constraintRight_toRightOf="parent" />
+
+            <Button
+                android:id="@+id/remove_robot"
+                android:layout_width="90dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="10dp"
+                android:padding="5dp"
+                android:text="Remove"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/finalise_robot" />
+
+
+            <TextView
+                android:id="@+id/popup_robotText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginBottom="100dp"
+                android:gravity="center_horizontal|top"
+                android:text="Robot Coordinates"
+                android:textColor="#000000"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Spinner
+                android:id="@+id/spinner_robot_x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/finalise_robot"
+                app:layout_constraintEnd_toStartOf="@+id/spinner_robot_y"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/popup_robotText" />
+
+            <Spinner
+                android:id="@+id/spinner_robot_y"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@+id/finalise_robot"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/spinner_robot_x"
+                app:layout_constraintTop_toBottomOf="@+id/popup_robotText" />
+
+            <Spinner
+                android:id="@+id/spinner_robot_facing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@+id/spinner_robot_y"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/popup_robotText" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <TableLayout
+            android:id="@+id/textTableLayout"
+            android:layout_width="300dp"
+            android:layout_height="120dp"
+            android:stretchColumns="0,1"
+            android:layout_marginTop="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.931"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mapView"
+            app:layout_constraintVertical_bias="0"> <!-- stretch the second column of the layout-->
+
+            <!-- first row of the table layout-->
+
+            <TableRow
+
+                android:id="@+id/firstRow"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+                <!-- first element of the row: 100,223-->
+
+                <TextView
+                    android:id="@+id/notificationsHeader"
+                    android:layout_height="20dp"
+                    android:text="Notifications"
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="16sp"
+                    android:layout_span="2"
+                    app:layout_anchorGravity="center"
+                    android:textStyle="bold"/>
+
+
+            </TableRow>
+
+            <TableRow
+
+                android:id="@+id/secondRow"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+                <!-- first element of the row: 100,223-->
+
+                <TextView
+                    android:id="@+id/notifications"
+                    android:layout_height="40dp"
+                    android:text=""
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="14sp"
+                    android:layout_span="2"
+                    app:layout_anchorGravity="center" />
+
+
+            </TableRow>
+
+            <!-- second row of the table layout-->
+            <TableRow
+
+                android:id="@+id/thirdRow"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- first element of the row-->
+                <TextView
+                    android:id="@+id/robot_location_header"
+                    android:layout_height="20dp"
+                    android:text="@string/robot_location_header"
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_anchorGravity="center"
+                    app:layout_constraintVertical_bias="0.701" />
+
+                <TextView
+                    android:id="@+id/robot_facing_header"
+                    android:layout_height="20dp"
+                    android:text="@string/robot_facing_header"
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_anchorGravity="center" />
+
+            </TableRow>
+
+            <TableRow
+
+                android:id="@+id/fourthRow"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- first element of the row-->
+                <TextView
+                    android:id="@+id/robot_location"
+                    android:layout_height="40dp"
+                    android:text=""
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="14sp"
+                    app:layout_anchorGravity="center"/>
+
+                <TextView
+                    android:id="@+id/robot_facing"
+                    android:layout_height="40dp"
+                    android:text=""
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="14sp" />
+
+            </TableRow>
+        </TableLayout>
+
+        <TableLayout
+            android:id="@+id/btnTableLayout"
+            android:layout_width="570dp"
+            android:layout_height="90dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/roundedbar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.98"> <!-- stretch the second column of the layout-->
+
+            <!-- new first row of the table layout-->
+            <TableRow
+                android:id="@+id/btnfirstRow"
+                android:layout_width="575dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:paddingTop="13dp"
+                android:paddingBottom="10dp">
+
+                <!-- first element of the row-->
+                <ImageButton
+                    android:id="@+id/connect_button"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_marginStart="12dp"
+                    android:adjustViewBounds="true"
+                    android:background="@null"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:maxWidth="40dp"
+                    android:maxHeight="40dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/connect_button" />
 
-                    <ImageButton
-                        android:id="@+id/button_direction_up"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_marginStart="70dp"
-                        android:background="@color/colorAppTheme"
-                        android:contentDescription="@string/label_arrow"
-                        android:src="@drawable/ic_arrow_up" />
+                <ImageButton
+                    android:id="@+id/resetObstacles"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:adjustViewBounds="true"
+                    android:background="@null"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:maxWidth="40dp"
+                    android:maxHeight="40dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/reset_button" />
 
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
+                <ImageButton
+                    android:id="@+id/generateRobot"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:adjustViewBounds="true"
+                    android:background="@null"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:maxWidth="40dp"
+                    android:maxHeight="40dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/generate_button" />
 
-                        <ImageButton
-                            android:id="@+id/button_direction_left"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_alignParentStart="true"
-                            android:layout_marginStart="20dp"
-                            android:layout_marginTop="50dp"
-                            android:background="@color/colorAppTheme"
-                            android:contentDescription="@string/label_arrow"
-                            android:src="@drawable/ic_arrow_left" />
+                <ImageButton
+                    android:id="@+id/calculate"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:adjustViewBounds="true"
+                    android:background="@null"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:maxWidth="40dp"
+                    android:maxHeight="40dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/path_button" />
 
-                        <io.github.controlwear.virtual.joystick.android.JoystickView xmlns:custom="http://schemas.android.com/apk/res-auto"
-                            android:id="@+id/joystickView"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_alignParentStart="true"
-                            android:layout_marginStart="70dp"
-                            android:layout_marginTop="50dp"
-                            custom:JV_backgroundColor="@color/colorYellow"
-                            custom:JV_borderColor="@color/colorAccent"
-                            custom:JV_borderWidth="4dp"
-                            custom:JV_buttonColor="@color/colorAppTheme"
-                            custom:JV_buttonSizeRatio="50%"
-                            custom:JV_fixedCenter="false" />
-
-                        <ImageButton
-                            android:id="@+id/button_direction_right"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_marginTop="50dp"
-                            android:layout_marginEnd="10dp"
-                            android:background="@color/colorAppTheme"
-                            android:contentDescription="@string/label_arrow"
-                            android:src="@drawable/ic_arrow_right" />
-                    </RelativeLayout>
-                </RelativeLayout>
-
-            </LinearLayout>
+                <ImageButton
+                    android:id="@+id/start_robot"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:adjustViewBounds="true"
+                    android:background="@null"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:maxWidth="40dp"
+                    android:maxHeight="40dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/start_button" />
 
 
-        </LinearLayout>
-    </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            </TableRow>
+            <!-- second row of the table layout-->
+            <TableRow
+                android:id="@+id/secondBtnRow"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- first element of the row-->
+                <TextView
+                    android:id="@+id/connect_Text"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="12dp"
+                    android:text="Bluetooth"
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="15sp"
+                    app:layout_anchorGravity="center" />
+                <TextView
+                    android:id="@+id/reset_Text"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="12dp"
+                    android:text="Reset"
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="15sp"
+                    app:layout_anchorGravity="center" />
+                <TextView
+                    android:id="@+id/robot_Text"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="12dp"
+                    android:text="Generate"
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="15sp"
+                    app:layout_anchorGravity="center" />
+                <TextView
+                    android:id="@+id/path_Text"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="12dp"
+                    android:text="Path"
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="15sp"
+                    app:layout_anchorGravity="center" />
+                <TextView
+                    android:id="@+id/start_Text"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="12dp"
+                    android:text="Start"
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:textSize="15sp"
+                    app:layout_anchorGravity="center" />
+
+            </TableRow>
+
+        </TableLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
