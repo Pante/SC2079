@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ListView
+        android:id="@+id/listNewDevice"
+        android:layout_width="371dp"
+        android:layout_height="158dp"
+        app:layout_constraintBottom_toTopOf="@+id/pairedDeviceText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.529"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.576"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/deviceSearchStatus"
+        android:layout_width="133dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Bluetooth Devices:"
+        app:layout_constraintBottom_toTopOf="@+id/listNewDevice"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.872" />
+
+    <TextView
+        android:id="@+id/deviceOutputMsg"
+        android:layout_width="126dp"
+        android:layout_height="25dp"
+        android:layout_marginBottom="8dp"
+        android:text="Incoming Msg:"
+        app:layout_constraintBottom_toTopOf="@+id/incomingText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.308"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/deviceInputMsg"
+        android:layout_width="243dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="76dp"
+        android:text="Outgoing Msg:"
+        app:layout_constraintBottom_toTopOf="@+id/messageText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.125"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/incomingText"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/connectBtn"
+        android:layout_width="120dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="30dp"
+        android:backgroundTint="#03A9F4"
+        android:text="Connect"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.882"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.938" />
+
+    <Button
+        android:id="@+id/connectCancel"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:backgroundTint="#03A9F4"
+        android:text="Cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.165"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.972" />
+
+    <Button
+        android:id="@+id/searchBtn"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:backgroundTint="#03A9F4"
+        android:text="Search Devices"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.871"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.971" />
+
+    <Button
+        android:id="@+id/btSend1"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="60dp"
+        android:text="Send"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.903"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.735" />
+
+    <ImageButton
+        android:id="@+id/btSend"
+        android:layout_width="90dp"
+        android:layout_height="60dp"
+        android:layout_marginBottom="172dp"
+        android:adjustViewBounds="true"
+        android:background="@null"
+        android:clickable="true"
+        android:focusable="true"
+        android:maxWidth="40dp"
+        android:maxHeight="40dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/send_message"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.881"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/messageText"
+        android:layout_width="219dp"
+        android:layout_height="62dp"
+        android:layout_marginBottom="92dp"
+        android:background="@color/white"
+        android:inputType="textPersonName"
+        android:text="Input Msg"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.125"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ListView
+        android:id="@+id/pairedDeviceList"
+        android:layout_width="367dp"
+        android:layout_height="104dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/white"
+        android:listSelector="#bcbcbc"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.535"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44" />
+
+    <TextView
+        android:id="@+id/pairedDeviceText"
+        android:layout_width="116dp"
+        android:layout_height="24dp"
+        android:text="Paired Devices:"
+        app:layout_constraintBottom_toTopOf="@+id/pairedDeviceList"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/incomingText"
+        android:layout_width="369dp"
+        android:layout_height="77dp"
+        android:layout_marginBottom="212dp"
+        android:background="@color/white"
+        android:text="Incoming Msg"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.206"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
