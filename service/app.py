@@ -5,7 +5,7 @@ import time
 from flasgger import Swagger
 from flask import Flask, jsonify, request
 
-from pathfinding.algo import MazeSolver
+from pathfinding.old import MazeSolver
 from pathfinding.pathfinding_controller import pathfinding_blueprint
 
 app = Flask(__name__)

@@ -1,68 +1,15 @@
 from __future__ import annotations
 
-from collections import namedtuple
+from abc import ABC
 from dataclasses import dataclass
-from enum import Enum
 from typing import List
 
 import numpy as np
 
+from pathfinding.world.primitives import Direction, Point, Vector
 
-GRID_CELL_LENGTH = 5
-
-
-@dataclass
-class Point:
-    x: int
-    y: int
-
-    def direction(self, to: Point) -> Direction:
-        assert self.x != to.x ^ self.y != to.y
-        match (self.x, self.y):
-            case (0, y) if y < 0:
-                return Direction.NORTH
-            case (x, 0) if x < 0:
-                return Direction.EAST
-            case (x, 0) if x > 0:
-                return Direction.WEST
-            case (0, y) if y > 0:
-                return Direction.SOUTH
-
-
-class Direction(Enum):
-    NORTH = 1
-    EAST = 2
-    SOUTH = 3
-    WEST = 4
-
-
-MOVE_DIRECTION = [
-    (1, 0, Direction.EAST),
-    (-1, 0, Direction.WEST),
-    (0, 1, Direction.NORTH),
-    (0, -1, Direction.SOUTH),
-]
-
-def same_axis(self, direction: Direction) -> bool:
-    """
-    Determines if both directions are on the same axis, i.e. NORTH and SOUTH, EAST and WEST, or NORTH and NORTH.
-
-    :param direction: The other direction.
-    :return: True if both directions are on the same axis.
-    """
-    return self == direction or self == direction.opposite
-
-@property
-def opposite(self) -> Direction:
-    match self:
-        case Direction.NORTH:
-            return Direction.SOUTH
-        case Direction.EAST:
-            return Direction.WEST
-        case Direction.WEST:
-            return Direction.EAST
-        case Direction.SOUTH:
-            return Direction.NORTH
+# The length & width of each square grid cell (in cm).
+GRID_CELL_SIZE = 5
 
 
 class World:
@@ -77,12 +24,7 @@ class World:
     robot: Robot
     obstacles: [Obstacle]
 
-    def __init__(
-    self,
-    width: int,
-    height: int,
-    robot: Robot,
-    obstacles: List[Obstacle]):
+    def __init__(self, width: int, height: int, robot: Robot, obstacles: List[Obstacle]):
         assert self.__inside(robot)
         assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
 
@@ -104,9 +46,7 @@ class World:
     def __annotate_obstacles(self: World) -> None:
         for obstacle in self.obstacles:
             for x in range(obstacle.south_west.x, obstacle.north_east.x + 1):
-                for y in range(
-    obstacle.south_west.y,
-     obstacle.north_east.y + 1):
+                for y in range(obstacle.south_west.y, obstacle.north_east.y + 1):
                     self.grid[x, y] = -1
 
     def __annotate_true_clearance(self: World) -> None:
@@ -133,16 +73,10 @@ class World:
                     return False
 
         return True
-    
-    def add_obstacle(self, x: int, y: int, direction: Direction, obstacle_id: int):
-        # Create an obstacle object
-        obstacle = Obstacle(x, y, direction, obstacle_id)
-        # Add created obstacle to grid object
-        self.grid.add_obstacle(obstacle)
 
 
 @dataclass
-class Entity:
+class Entity(ABC):
     direction: Direction
     south_west: Point
     north_east: Point
@@ -150,6 +84,10 @@ class Entity:
     def __post_init__(self):
         assert 0 <= self.south_west.x <= self.north_east.x
         assert 0 <= self.south_west.y <= self.north_east.y
+
+    @property
+    def vector(self) -> Vector:
+        return Vector(self.direction, self.south_west.x, self.south_west.y)
 
     @property
     def north_west(self) -> Point:
@@ -162,6 +100,14 @@ class Entity:
 
 @dataclass
 class Robot(Entity):
+    direction: Direction
+    south_west: Point
+    north_east: Point
+
+    @property
+    def centre(self) -> Point:
+        return Point((self.south_west.x + self.north_east.x) // 2, (self.south_west.y + self.north_east.y) // 2)
+
     @property
     def height(self):
         return self.north_east.y - self.south_west.y
@@ -171,7 +117,7 @@ class Robot(Entity):
         return self.north_east.x - self.south_east.x
 
 
-@dataclass()
+@dataclass
 class Obstacle(Entity):
     image_id: int
 

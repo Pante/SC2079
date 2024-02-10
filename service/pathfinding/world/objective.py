@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from pathfinding.world.world import Entity, World, Obstacle, Direction, Point
+from pathfinding.world.world import Entity, World, Obstacle
+from pathfinding.world.primitives import Direction, Point
 
 """
 The minimum distance (in grid cells) between the obstacle and objective, inclusive.
@@ -38,6 +39,7 @@ def __generate_objective(world: World, obstacle: Obstacle) -> Objective | None:
     if world.can_contain(ideal):
         return ideal
 
+    # TODO: Can we find a nice way to return objectives closer to ideal first?
     for alignment in range(0, world.robot.width):
         for gap in range(MINIMUM_GAP, MAXIMUM_GAP):
             objective = __suggest_objective(world, obstacle, gap, alignment)
@@ -103,7 +105,7 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
             )
 
 
-@dataclass
+@dataclass(frozen=True)
 class Objective(Entity):
     image_id: int
 
@@ -114,14 +116,14 @@ class Objective(Entity):
             south_west: Point,
             width: int,
             height: int,
-            image_id: int
+            image_id: int,
     ) -> Objective:
         return cls(
             direction,
             south_west,
             Point(south_west.x + width, south_west.y + height),
-            image_id
+            image_id,
         )
 
-    def __post_init__(obstacle):
-        assert 1 <= obstacle.image_id < 36
+    def __post_init__(self):
+        assert 1 <= self.image_id < 36
