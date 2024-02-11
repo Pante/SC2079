@@ -12,7 +12,7 @@ from pathfinding.search.instructions import Turn, TurnInstruction, Move, MoveIns
 from pathfinding.search.segment import segment
 from pathfinding.world.objective import Objective
 from pathfinding.world.primitives import Vector, Point
-from pathfinding.world.world import Robot, World
+from pathfinding.world.world import Robot, World, GRID_CELL_SIZE
 
 
 def search(world: World, objectives: List[Objective]) -> List[Segment]:
@@ -73,10 +73,10 @@ class Segment:
 
                 case Move() if instructions and instructions[-1] is MoveInstruction and instructions[
                     -1].move == movement:
-                    instructions[-1].amount += 1
+                    instructions[-1].amount += GRID_CELL_SIZE
 
                 case Move():
-                    instructions.append(MoveInstruction(movement, 1))
+                    instructions.append(MoveInstruction(movement, GRID_CELL_SIZE))
 
         # TODO: This might need to be tweaked if we need to move back to starting point
         instructions.append(MiscInstruction.CAPTURE_IMAGE)
