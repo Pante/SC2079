@@ -1,4 +1,4 @@
-from pathfinding.search.instructions import TurnInstruction
+from pathfinding.instructions.instructions import Turn
 from pathfinding.world.primitives import Direction, Point, Vector
 from pathfinding.world.world import GRID_CELL_SIZE
 
@@ -6,26 +6,26 @@ from pathfinding.world.world import GRID_CELL_SIZE
 TURNING_RADIUS = 25 // GRID_CELL_SIZE
 
 
-def turn(vector: Vector, instruction: TurnInstruction) -> (Vector, set[Point]):
+def turn(vector: Vector, instruction: Turn) -> tuple[Vector, set[Point]]:
     centre_x, centre_y, result, quadrant = __turn(vector, instruction)
     points = __curve(centre_x, centre_y, quadrant)
     return result, points
 
 
-def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, int):
+def __turn(vector: Vector, instruction: Turn) -> tuple[int, int, Vector, int]:
     """
     Performs a turn.
 
     :param vector: The initial vector.
     :param instruction: The turn instruction.
     :return:
-        the x & y coordinates of the centre of the turning radius,
+        The x & y coordinates of the centre of the turning radius,
         the vector after executing the turn
         the quadrant of the turn,
     """
     match (vector.direction, instruction):
         # Initially facing north
-        case (Direction.NORTH, TurnInstruction.FORWARD_LEFT):
+        case (Direction.NORTH, Turn.FORWARD_LEFT):
             return (
                 vector.x - TURNING_RADIUS,
                 vector.y,
@@ -33,7 +33,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 1,
             )
 
-        case (Direction.NORTH, TurnInstruction.FORWARD_RIGHT):
+        case (Direction.NORTH, Turn.FORWARD_RIGHT):
             return (
                 vector.x + TURNING_RADIUS,
                 vector.y,
@@ -41,7 +41,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 2,
             )
 
-        case (Direction.NORTH, TurnInstruction.BACKWARD_LEFT):
+        case (Direction.NORTH, Turn.BACKWARD_LEFT):
             return (
                 vector.x - TURNING_RADIUS,
                 vector.y,
@@ -49,7 +49,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 4,
             )
 
-        case (Direction.NORTH, TurnInstruction.BACKWARD_RIGHT):
+        case (Direction.NORTH, Turn.BACKWARD_RIGHT):
             return (
                 vector.x + TURNING_RADIUS,
                 vector.y,
@@ -58,7 +58,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
             )
 
         # Initially facing east
-        case (Direction.EAST, TurnInstruction.FORWARD_LEFT):
+        case (Direction.EAST, Turn.FORWARD_LEFT):
             return (
                 vector.x,
                 vector.y + TURNING_RADIUS,
@@ -66,7 +66,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 4,
             )
 
-        case (Direction.EAST, TurnInstruction.FORWARD_RIGHT):
+        case (Direction.EAST, Turn.FORWARD_RIGHT):
             return (
                 vector.x,
                 vector.y - TURNING_RADIUS,
@@ -74,7 +74,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 1,
             )
 
-        case (Direction.EAST, TurnInstruction.BACKWARD_LEFT):
+        case (Direction.EAST, Turn.BACKWARD_LEFT):
             return (
                 vector.x,
                 vector.y + TURNING_RADIUS,
@@ -82,7 +82,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 3,
             )
 
-        case (Direction.EAST, TurnInstruction.BACKWARD_RIGHT):
+        case (Direction.EAST, Turn.BACKWARD_RIGHT):
             return (
                 vector.x,
                 vector.y - TURNING_RADIUS,
@@ -91,7 +91,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
             )
 
         # Initially facing south
-        case (Direction.SOUTH, TurnInstruction.FORWARD_LEFT):
+        case (Direction.SOUTH, Turn.FORWARD_LEFT):
             return (
                 vector.x + TURNING_RADIUS,
                 vector.y,
@@ -99,7 +99,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 3,
             )
 
-        case (Direction.SOUTH, TurnInstruction.FORWARD_RIGHT):
+        case (Direction.SOUTH, Turn.FORWARD_RIGHT):
             return (
                 vector.x - TURNING_RADIUS,
                 vector.y,
@@ -107,7 +107,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 4,
             )
 
-        case (Direction.SOUTH, TurnInstruction.BACKWARD_LEFT):
+        case (Direction.SOUTH, Turn.BACKWARD_LEFT):
             return (
                 vector.x + TURNING_RADIUS,
                 vector.y,
@@ -115,7 +115,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 2,
             )
 
-        case (Direction.SOUTH, TurnInstruction.BACKWARD_RIGHT):
+        case (Direction.SOUTH, Turn.BACKWARD_RIGHT):
             return (
                 vector.x - TURNING_RADIUS,
                 vector.y,
@@ -124,7 +124,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
             )
 
         # Initially facing west
-        case (Direction.WEST, TurnInstruction.FORWARD_LEFT):
+        case (Direction.WEST, Turn.FORWARD_LEFT):
             return (
                 vector.x,
                 vector.y + TURNING_RADIUS,
@@ -132,7 +132,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 2,
             )
 
-        case (Direction.WEST, TurnInstruction.FORWARD_RIGHT):
+        case (Direction.WEST, Turn.FORWARD_RIGHT):
             return (
                 vector.x,
                 vector.y + TURNING_RADIUS,
@@ -140,7 +140,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 3,
             )
 
-        case (Direction.WEST, TurnInstruction.BACKWARD_LEFT):
+        case (Direction.WEST, Turn.BACKWARD_LEFT):
             return (
                 vector.x,
                 vector.y + TURNING_RADIUS,
@@ -148,7 +148,7 @@ def __turn(vector: Vector, instruction: TurnInstruction) -> (int, int, Vector, i
                 1,
             )
 
-        case (Direction.WEST, TurnInstruction.BACKWARD_RIGHT):
+        case (Direction.WEST, Turn.BACKWARD_RIGHT):
             return (
                 vector.x,
                 vector.y + TURNING_RADIUS,

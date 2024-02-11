@@ -35,15 +35,15 @@ def __generate_objective(world: World, obstacle: Obstacle) -> Objective | None:
     :param obstacle: The obstacle.
     :return: An objective if one can be placed. None otherwise.
     """
-    ideal = __suggest_objective(world, obstacle, IDEAL_GAP, world.robot.width // 2)
-    if world.can_contain(ideal):
+    ideal = __suggest_objective(world, obstacle, IDEAL_GAP, world.robot.clearance // 2)
+    if world.contains(ideal):
         return ideal
 
     # TODO: Can we find a nice way to return objectives closer to ideal first?
-    for alignment in range(0, world.robot.width):
+    for alignment in range(0, world.robot.clearance):
         for gap in range(MINIMUM_GAP, MAXIMUM_GAP):
             objective = __suggest_objective(world, obstacle, gap, alignment)
-            if world.can_contain(objective):
+            if world.contains(objective):
                 return objective
 
     return None
@@ -62,26 +62,26 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
     :param alignment: An alignment (in grid cells) to adjust the suggested objective's placement by.
     :return: An objective.
     """
-    assert alignment < world.robot.width
+    assert alignment < world.robot.clearance
 
-    width, height = world.robot.width, world.robot.height
+    clearance = world.robot.clearance
     match obstacle.direction:
         case Direction.NORTH:
             north_west = obstacle.north_west
             return Objective.from_obstacle(
                 Direction.SOUTH,
                 Point(north_west.x - alignment, north_west.y + gap),
-                width,
-                height,
+                clearance,
+                clearance,
                 obstacle.image_id
             )
 
         case Direction.EAST:
             return Objective.from_obstacle(
                 Direction.WEST,
-                Point(obstacle.north_east.x + gap, obstacle.north_east.x - height + alignment),
-                width,
-                height,
+                Point(obstacle.north_east.x + gap, obstacle.north_east.x - clearance + alignment),
+                clearance,
+                clearance,
                 obstacle.image_id
             )
 
@@ -89,23 +89,23 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
             south_east = obstacle.south_east
             return Objective.from_obstacle(
                 Direction.NORTH,
-                Point(obstacle.north_east.x - width + alignment, south_east.y - gap - height),
-                width,
-                height,
+                Point(obstacle.north_east.x - clearance + alignment, south_east.y - gap - clearance),
+                clearance,
+                clearance,
                 obstacle.image_id
             )
 
         case Direction.WEST:
             return Objective.from_obstacle(
                 Direction.EAST,
-                Point(obstacle.south_west.x - gap - width, obstacle.south_west.y - alignment),
-                width,
-                height,
+                Point(obstacle.south_west.x - gap - clearance, obstacle.south_west.y - alignment),
+                clearance,
+                clearance,
                 obstacle.image_id
             )
 
 
-@dataclass(frozen=True)
+@dataclass
 class Objective(Entity):
     image_id: int
 

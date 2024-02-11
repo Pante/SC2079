@@ -18,24 +18,20 @@ class World:
 
     See https://harablog.wordpress.com/2009/01/29/clearance-based-pathfinding/
     """
-    width: int
-    height: int
-    grid: np.ndarray
-    robot: Robot
-    obstacles: [Obstacle]
 
     def __init__(self, width: int, height: int, robot: Robot, obstacles: List[Obstacle]):
-        assert self.__inside(robot)
-        assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
-
         self.width = width
         self.height = height
-        self.grid = np.zeros((40, 40), dtype=np.int32)
+        self.grid = np.full((height, width), -1, dtype=np.int32)
         self.robot = robot
         self.obstacles = obstacles
 
+        assert self.__inside(robot)
+        assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
+
         self.__annotate_obstacles()
         self.__annotate_true_clearance()
+        print(self.grid)
 
     def __inside(self, entity: Entity) -> bool:
         return (0 <= entity.south_west.x < self.width and
@@ -47,32 +43,31 @@ class World:
         for obstacle in self.obstacles:
             for x in range(obstacle.south_west.x, obstacle.north_east.x + 1):
                 for y in range(obstacle.south_west.y, obstacle.north_east.y + 1):
-                    self.grid[x, y] = -1
+                    self.grid[x, y] = 0
 
     def __annotate_true_clearance(self: World) -> None:
         for x in range(0, self.width):
             for y in range(0, self.height):
-                if self.grid[x, y] != -1:
+                if self.grid[x, y] != 0:
                     self.grid[x, y] = self.__compute_true_clearance(x, y)
 
     def __compute_true_clearance(self: World, x: int, y: int) -> int:
-        clearance = 1
-        for size in range(1, max(self.width, self.height)):
-            for box_x in range(x, x + size):
-                for box_y in range(y, y + size):
-                    if self.grid[x, y] == -1:
-                        return clearance
+        max_size = min(self.width, self.height)
+        for size in range(0, max_size):
+            min_x = max(x - size, 0)
+            max_x = min(x + size + 1, self.width)
+            min_y = max(y - size, 0)
+            max_y = min(y + size + 1, self.height)
 
-    def can_contain(self, entity: Entity) -> bool:
-        if not self.__inside(entity):
-            return False
+            for box_x in range(min_x, max_x):
+                for box_y in range(min_y, max_y):
+                    if self.grid[box_x, box_y] == 0:
+                        return size
 
-        for x in range(entity.south_west.x, entity.north_east.x):
-            for y in range(entity.south_west.y, entity.north_east.y):
-                if self.grid[x, y] == -1:
-                    return False
+        return max_size
 
-        return True
+    def contains(self, entity: Entity) -> bool:
+        return self.__inside(entity) and entity.clearance <= self.grid[entity.south_west.x, entity.south_west.y]
 
 
 @dataclass
@@ -84,6 +79,7 @@ class Entity(ABC):
     def __post_init__(self):
         assert 0 <= self.south_west.x <= self.north_east.x
         assert 0 <= self.south_west.y <= self.north_east.y
+        assert self.north_east.y - self.south_west.y == self.north_east.x - self.south_east.x
 
     @property
     def vector(self) -> Vector:
@@ -97,6 +93,11 @@ class Entity(ABC):
     def south_east(self) -> Point:
         return Point(self.south_west.x, self.north_east.y)
 
+    @property
+    def clearance(self):
+        # Assumes that height & width are the same
+        return self.north_east.y - self.south_west.y + 1
+
 
 @dataclass
 class Robot(Entity):
@@ -104,17 +105,20 @@ class Robot(Entity):
     south_west: Point
     north_east: Point
 
-    @property
-    def centre(self) -> Point:
-        return Point((self.south_west.x + self.north_east.x) // 2, (self.south_west.y + self.north_east.y) // 2)
+    def set_vector(self, vector: Vector) -> Robot:
+        clearance = self.clearance
 
-    @property
-    def height(self):
-        return self.north_east.y - self.south_west.y
+        self.direction = vector.direction
+        self.south_west = Point(vector.x, vector.y)
+        self.north_east = Point(vector.x + clearance, vector.y + clearance)
+        return self
 
-    @property
-    def width(self):
-        return self.north_east.x - self.south_east.x
+    def set_point(self, point: Point) -> Robot:
+        clearance = self.clearance
+
+        self.south_west = point
+        self.north_east = Point(point.x + clearance, point.y + clearance)
+        return self
 
 
 @dataclass
