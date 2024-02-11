@@ -1,5 +1,5 @@
 from pathfinding.world.primitives import Vector, Direction
-from pathfinding.instructions.instructions import Move
+from pathfinding.search.instructions import Move
 
 
 def move(vector: Vector, instruction: Move) -> Vector:

@@ -31,7 +31,6 @@ class World:
 
         self.__annotate_obstacles()
         self.__annotate_true_clearance()
-        print(self.grid)
 
     def __inside(self, entity: Entity) -> bool:
         return (0 <= entity.south_west.x < self.width and
@@ -105,16 +104,19 @@ class Robot(Entity):
     south_west: Point
     north_east: Point
 
-    def set_vector(self, vector: Vector) -> Robot:
-        clearance = self.clearance
+
+@dataclass
+class Cell(Entity):
+    def set_vector(self, vector: Vector) -> Cell:
+        clearance = self.clearance - 1
 
         self.direction = vector.direction
         self.south_west = Point(vector.x, vector.y)
         self.north_east = Point(vector.x + clearance, vector.y + clearance)
         return self
 
-    def set_point(self, point: Point) -> Robot:
-        clearance = self.clearance
+    def set_point(self, point: Point) -> Cell:
+        clearance = self.clearance - 1
 
         self.south_west = point
         self.north_east = Point(point.x + clearance, point.y + clearance)

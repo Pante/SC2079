@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import IntEnum
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class Vector:
     direction: Direction
     x: int
@@ -29,7 +29,7 @@ class Point:
                 return Direction.SOUTH
 
 
-class Direction(Enum):
+class Direction(IntEnum):
     NORTH = 1
     EAST = 2
     SOUTH = 3

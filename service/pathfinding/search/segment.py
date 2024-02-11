@@ -2,38 +2,46 @@ import heapq
 import math
 from typing import List, Generator
 
-from pathfinding.instructions.instructions import TurnInstruction, Move, Turn
+from pathfinding.search.instructions import Turn, Move, TurnInstruction
 from pathfinding.search.move import move
 from pathfinding.search.turn import turn
-from pathfinding.world.objective import generate_objectives
-from pathfinding.world.primitives import Vector, Direction, Point
-from pathfinding.world.world import World, Robot, Obstacle
+from pathfinding.world.primitives import Vector
+from pathfinding.world.world import World, Cell
 
 
-def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List[tuple[Vector, TurnInstruction | Move]]]:
+def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List[tuple[Vector, Turn | Move | None]]]:
     """
     Finds the shortest path of a segment of the overall path.
 
-    Uses an annotated A* pathfinding algorithm with a modified function for returning a vector's neighbour.
+    Uses an annotated A* pathfinding algorithm with a modified function for returning a vector's neighbour. Each grid
+    cell contains a "true clearance" value which denotes the distance from an obstacle. These values are pre-computed to
+    avoid re-computation during each run.
+
+    See https://harablog.wordpress.com/2009/02/05/hierarchical-clearance-based-pathfinding/
+
+    The possible neighbours are constrained by the current vector's direction and moves, i.e. FORWARD_LEFT, BACKWARD.
+    Vectors that share the same x & y coordinates but different direction are considered different cells.
+
     The Euclidean distance between two vectors is used as the heuristic function.
-    https://harablog.wordpress.com/2009/02/05/hierarchical-clearance-based-pathfinding/
 
     :param world: The world.
-    :param initial: The initial vector.
-    :param objective: The goal vector.
+    :param initial: The initial vector. Always the south-west corner of the robot.
+    :param objective: The goal vector. Always the south-west corner of an objective.
     :return:
-        The cost of the segment,
-        The
+        The cost of the segment.
+        The vectors and corresponding instructions from the initial vector to the objective vector. Vectors that form
+        a curve when turning are embedded inside the instruction
     """
     frontier = __PriorityQueue()
     source: dict[Vector, Vector | None] = {}
-    instructions: dict[Vector, TurnInstruction | Move | None] = {}
-    cost: dict[Vector, int] = {}
+    instructions: dict[Vector, Turn | Move | None] = {}
+    costs: dict[Vector, int] = {}
 
     frontier.add(0, initial)
     source[initial] = None
     instructions[initial] = None
-    cost[initial] = 0
+    costs[initial] = 0
+    cell = Cell(world.robot.direction, world.robot.south_west, world.robot.north_east)
 
     while not frontier.empty():
         current = frontier.pop()
@@ -41,34 +49,35 @@ def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List
         if current == objective:
             break
 
-        for next, instruction in __neighbours(world, current):
-            new_cost = cost[current]
+        for next, instruction in __neighbours(world, cell, current):
+            new_cost = costs[current]
             match instruction:
                 case Move():
                     new_cost += + 1
-                case TurnInstruction():
+                case Turn():
                     new_cost += len(instruction.points)
 
-            if next not in cost or new_cost < cost[next]:
+            if next not in costs or new_cost < costs[next]:
                 frontier.add(new_cost + __heuristic(next, objective), next)
                 source[next] = current
                 instructions[next] = instruction
-                cost[next] = new_cost
+                costs[next] = new_cost
 
     path = []
     current = objective
 
     while current is not None:
-        path.append((current, instructions[current]))
-        current = source[current]
+        path.append((current, instructions.get(current)))
+        current = source.get(current)
 
     path.reverse()
 
-    return cost[objective], path
+    return costs[objective], path
 
 
 class __PriorityQueue:
-    elements: List[tuple[int, Vector]] = []
+    def __init__(self):
+        self.elements: List[tuple[int, Vector]] = []
 
     def empty(self):
         return not self.elements
@@ -80,16 +89,15 @@ class __PriorityQueue:
         return heapq.heappop(self.elements)[1]
 
 
-def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, TurnInstruction | Move], None, None]:
-    robot = world.robot
-    for instruction in Turn:
+def __neighbours(world: World, cell: Cell, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
+    for instruction in TurnInstruction:
         next, path = turn(current, instruction)
-        if all(map(lambda p: world.contains(robot.set_point(p)), path)) and world.contains(robot.set_vector(next)):
-            yield next, TurnInstruction(instruction, path)
+        if all(map(lambda p: world.contains(cell.set_point(p)), path)) and world.contains(cell.set_vector(next)):
+            yield next, Turn(instruction, path)
 
     for instruction in Move:
         next = move(current, instruction)
-        if world.contains(robot.set_vector(next)):
+        if world.contains(cell.set_vector(next)):
             yield next, instruction
 
 
@@ -98,21 +106,3 @@ def __heuristic(a: Vector, b: Vector) -> int:
     The Euclidean distance between two vectors. This is preferred over Manhattan distance which is not admissible.
     """
     return int(math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2))
-
-
-# Create a Robot instance
-robot = Robot(Direction.NORTH, Point(0, 0), Point(2, 2))
-
-# Create some Obstacle instances
-obstacle1 = Obstacle(Direction.NORTH, Point(2, 2), Point(3, 3), 1)
-obstacle2 = Obstacle(Direction.SOUTH, Point(3, 4), Point(4, 5), 2)
-
-# Create a list of obstacles
-
-
-# Create a World instance
-world = World(15, 15, robot, [obstacle1, obstacle2])
-objectives = generate_objectives(world)
-print(robot.clearance)
-
-print(objectives)
