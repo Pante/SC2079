@@ -6,9 +6,9 @@ from enum import Enum
 from pathfinding.world.primitives import Point
 
 
-class MiscInstruction(Enum):
-    CAPTURE_IMAGE = 1
-    RESET_GYROSCOPE = 2
+class MiscInstruction(str, Enum):
+    CAPTURE_IMAGE = 'CAPTURE_IMAGE'
+    RESET_GYROSCOPE = 'RESET_GYROSCOPE'
 
 
 @dataclass
@@ -16,17 +16,20 @@ class MoveInstruction:
     move: Move
     amount: int
 
-
-class Move(Enum):
-    FORWARD = 1
-    BACKWARD = 2
+    def __post_init__(self):
+        assert 0 <= self.amount
 
 
-class TurnInstruction(Enum):
-    FORWARD_LEFT = 1
-    FORWARD_RIGHT = 2
-    BACKWARD_LEFT = 3
-    BACKWARD_RIGHT = 4
+class Move(str, Enum):
+    FORWARD = 'FORWARD'
+    BACKWARD = 'BACKWARD'
+
+
+class TurnInstruction(str, Enum):
+    FORWARD_LEFT = 'FORWARD_LEFT'
+    FORWARD_RIGHT = 'FORWARD_RIGHT'
+    BACKWARD_LEFT = 'BACKWARD_LEFT'
+    BACKWARD_RIGHT = 'BACKWARD_RIGHT'
 
 
 @dataclass(frozen=True)

@@ -36,7 +36,6 @@ def __hamiltonian_path(entities: List[Robot | Objective]) -> tuple[List[int], fl
     #       Can be switched to use open TSP algorithm otherwise.
     positions = [[entity.south_west.x, entity.south_west.y] for entity in entities]
     distance_matrix = euclidean_distance_matrix(np.array(positions))
-    print(distance_matrix)
     permutation, distance = solve_tsp_dynamic_programming(distance_matrix)
     return permutation, distance
 
@@ -52,8 +51,7 @@ def __segments(world: World, entities: List[Robot | Objective]) -> List[Segment]
 
 @dataclass
 class Segment:
-    # TODO: This might need to be tweaked if we need to move back to starting point
-    image_id: int | None
+    image_id: int
     cost: int
     instructions: List[TurnInstruction | MoveInstruction | MiscInstruction]
     points: set[Point]

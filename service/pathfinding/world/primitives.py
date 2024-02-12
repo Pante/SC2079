@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import IntEnum
+from enum import Enum
 
 
 @dataclass(frozen=True, order=True)
@@ -29,11 +29,11 @@ class Point:
                 return Direction.SOUTH
 
 
-class Direction(IntEnum):
-    NORTH = 1
-    EAST = 2
-    SOUTH = 3
-    WEST = 4
+class Direction(str, Enum):
+    NORTH = 'NORTH'
+    EAST = 'EAST'
+    SOUTH = 'SOUTH'
+    WEST = 'WEST'
 
     def same_axis(self, direction: Direction) -> bool:
         """

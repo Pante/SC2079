@@ -8,6 +8,8 @@ import numpy as np
 
 from pathfinding.world.primitives import Direction, Point, Vector
 
+# The dimensions of the square grid (in number of cells).
+GRID_SIZE = 20
 # The length & width of each square grid cell (in cm).
 GRID_CELL_SIZE = 5
 
