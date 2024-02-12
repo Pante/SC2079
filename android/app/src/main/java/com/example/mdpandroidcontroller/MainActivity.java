@@ -262,8 +262,11 @@ public class MainActivity extends AppCompatActivity {
         //LocalBroadcastManager.getInstance(this).registerReceiver(incomingMsgReceiver, new IntentFilter("IncomingMsg"));
 
 
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
         //GUI
 
         map = findViewById(R.id.mapView);
@@ -1386,17 +1389,34 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
+<<<<<<< Updated upstream
+=======
+    private void requestBluetoothPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, 1);
+        }
+    }
+
+>>>>>>> Stashed changes
     //first fragment - turn on bluetooth
     public void turnonbluetooth() {
         if (!mBlueAdapter.isEnabled()) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
+<<<<<<< Updated upstream
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, 1);
+=======
+                //ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, 1);
+>>>>>>> Stashed changes
                 // here to request the missing permissions, and then overriding
                 //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
                 //                                          int[] grantResults)
                 // to handle the case where the user grants the permission. See the documentation
                 // for ActivityCompat#requestPermissions for more details.
+<<<<<<< Updated upstream
+=======
+                requestBluetoothPermissions(); //ADDED LINE!!!!
+>>>>>>> Stashed changes
                 Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 activityResultLauncher.launch(intent);
                 //return;
@@ -1424,6 +1444,10 @@ public class MainActivity extends AppCompatActivity {
                 //                                          int[] grantResults)
                 // to handle the case where the user grants the permission. See the documentation
                 // for ActivityCompat#requestPermissions for more details.
+<<<<<<< Updated upstream
+=======
+                requestBluetoothPermissions(); //ADDED LINE!!!!!
+>>>>>>> Stashed changes
 
                 mBlueAdapter.disable();
                 showToast("Turning Bluetooth Off");
@@ -1440,12 +1464,20 @@ public class MainActivity extends AppCompatActivity {
         if (!mBlueAdapter.isEnabled()) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
+<<<<<<< Updated upstream
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, 1);
+=======
+                //ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, 1);
+>>>>>>> Stashed changes
                 // here to request the missing permissions, and then overriding
                 //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
                 //                                          int[] grantResults)
                 // to handle the case where the user grants the permission. See the documentation
                 // for ActivityCompat#requestPermissions for more details.
+<<<<<<< Updated upstream
+=======
+                requestBluetoothPermissions(); //ADDED LINE HERE AND COMMENTED THE PART ABOVE
+>>>>>>> Stashed changes
                 mStatusBlueTv.setText("Making Your Device Discoverable");
                 Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                 //startActivityForResult(intent ,REQUEST_DISCOVER_BT);
@@ -1489,6 +1521,20 @@ public class MainActivity extends AppCompatActivity {
                     //RECONNECT DIALOG MSG
                     AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
                     alertDialog.setTitle("BLUETOOTH DISCONNECTED");
+<<<<<<< Updated upstream
+=======
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        requestBluetoothPermissions();
+                        return;
+                    }
+>>>>>>> Stashed changes
                     alertDialog.setMessage("Connection with device: '" + myBTConnectionDevice.getName() + "' has ended. Do you want to reconnect?");
 
 
@@ -1530,6 +1576,10 @@ public class MainActivity extends AppCompatActivity {
                         //                                          int[] grantResults)
                         // to handle the case where the user grants the permission. See the documentation
                         // for ActivityCompat#requestPermissions for more details.
+<<<<<<< Updated upstream
+=======
+                        requestBluetoothPermissions();
+>>>>>>> Stashed changes
                     }
                     connectedDevice = myBTConnectionDevice.getName();
                     connectedState = true;
