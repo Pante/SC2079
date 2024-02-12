@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(eq=True, unsafe_hash=True, order=True)
 class Vector:
     direction: Direction
     x: int

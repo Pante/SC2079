@@ -54,29 +54,30 @@ class Segment:
     image_id: int
     cost: int
     instructions: List[TurnInstruction | MoveInstruction | MiscInstruction]
-    points: set[Point]
+    vectors: list[Vector]
 
     @classmethod
     def compress(cls, image_id: int | None, information: tuple[int, list[tuple[Vector, Turn | Move]]]) -> Segment:
         cost, parts = information
         instructions: List[TurnInstruction | MoveInstruction | MiscInstruction] = []
-        points: set[Point] = set()
+        vectors: list[Vector] = []
 
         for vector, movement in parts:
-            points.add(Point(vector.x, vector.y))
             match movement:
                 case Turn():
                     instructions.append(movement.turn)
-                    points.update(movement.points)
+                    vectors.extend(movement.vectors)
 
                 case Move() if instructions and instructions[-1] is MoveInstruction and instructions[
                     -1].move == movement:
+                    vectors.append(vector)
                     instructions[-1].amount += GRID_CELL_SIZE
 
                 case Move():
+                    vectors.append(vector)
                     instructions.append(MoveInstruction(movement, GRID_CELL_SIZE))
 
         # TODO: This might need to be tweaked if we need to move back to starting point
         instructions.append(MiscInstruction.CAPTURE_IMAGE)
 
-        return cls(image_id, cost, instructions, points)
+        return cls(image_id, cost, instructions, vectors)

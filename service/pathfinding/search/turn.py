@@ -6,197 +6,210 @@ from pathfinding.world.world import GRID_CELL_SIZE
 TURNING_RADIUS = 25 // GRID_CELL_SIZE
 
 
-def turn(vector: Vector, instruction: TurnInstruction) -> tuple[Vector, set[Point]]:
-    centre_x, centre_y, result, quadrant = __turn(vector, instruction)
-    points = __curve(centre_x, centre_y, quadrant)
-    return result, points
-
-
-def __turn(vector: Vector, instruction: TurnInstruction) -> tuple[int, int, Vector, int]:
+def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
     """
     Performs a turn.
 
-    :param vector: The initial vector.
+    :param start: The initial vector.
     :param instruction: The turn instruction.
     :return:
         The x & y coordinates of the centre of the turning radius,
         the vector after executing the turn
         the quadrant of the turn,
     """
-    match (vector.direction, instruction):
+    match (start.direction, instruction):
         # Initially facing north
         case (Direction.NORTH, TurnInstruction.FORWARD_LEFT):
-            return (
-                vector.x - TURNING_RADIUS,
-                vector.y,
-                Vector(Direction.WEST, vector.x - TURNING_RADIUS, vector.y + TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.WEST, start.x - TURNING_RADIUS, start.y + TURNING_RADIUS),
+                start.x - TURNING_RADIUS,
+                start.y,
                 1,
             )
 
         case (Direction.NORTH, TurnInstruction.FORWARD_RIGHT):
-            return (
-                vector.x + TURNING_RADIUS,
-                vector.y,
-                Vector(Direction.EAST, vector.x + TURNING_RADIUS, vector.y + TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.EAST, start.x + TURNING_RADIUS, start.y + TURNING_RADIUS),
+                start.x + TURNING_RADIUS,
+                start.y,
                 2,
             )
 
         case (Direction.NORTH, TurnInstruction.BACKWARD_LEFT):
-            return (
-                vector.x - TURNING_RADIUS,
-                vector.y,
-                Vector(Direction.EAST, vector.x - TURNING_RADIUS, vector.y - TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.EAST, start.x - TURNING_RADIUS, start.y - TURNING_RADIUS),
+                start.x - TURNING_RADIUS,
+                start.y,
                 4,
             )
 
         case (Direction.NORTH, TurnInstruction.BACKWARD_RIGHT):
-            return (
-                vector.x + TURNING_RADIUS,
-                vector.y,
-                Vector(Direction.WEST, vector.x + TURNING_RADIUS, vector.y - TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.WEST, start.x + TURNING_RADIUS, start.y - TURNING_RADIUS),
+                start.x + TURNING_RADIUS,
+                start.y,
                 3,
             )
 
         # Initially facing east
         case (Direction.EAST, TurnInstruction.FORWARD_LEFT):
-            return (
-                vector.x,
-                vector.y + TURNING_RADIUS,
-                Vector(Direction.NORTH, vector.x + TURNING_RADIUS, vector.y + TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.NORTH, start.x + TURNING_RADIUS, start.y + TURNING_RADIUS),
+                start.x,
+                start.y + TURNING_RADIUS,
                 4,
             )
 
         case (Direction.EAST, TurnInstruction.FORWARD_RIGHT):
-            return (
-                vector.x,
-                vector.y - TURNING_RADIUS,
-                Vector(Direction.SOUTH, vector.x + TURNING_RADIUS, vector.y - TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.SOUTH, start.x + TURNING_RADIUS, start.y - TURNING_RADIUS),
+                start.x,
+                start.y - TURNING_RADIUS,
                 1,
             )
 
         case (Direction.EAST, TurnInstruction.BACKWARD_LEFT):
-            return (
-                vector.x,
-                vector.y + TURNING_RADIUS,
-                Vector(Direction.SOUTH, vector.x - TURNING_RADIUS, vector.y + TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.SOUTH, start.x - TURNING_RADIUS, start.y + TURNING_RADIUS),
+                start.x,
+                start.y + TURNING_RADIUS,
                 3,
             )
 
         case (Direction.EAST, TurnInstruction.BACKWARD_RIGHT):
-            return (
-                vector.x,
-                vector.y - TURNING_RADIUS,
-                Vector(Direction.NORTH, vector.x - TURNING_RADIUS, vector.y - TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.NORTH, start.x - TURNING_RADIUS, start.y - TURNING_RADIUS),
+                start.x,
+                start.y - TURNING_RADIUS,
                 2,
             )
 
         # Initially facing south
         case (Direction.SOUTH, TurnInstruction.FORWARD_LEFT):
-            return (
-                vector.x + TURNING_RADIUS,
-                vector.y,
-                Vector(Direction.EAST, vector.x + TURNING_RADIUS, vector.y - TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.EAST, start.x + TURNING_RADIUS, start.y - TURNING_RADIUS),
+                start.x + TURNING_RADIUS,
+                start.y,
                 3,
             )
 
         case (Direction.SOUTH, TurnInstruction.FORWARD_RIGHT):
-            return (
-                vector.x - TURNING_RADIUS,
-                vector.y,
-                Vector(Direction.WEST, vector.x - TURNING_RADIUS, vector.y - TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.WEST, start.x - TURNING_RADIUS, start.y - TURNING_RADIUS),
+                start.x - TURNING_RADIUS,
+                start.y,
                 4,
             )
 
         case (Direction.SOUTH, TurnInstruction.BACKWARD_LEFT):
-            return (
-                vector.x + TURNING_RADIUS,
-                vector.y,
-                Vector(Direction.WEST, vector.x + TURNING_RADIUS, vector.y + TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.WEST, start.x + TURNING_RADIUS, start.y + TURNING_RADIUS),
+                start.x + TURNING_RADIUS,
+                start.y,
                 2,
             )
 
         case (Direction.SOUTH, TurnInstruction.BACKWARD_RIGHT):
-            return (
-                vector.x - TURNING_RADIUS,
-                vector.y,
-                Vector(Direction.EAST, vector.x - TURNING_RADIUS, vector.y + TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.EAST, start.x - TURNING_RADIUS, start.y + TURNING_RADIUS),
+                start.x - TURNING_RADIUS,
+                start.y,
                 1,
             )
 
         # Initially facing west
         case (Direction.WEST, TurnInstruction.FORWARD_LEFT):
-            return (
-                vector.x,
-                vector.y + TURNING_RADIUS,
-                Vector(Direction.SOUTH, vector.x - TURNING_RADIUS, vector.y - TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.SOUTH, start.x - TURNING_RADIUS, start.y - TURNING_RADIUS),
+                start.x,
+                start.y - TURNING_RADIUS,
                 2,
             )
 
         case (Direction.WEST, TurnInstruction.FORWARD_RIGHT):
-            return (
-                vector.x,
-                vector.y + TURNING_RADIUS,
-                Vector(Direction.NORTH, vector.x - TURNING_RADIUS, vector.y + TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.NORTH, start.x - TURNING_RADIUS, start.y + TURNING_RADIUS),
+                start.x,
+                start.y + TURNING_RADIUS,
                 3,
             )
 
         case (Direction.WEST, TurnInstruction.BACKWARD_LEFT):
-            return (
-                vector.x,
-                vector.y + TURNING_RADIUS,
-                Vector(Direction.NORTH, vector.x + TURNING_RADIUS, vector.y - TURNING_RADIUS),
+            return __curve(
+                start,
+                Vector(Direction.NORTH, start.x + TURNING_RADIUS, start.y - TURNING_RADIUS),
+                start.x,
+                start.y - TURNING_RADIUS,
                 1,
             )
 
         case (Direction.WEST, TurnInstruction.BACKWARD_RIGHT):
-            return (
-                vector.x,
-                vector.y + TURNING_RADIUS,
-                Vector(Direction.SOUTH, vector.x + TURNING_RADIUS, vector.y + TURNING_RADIUS),
-                4,
+            return __curve(
+                start,
+                Vector(Direction.SOUTH, start.x + TURNING_RADIUS, start.y + TURNING_RADIUS),
+                start.x,
+                start.y + TURNING_RADIUS,
+                1,
             )
 
 
-def __curve(centre_x: int, centre_y, quadrant: int) -> set[Point]:
+def __curve(start: Vector, end: Vector, centre_x: int, centre_y, quadrant: int) -> list[Vector]:
     """
-    Uses Bresenham's circle drawing algorithm to determine the curved path of a robot when turning.
+    Uses a modified Midpoint circle algorithm to determine the curved path of a robot when turning.
 
+    :param start: The starting vector.
     :param centre_x: The centre of the turning radius's x value.
     :param centre_y: The centre of the turning radius's y value.
-    :param radius: The turning radius.
     :param quadrant: The quadrant of the circle.
         Quadrants:
               2 | 1
             ----+----
               3 | 4
-    :return: the points in the curve
+    :return: the vectors in the curve, may contain duplicates
     """
     assert 1 <= quadrant <= 4
 
     x = TURNING_RADIUS
     y = 0
     err = 0
-    points = set[Point]()
 
-    first = None
-    second = None
+    # The original Midpoint circle algorithm fills in quadrants from two extremes. We store them in separate lists to
+    # ensure an ordered list of vectors starting from the starting vector is returned.
+    a = []
+    b = []
+    a_map = None
+    b_map = None
     match quadrant:
         case 1:
-            first = lambda _x, _y: Point(centre_x + _x, centre_y + _y)
-            second = lambda _x, _y: Point(centre_x + _y, centre_y + _x)
+            a_map = lambda _x, _y: Vector(None, centre_x + _x, centre_y + _y)
+            b_map = lambda _x, _y: Vector(None, centre_x + _y, centre_y + _x)
         case 2:
-            first = lambda _x, _y: Point(centre_x - _y, centre_y + _x)
-            second = lambda _x, _y: Point(centre_x - _x, centre_y + _y)
+            a_map = lambda _x, _y: Vector(None, centre_x - _y, centre_y + _x)
+            b_map = lambda _x, _y: Vector(None, centre_x - _x, centre_y + _y)
         case 3:
-            first = lambda _x, _y: Point(centre_x - _x, centre_y - _y)
-            second = lambda _x, _y: Point(centre_x - _y, centre_y - _x)
+            a_map = lambda _x, _y: Vector(None, centre_x - _x, centre_y - _y)
+            b_map = lambda _x, _y: Vector(None, centre_x - _y, centre_y - _x)
         case 4:
-            first = lambda _x, _y: Point(centre_x + _y, centre_y - _x)
-            second = lambda _x, _y: Point(centre_x + _x, centre_y - _y)
+            a_map = lambda _x, _y: Vector(None, centre_x + _y, centre_y - _x)
+            b_map = lambda _x, _y: Vector(None, centre_x + _x, centre_y - _y)
 
     while x >= y:
-        points.add(first(x, y))
-        points.add(second(x, y))
+        a.append(a_map(x, y))
+        b.append(b_map(x, y))
 
         y += 1
         err += 1 + 2 * y
@@ -204,4 +217,22 @@ def __curve(centre_x: int, centre_y, quadrant: int) -> set[Point]:
             x -= 1
             err += 1 - 2 * x
 
-    return points
+    first_part, second_part = __order(start, a, b)
+    second_part.reverse()
+    second_part.append(end)
+
+    for vector in first_part:
+        vector.direction = start.direction
+
+    for vector in second_part:
+        vector.direction = end.direction
+
+    return first_part + second_part
+
+
+def __order(start: Vector, a: list[Vector], b: list[Vector]) -> tuple[list[Vector], list[Vector]]:
+    return (a, b) if __manhattan_distance(start, a[0]) < __manhattan_distance(start, b[0]) else (b, a)
+
+
+def __manhattan_distance(a: Vector, b: Vector) -> int:
+    return abs(a.x - b.x) + abs(a.y - b.y)

@@ -1,12 +1,13 @@
 import heapq
 import math
+import time
 from typing import List, Generator
 
 from pathfinding.search.instructions import Turn, Move, TurnInstruction
 from pathfinding.search.move import move
 from pathfinding.search.turn import turn
-from pathfinding.world.primitives import Vector
-from pathfinding.world.world import World, Cell
+from pathfinding.world.primitives import Vector, Direction, Point
+from pathfinding.world.world import World, Cell, Robot
 
 
 def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List[tuple[Vector, Turn | Move | None]]]:
@@ -55,7 +56,7 @@ def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List
                 case Move():
                     new_cost += + 1
                 case Turn():
-                    new_cost += len(instruction.points)
+                    new_cost += len(instruction.vectors)
 
             if next not in costs or new_cost < costs[next]:
                 frontier.add(new_cost + __heuristic(next, objective), next)
@@ -72,7 +73,7 @@ def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List
 
     path.reverse()
 
-    return costs[objective], path
+    return costs.get(objective, -1), path
 
 
 class __PriorityQueue:
@@ -91,9 +92,9 @@ class __PriorityQueue:
 
 def __neighbours(world: World, cell: Cell, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
     for instruction in TurnInstruction:
-        next, path = turn(current, instruction)
-        if all(map(lambda p: world.contains(cell.set_point(p)), path)) and world.contains(cell.set_vector(next)):
-            yield next, Turn(instruction, path)
+        path = turn(current, instruction)
+        if all(map(lambda p: world.contains(cell.set_vector(p)), path)):
+            yield path[-1], Turn(instruction, path)
 
     for instruction in Move:
         next = move(current, instruction)

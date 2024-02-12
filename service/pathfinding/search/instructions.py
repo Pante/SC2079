@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
-from pathfinding.world.primitives import Point
+from pathfinding.world.primitives import Vector
 
 
 class MiscInstruction(str, Enum):
@@ -35,4 +35,4 @@ class TurnInstruction(str, Enum):
 @dataclass(frozen=True)
 class Turn:
     turn: TurnInstruction
-    points: set[Point]
+    vectors: list[Vector]

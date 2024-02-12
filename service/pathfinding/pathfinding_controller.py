@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import logging
-import sys
 from http import HTTPStatus
 
 from flask import make_response
 from flask_openapi3 import APIBlueprint, Tag
-from pydantic import BaseModel, Field, json
+from pydantic import BaseModel, Field
 
 from pathfinding.search.instructions import MiscInstruction, TurnInstruction, MoveInstruction, Move
 from pathfinding.search.search import Segment, search
@@ -63,7 +61,7 @@ class PathfindingResponseSegment(BaseModel):
     cost: int | None = Field(description='The cost, included only if verbose is true.')
     instructions: list[MiscInstruction | TurnInstruction | PathfindingResponseMoveInstruction]
     # TODO: change this to vectors
-    points: list[PathfindingPoint] | None = Field(description='The path (unordered), included only if verbose is true.')
+    path: list[PathfindingVector] | None = Field(description='The path (unordered), included only if verbose is true.')
 
     @classmethod
     def from_segment(cls, verbose: bool, segment: Segment):
@@ -73,8 +71,8 @@ class PathfindingResponseSegment(BaseModel):
             else i
             for i in segment.instructions
         ]
-        points = [PathfindingPoint.from_point(point) for point in segment.points] if verbose else None
-        return cls(image_id=segment.image_id, cost=cost, instructions=instructions, points=points)
+        vectors = [PathfindingVector.from_vector(vector) for vector in segment.vectors] if verbose else None
+        return cls(image_id=segment.image_id, cost=cost, instructions=instructions, path=vectors)
 
 
 class PathfindingResponseMoveInstruction(BaseModel):
@@ -111,7 +109,7 @@ class PathfindingPoint(BaseModel):
         return Point(self.x, self.y)
 
 
-@api.post('/')
+@api.post('/', responses={200: PathfindingResponse})
 def pathfinding(body: PathfindingRequest):
     robot = body.robot.to_robot()
     obstacles = [obstacle.to_obstacle() for obstacle in body.obstacles]
