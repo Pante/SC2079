@@ -28,7 +28,7 @@ class ImagePredictionResponse(BaseModel):
 def image_prediction_task1(form: ImagePredictionRequest):
     file, obstacle_id, signal = __parse(form)
 
-    ## TODO: Pass into model & return image id
+    # TODO: Pass into model & return image id
     prediction_response = ImagePredictionResponse(obstacle_id=1, image_id=2)
 
     response = make_response(prediction_response.model_dump(mode='json'), HTTPStatus.OK)
@@ -40,7 +40,7 @@ def image_prediction_task1(form: ImagePredictionRequest):
 def image_prediction_task2(form: ImagePredictionRequest):
     file, obstacle_id, signal = __parse(form)
 
-    ## TODO: Pass into model & return image id
+    # TODO: Pass into model & return image id
     prediction_response = ImagePredictionResponse(obstacle_id=1, image_id=2)
 
     response = make_response(prediction_response.model_dump(mode='json'), HTTPStatus.OK)

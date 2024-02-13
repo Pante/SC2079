@@ -1,5 +1,5 @@
 from pathfinding.search.instructions import TurnInstruction
-from pathfinding.world.primitives import Direction, Point, Vector
+from pathfinding.world.primitives import Direction, Vector
 from pathfinding.world.world import GRID_CELL_SIZE
 
 # The turning radius (in grid cells). The turning radius is assumed to be 25cm.
