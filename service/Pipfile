@@ -4,13 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
-flasgger = "*"
+flask-openapi3 = "*"
 jinja2 = "*"
 marshmallow = "*"
 marshmallow_enum="*"
 numpy = "*"
 python_tsp = "*"
+pydantic = "*"
 
 [dev-packages]
 
