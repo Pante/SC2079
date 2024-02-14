@@ -101,7 +101,7 @@ def rpi_image():
         description: Image received and displayed successfully.
     """
     image = request.files['image']
-    image.save('received_image.jpg')
+    image.save('Flask_Image_Testing/received_image.jpg')
     # Display the image on the PC side
     # $PLACEHOLDER$
 
