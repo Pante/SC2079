@@ -79,6 +79,12 @@ void Error_Handler(void);
 #define OLED_RESET__GPIO_Port GPIOE
 #define OLED_DATA_COMMAND__Pin GPIO_PIN_8
 #define OLED_DATA_COMMAND__GPIO_Port GPIOE
+#define SERVO_PWM_Pin GPIO_PIN_9
+#define SERVO_PWM_GPIO_Port GPIOE
+#define BUZZER_Pin GPIO_PIN_10
+#define BUZZER_GPIO_Port GPIOB
+#define BTN_USER_Pin GPIO_PIN_8
+#define BTN_USER_GPIO_Port GPIOD
 #define MOTORA_PWM_Pin GPIO_PIN_6
 #define MOTORA_PWM_GPIO_Port GPIOC
 #define MOTORB_PWM_Pin GPIO_PIN_7

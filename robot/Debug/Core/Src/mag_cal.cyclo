@@ -1,0 +1,7 @@
+../Core/Src/mag_cal.c:6:13:magcal_preload	1
+../Core/Src/mag_cal.c:16:6:magcal_init	1
+../Core/Src/mag_cal.c:23:7:abs_float	2
+../Core/Src/mag_cal.c:26:7:square_float	1
+../Core/Src/mag_cal.c:29:7:dist_squared	1
+../Core/Src/mag_cal.c:34:6:magcal_calc_params	20
+../Core/Src/mag_cal.c:161:6:magcal_adjust	1
