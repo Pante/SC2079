@@ -63,7 +63,7 @@ class PC(Link):
 			message_bytes = message.encode('utf-8')
 			self.client_socket.send(message.bytes)
 			print("Sent: %s", str(message))
-		excep Exception as e:
+		except Exception as e:
 			print("Failed to send message: %s", str(e))
 			
 	# receive data from PC
