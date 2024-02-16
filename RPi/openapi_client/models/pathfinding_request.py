@@ -29,6 +29,7 @@ class PathfindingRequest(BaseModel):
     """
     PathfindingRequest
     """ # noqa: E501
+    # Parameters for the pathfinding request
     obstacles: Annotated[List[PathfindingRequestObstacle], Field(min_length=1)]
     robot: PathfindingRequestRobot = Field(description="The initial position of the robot.")
     verbose: Optional[StrictBool] = Field(default=True, description="Whether to attach the path and cost alongside the movement instructions in the response.")
