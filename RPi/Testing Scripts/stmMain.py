@@ -56,22 +56,22 @@ class RaspberryPi:
             print("STM connected successfully")
             user_input = 0
             while user_input < 3:
-                user_input = int(input("1: Send a message, 2: Receive a message, 3: Exit"))
+                user_input = int(input("1: Send a message, 2: Receive a message, 3: Exit >> "))
                 if user_input == 1:
                     try:
-                        command_text = input("Enter command")
+                        command_text = input("Enter command >> ")
                         # ~ REFERENCE
                         #define CMD_FORWARD_DIST_TARGET 'T'		//go forward for a target distance.
                         #define CMD_FORWARD_DIST_WITHIN 'W'		//go forward until within a certain distance.
                         #define CMD_BACKWARD_DIST_TARGET 't'	//go backward for a target distance.
                         #define CMD_BACKWARD_DIST_WITHIN 'w'	//go backward until within a certain distance.
-                        stm.send("T")
+                        self.stm.send(command_text + '\n')
                         print("message sent")
                     except OSError as e:
                         print("Error in sending data: {e}")
                 else:
                     try:
-                        stm.receive()
+                        self.stm.receive()
                     except OSError as e:
                         print("Error in receiving data: {e}")
             self.stm.stmTest()
