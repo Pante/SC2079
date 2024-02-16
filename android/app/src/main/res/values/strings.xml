@@ -1,64 +1,27 @@
 <resources>
-    <string name="app_name">NaviBot</string>
-    <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">NaviBot</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="app_name">MDP_Group_21</string>
+    <string name="tab_text_1">Bluetooth</string>
+    <string name="tab_text_2">Chat</string>
+    <string name="tab_text_3">Map Config</string>
+    <string name="tab_text_4">Challenge</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="obstacle_face_text">Obstacle: </string>
-    <string name="obstacle1ID_text">1</string>
-    <string name="obstacle2ID_text">2</string>
-    <string name="obstacle3ID_text">3</string>
-    <string name="obstacle4ID_text">4</string>
-    <string name="obstacle5ID_text">5</string>
-    <string name="obstacle6ID_text">6</string>
-    <string name="obstacle7ID_text">7</string>
-    <string name="obstacle8ID_text">8</string>
-    <string name="notifications">Notifications</string>
-    <string name="notifications_header">Notifications</string>
-    <string name="robot_location_header">Robot Location</string>
-    <string name="robot_facing_header">Robot Facing</string>
+    <!--  Comms  -->
+    <string name="send">SEND</string>
+    <string name="configure">Reconfigure</string>
+    <string name="f1">F1</string>
+    <string name="f2">F2</string>
+    <string name="bluetooth_connection">Not Connected</string>
 
-    <string-array name="spinner_array">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-    </string-array>
-    <string-array name="spinner_robot_facing">
-        <item>N</item>
-        <item>E</item>
-        <item>S</item>
-        <item>W</item>
-    </string-array>
-    <string-array name="spinner_robot_coord">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
-        <item>11</item>
-        <item>12</item>
-        <item>13</item>
-        <item>14</item>
-        <item>15</item>
-        <item>16</item>
-        <item>17</item>
-        <item>18</item>
-        <item>19</item>
-    </string-array>
+    <!-- Dialog -->
+    <string name="reconfiguration">Reconfiguration</string>
+    <string name="f1Title">F1:</string>
+    <string name="f2Title">F2:</string>
+    <string name="f1Placeholder">Enter F1 value</string>
+    <string name="f2Placeholder">Enter F2 value</string>
+    <string name="save">SAVE</string>
+    <string name="cancel">CANCEL</string>
 
+    <!-- Map -->
+    <string name="manual">MANUAL</string>
+    <string name="auto">AUTO</string>
 </resources>

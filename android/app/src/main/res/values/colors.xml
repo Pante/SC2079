@@ -7,5 +7,46 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="button_color">#246EE9</color>
+    <color name="lightYellow">#FFFFE0</color>
+    <color name="colorYellow">#ffcb05</color>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#1E88E5</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorRed">#FF0000</color>
+    <color name="darkRed">#F88379</color>
+    <color name="lightRed">#FFCCCB</color>
+    <color name="colorBlack">#FF000000</color>
+    <color name="light_blue">#99E8F8</color>
+    <color name="exploredColor">#FFF9FBE7</color>
+    <color name="niceGreen">#2AF598</color>
+    <color name="niceBlue">#66B9F9</color>
+    <color name="betterBlue">#4776E6</color>
+    <color name="betterPurple">#8E54E9</color>
+    <color name="betterOrange">#FFA500</color>
+    <color name="lightBlue">#83a4d4</color>
+    <color name="lighterBlue">#b6fbff</color>
+    <color name="dirtyfog1">#B993D6</color>
+    <color name="dirtyfog2">#8CA6DB</color>
+    <color name="pastelPink">#F8C8DC</color>
+    <color name="transparent">#0000ffff</color>
+    <color name="exploredColor2">#fee3e2</color>
+    <color name="rockColor">#9E733B</color>
+    <color name="grassColor">#597d35</color>
+    <color name="grey">#BEBEBE</color>
+    <color name="navyBlue">#171738</color>
+    <color name="midnightBlue">#2E1760</color>
+    <color name="lightGreen">#DFF3E4</color>
+    <color name="lightPurple">#7180B9</color>
+    <color name="hotPink">#FAA6FF</color>
+    <color name="lighterHotPink">#FAA6FF</color>
+    <color name="xiketic">#0F1020</color>
+    <color name="royalPurple">#7353BA</color>
+    <color name="brightRed">#e62310</color>
+    <color name="superMarioBlue">#009bd9</color>
+    <color name="luigiGreen">#b3cf99</color>
+    <color name="grassGreen">#40b088</color>
+
+
+
+
 </resources>
