@@ -49,6 +49,11 @@ try:
         # Run the image through the model
         pred = model(img, augment=False)[0]
 
+        # TODO: REPLACE THIS WITH THE NEW .predict FUNCTION - Bohui
+        
+
+
+        # START EDITS - Bohui
         # Apply NMS
         pred = non_max_suppression(pred, 0.25, 0.45, classes=None, agnostic=False)
 
@@ -69,6 +74,7 @@ try:
                 # Convert img_pil back to a numpy array
                 img = np.array(img_pil)
     
+        # END EDITS - Bohui
         # Display the image
         cv2.imshow('Live Camera Feed', img)
         if cv2.waitKey(1) == ord('q'):  # Exit if Q is pressed
