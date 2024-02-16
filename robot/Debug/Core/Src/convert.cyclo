@@ -1,8 +1,11 @@
 ../Core/Src/convert.c:3:10:get_uint16	3
 ../Core/Src/convert.c:15:10:parse_uint16_t_until	5
 ../Core/Src/convert.c:29:7:parse_float_until	9
-../Core/Src/convert.c:53:7:get_w_ms	1
-../Core/Src/convert.c:57:14:mod_360	3
-../Core/Src/convert.c:63:7:add_angle	1
-../Core/Src/convert.c:67:7:angle_diff	1
-../Core/Src/convert.c:71:7:get_distance_cm	1
+../Core/Src/convert.c:54:14:get_turning_r_steer_cm	1
+../Core/Src/convert.c:57:7:get_turning_r_back_cm	1
+../Core/Src/convert.c:60:7:get_turning_r_robot_cm	2
+../Core/Src/convert.c:69:7:get_w_ms	1
+../Core/Src/convert.c:73:14:mod_360	3
+../Core/Src/convert.c:79:7:add_angle	1
+../Core/Src/convert.c:83:7:angle_diff	1
+../Core/Src/convert.c:87:7:get_distance_cm	1

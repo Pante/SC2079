@@ -30,7 +30,7 @@ void sensors_init(I2C_HandleTypeDef *i2c_ptr, Sensors *sens_ptr) {
 void sensors_read_gyroZ() {
 	float val;
 	ICM20948_readGyroscope_Z(hi2c1_ptr, ICM_I2C_ADDR, GYRO_SENS, &val);
-	sensors_ptr->gyroZ = val - sensors_ptr->gyroZ_bias;
+	sensors_ptr->gyroZ = (val - sensors_ptr->gyroZ_bias) / 1000; //convert to ms
 }
 
 

@@ -168,9 +168,10 @@ int main(void)
   /* ----- End: Car setup ----- */
 
   /* ----- Start: OS Parameters ----- */
-  Command *cmd = NULL;				//current command.
-  float distDiff = 0; 				//current distance difference.
-  float wDiff = 0, wTarget = 0;		//current angular velocity difference and target.
+  Command *cmd = NULL;					//current command.
+  float distDiff = 0, brakingDist = 0; 	//current distance difference.
+  float wDiff = 0, wTarget = 0;			//current angular velocity difference and target.
+  float rBack = 0, rRobot = 0;			//turning radii at the back and centre of robot.
   /* ----- End: OS Parameters ----- */
 
   /* ----- Start: Interrupts ----- */
@@ -194,8 +195,22 @@ int main(void)
 		if (cmd != NULL) {
 			motor_setDrive(cmd->dir, cmd->speed);
 			if (cmd->dir != 0) {
-				servo_setAngle(cmd->steeringAngle);
-				wTarget = get_w_ms(cmd->speed, cmd->steeringAngle);
+				brakingDist = MOTOR_BRAKING_DIST_CM * cmd->speed / 100;
+
+				float steeringAngle = cmd->steeringAngle;
+				servo_setAngle(steeringAngle);
+				if (steeringAngle != 0) {
+					rBack = get_turning_r_back_cm(steeringAngle);
+					rRobot = get_turning_r_robot_cm(steeringAngle);
+					wTarget = get_w_ms(cmd->speed, rRobot);
+				} else {
+					rBack = 0;
+					rRobot = 0;
+					wTarget = 0;
+				}
+			} else {
+				free(cmd);
+				cmd = NULL;
 			}
 		}
 	}
@@ -204,7 +219,8 @@ int main(void)
 	/* ----- Start: Drive PID Control ----- */
 	if (cmd != NULL && cmd->dir != 0) {
 		sensors_read_gyroZ();
-		wDiff = sensors.gyroZ * MS_FRAME - wTarget;
+		wDiff = (sensors.gyroZ - wTarget) * MS_FRAME;
+//		wDiff = 0;
 
 		switch (cmd->distType) {
 			case TARGET:
@@ -218,9 +234,9 @@ int main(void)
 				break;
 		}
 
-		motor_pwmCorrection(cmd->dir, wDiff, distDiff, 40); //motor correction.
+		motor_pwmCorrection(cmd->dir, wDiff, rBack, rRobot, distDiff, brakingDist); //motor correction.
 
-		if (distDiff <= 0) {
+		if (distDiff <= 1) {
 			//target achieved; move to next command.
 			free(cmd);
 			cmd = NULL;

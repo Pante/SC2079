@@ -75,7 +75,7 @@ float motor_getDist() {
 }
 
 //PWM at fixed intervals.
-void motor_pwmCorrection(int8_t dir, float wDiff, float distDiff, float brakingDist) {
+void motor_pwmCorrection(int8_t dir, float wDiff, float rBack, float rRobot, float distDiff, float brakingDist) {
 	//adjust speed based on distance to drive.
 	if (distDiff < brakingDist) {
 		pwmValAccel = MOTOR_PWM_MIN + pid_adjust(&pidDist, distDiff) / brakingDist * (pwmValTarget - MOTOR_PWM_MIN);
@@ -83,10 +83,27 @@ void motor_pwmCorrection(int8_t dir, float wDiff, float distDiff, float brakingD
 	if (pwmValAccel > pwmValTarget) pwmValAccel = pwmValTarget;
 
 	float offset = pid_adjust(&pidMatch, wDiff) * pwmValAccel / pwmValTarget;
-	if (dir < 0) offset = -offset;
+//	float offset = 0;
+	float lScale = 1, rScale = 1;
 
-	lPwmVal = pwmValAccel - offset;
-	rPwmVal = pwmValAccel + offset;
+	if (rBack != 0 && rRobot != 0) {
+		float B2 = WHEELBASE_CM / 2;
+
+		if (rBack < 0 && rRobot < 0) {
+			lScale = (-rBack - B2) / -rRobot;
+			rScale = (-rBack + B2) / -rRobot;
+		} else {
+			lScale = (rBack + B2) / rRobot;
+			rScale = (rBack - B2) / rRobot;
+		}
+	}
+
+	if (dir < 0) {
+		offset = -offset;
+	}
+
+	lPwmVal = pwmValAccel * lScale - offset;
+	rPwmVal = pwmValAccel * rScale + offset;
 
 	setPwmLR();
 }

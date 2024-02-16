@@ -49,9 +49,25 @@ float parse_float_until(uint8_t **buf_ptr, uint8_t until, uint8_t sizeExpected) 
 
 	return (whole + frac) * sign;
 }
+
+
+static float get_turning_r_steer_cm(float steeringAngle) {
+	return CHASSIS_CM / sin(steeringAngle * M_PI / 180);
+}
+float get_turning_r_back_cm(float steeringAngle) {
+	return CHASSIS_CM / tan(steeringAngle * M_PI / 180);
+}
+float get_turning_r_robot_cm(float steeringAngle) {
+	float r_steer = get_turning_r_steer_cm(steeringAngle);
+	float L2 = CHASSIS_CM / 2;
+	float r = sqrt(r_steer * r_steer + L2 * L2);
+	if (steeringAngle < 0) r = -r;
+	return r;
+}
+
 //angular velocity.
-float get_w_ms(float speed, float steeringAngle) {
-	return 0.905 * (MOTOR_PWM_MAX / MOTOR_PWM_PERIOD) * (speed / 100) * tan(steeringAngle) / WHEELBASE_CM * ( 180 / M_PI * 1000);
+float get_w_ms(float speed, float turning_r_robot_cm) {
+	return 90.5f * MOTOR_PWM_MAX / MOTOR_PWM_PERIOD * speed / 100 / turning_r_robot_cm *  180 / M_PI / 1000;
 }
 
 static float mod_360(float angle) {
