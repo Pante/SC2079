@@ -5,7 +5,7 @@ from picamera import PiCamera
 
 def send_frame(frame):
     """Send a frame to the server."""
-    url = 'http://192.168.14.14/stream'
+    url = 'http://192.168.14.13:5000/stream'
     headers = {'Content-Type': 'image/jpeg'}
     response = requests.post(url, data=frame, headers=headers)
     return response
@@ -21,7 +21,9 @@ with PiCamera() as camera:
         response = send_frame(frame)
 
         # check response
-        if response.status_code != 200:
+        if response.status_code == 200:
+            print('Frame sent successfully: ', response.text)
+        elif response.status_code != 204:
             print('Failed to send frame:', response.status_code, response.text)
 
         # reset stream for next frame

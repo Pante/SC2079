@@ -5,7 +5,7 @@ from picamera import PiCamera
 
 camera = PiCamera()
 # TODO: Replace the IP Address with the PC's IP Address
-image_sender = imagezmq.ImageSender(connect_to='tcp://999.999.999.999:5555')  
+image_sender = imagezmq.ImageSender(connect_to='tcp://192.168.14.14')  
 
 camera.start_preview()
 

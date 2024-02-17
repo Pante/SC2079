@@ -6,6 +6,7 @@ pip install imagezmq
 pip install torch
 pip install numpy
 pip install pillow
+pip install yolov5
 
 I have cloned YoloV5's repo into the packages folder as a submodule, and added a entry in the .gitmodules file.
 
