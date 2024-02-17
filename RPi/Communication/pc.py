@@ -4,6 +4,8 @@ import threading
 import socket
 import sys
 import time
+# Install pyshine
+import pyshine as ps
 from picamera import PiCamera
 path_root = Path(__file__).parents[2]
 sys.path.append(str(path_root))
@@ -11,11 +13,32 @@ from RPi.Communication.link import Link
 
 class PC(Link):
 	def __init__(self):
-		self.host = ""
-		self.port = 0
+		self.host = "192.168.14.14"
+		self.port = 12345
 		self.connected = False
 		self.server_socket = None
 		self.client_socket = None
+		# Stream on or off
+		# self.streamOn = False
+
+		# self.manager = Manager()
+		# self.switchStream = self.manager.Event()
+		# # For image rec
+		# self.StreamProps = ps.StreamProps
+
+		# self.HTML="""
+		# <html>
+		# <head>
+		# <title>Pyshine Live Streaming </title>
+		# </head>
+		
+		# <body>
+		# <center><h1>  Live Image Recognition </h1></center>
+		# <center><img src="stream.mjpg" width='1280' height='720' autoplay playsinline></center>
+		# </body>
+		# </html>
+		# """
+
 	
 	def connect(self):
 		self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -72,7 +95,74 @@ class PC(Link):
 			unclean_message = self.client_socket.recv(1024)
 			message = unclean_message.strip().decode("utf-8")
 			print("Message received from pc: %s" , str(e))
-			return messaege
+			return message
 		except OSError as e:
 			print("Message failed to be received: %s ", str(e))
 			raise e
+
+# TODO: TRY PYSHINE FOR STREAMING
+# def camera_stream(self):
+# 	while True:
+# 		if(self.streamOn == False):
+# 			self.streamOn = True
+# 			try:
+# 				with picamera.PiCamera(resolution='1280x720', framerate=5) as self.camera:
+# 					self.output = ps.StreamOut()
+# 					self.StreamProps.set_Output(self.StreamProps, self.output)
+# 					self.camera.rotation = 0
+# 					self.camera.start_recording(self.output, format='mjpeg')
+# 					try:
+# 						self.server = ps.Streamer(self.address, self.StreamProps)
+# 						print('Server started at','http://' + self.address[0] + ':' + str(self.address[1]))
+# 						self.server.serve_forever()
+# 						print("Put stream to sleep")
+# 						self.switchStream.wait()
+# 						print("Recording Stopped")
+
+# 					finally:
+# 						self.streamOn = False       
+# 						self.camera.stop_recording()
+# 			except Exception as e:
+# 				print("Error: %s\n", str(e))
+
+
+# def camera_cap(self) -> str:
+			
+# 	while True:
+# 		message: Optional[str] = None
+# 		try:
+# 			message = self.receive()
+# 			if message != None:
+# 				return message
+# 		except Exception as e:
+# 			#print("Waiting for image capture instruction")
+# 			continue
+
+# 		# if message.startswith("Result"):
+# 		#     return message
+            
+            
+# def old_camera_cap(self) -> str:
+	
+# 	with picamera.PiCamera(resolution='1280x720', framerate=5) as self.camera:
+# 		self.output = ps.StreamOut()
+# 		self.StreamProps.set_Output(self.StreamProps, self.output)
+# 		self.camera.rotation = 0
+# 		self.camera.start_recording(self.output, format='mjpeg')
+# 		output = None
+# 		try:
+# 			self.server = ps.Streamer(self.address, self.StreamProps)
+# 			print('Server started at','http://' + self.address[0] + ':' + str(self.address[1]))
+# 			self.server.serve_forever()
+# 			self.send("Capture")
+# 			print("Capture")
+# 			while True:
+# 				message: Optional[str] = None
+# 				message = self.receive()
+
+# 				if message is None:
+# 					continue
+# 				output = message
+# 		finally:
+# 			self.camera.stop_recording()
+# 			return output
