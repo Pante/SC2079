@@ -1,13 +1,20 @@
 import cv2
+import sys
 import random
 import numpy as np
 import imagezmq
 import torch
-from models.experimental import attempt_load
-# from utils.datasets import letterbox
-from utils.general import check_img_size, non_max_suppression, scale_coords
-from utils.plots import plot_one_box
-from utils.torch_utils import select_device
+
+
+# from pathlib import Path
+# path_root = Path(__file__).parents[3]
+# sys.path.append(str(path_root))
+
+# from yolov5.models.experimental import attempt_load
+# # from utils.datasets import letterbox
+# from yolov5.utils.general import check_img_size, non_max_suppression, scale_coords
+# from yolov5.utils.plots import plot_one_box
+# from yolov5.utils.torch_utils import select_device
 from PIL import Image
 
 # Alternative to YoloV's letterbox function
@@ -16,7 +23,7 @@ def resize_image(image, size=(640, 640)):
 
 # Load the model
 device = select_device('')
-model = attempt_load('path/to/your/model.pt', map_location=device)  # replace with your model path
+model = attempt_load('../yolov_model/v6.pt', map_location=device)  # replace with your model path
 imgsz = check_img_size(640, s=model.stride.max())  # check img_size
 
 # Get names and colors
