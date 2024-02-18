@@ -33,7 +33,6 @@ class World:
 
         self.__annotate_obstacles()
         self.__annotate_true_clearance()
-        print(self.grid)
 
     def __inside(self, entity: Entity) -> bool:
         return (0 <= entity.south_west.x < self.width and
@@ -81,7 +80,7 @@ class Entity(ABC):
     def __post_init__(self):
         assert 0 <= self.south_west.x <= self.north_east.x
         assert 0 <= self.south_west.y <= self.north_east.y
-        assert (self.north_east.y - self.south_west.y) == (self.north_east.x - self.south_east.x)
+        assert (self.north_east.y - self.south_west.y) == (self.north_east.x - self.south_west.x)
 
     @property
     def vector(self) -> Vector:
@@ -89,11 +88,11 @@ class Entity(ABC):
 
     @property
     def north_west(self) -> Point:
-        return Point(self.north_east.x, self.south_west.y)
+        return Point(self.south_west.x, self.north_east.y)
 
     @property
     def south_east(self) -> Point:
-        return Point(self.south_west.x, self.north_east.y)
+        return Point(self.north_east.x, self.south_west.y)
 
     @property
     def clearance(self):

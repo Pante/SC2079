@@ -66,8 +66,7 @@ class Segment:
                     instructions.append(movement.turn)
                     vectors.extend(movement.vectors)
 
-                case Move() if instructions and instructions[-1] is MoveInstruction and instructions[
-                    -1].move == movement:
+                case Move() if instructions and isinstance(instructions[-1], MoveInstruction) and instructions[-1].move == movement:
                     vectors.append(vector)
                     instructions[-1].amount += GRID_CELL_SIZE
 
