@@ -1,12 +1,13 @@
 #ifndef INC_SENSORS_H_
 #define INC_SENSORS_H_
 
+#include "main.h"
 #include "ICM20948.h"
 #include "mag_cal.h"
 #include <math.h>
 
 #define ICM_I2C_ADDR 0
-
+#define GRAVITY 9.80665e-4f //in cm/ms^2
 typedef struct {
 	float gyroZ;
 	float accel[3];

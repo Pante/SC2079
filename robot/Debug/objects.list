@@ -1,6 +1,8 @@
 "./Core/Src/ICM20948.o"
 "./Core/Src/commands.o"
 "./Core/Src/convert.o"
+"./Core/Src/dist.o"
+"./Core/Src/kalman.o"
 "./Core/Src/mag_cal.o"
 "./Core/Src/main.o"
 "./Core/Src/motor.o"

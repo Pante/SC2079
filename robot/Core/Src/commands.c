@@ -14,6 +14,16 @@ static Command *get_new_cmd() {
 	return new;
 }
 
+static void commands_ack(UART_HandleTypeDef *uart, Command *cmd, uint8_t indicator) {
+	uint8_t buf_size = cmd->str_size + 1;
+	uint8_t *buf = (uint8_t *) malloc(buf_size * sizeof(uint8_t));
+	*buf = indicator;
+	memcpy(buf + 1, cmd->str, buf_size - 1);
+
+	HAL_UART_Transmit(uart, buf, buf_size, HAL_MAX_DELAY);
+	free(buf);
+}
+
 void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 	Command *next = get_new_cmd();
 
@@ -60,10 +70,10 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 	}
 
 	//copy command.
-	uint8_t str_size = temp - buf;
+	uint8_t str_size = temp - buf + 1;
 	next->str_size = str_size;
 	next->str = (uint8_t *) malloc(str_size * sizeof(uint8_t));
-	memcpy(cmd->str, buf, str_size);
+	memcpy(next->str, buf, str_size);
 
 	//acknowledge command.
 	commands_ack(uart, next, CMD_RCV);
@@ -77,15 +87,6 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 	cur->next = next;
 }
 
-static void commands_ack(UART_HandleTypeDef *uart, Commands *cmd, uint8_t indicator) {
-	uint8_t buf_size = cmd->str_size + 1;
-	uint8_t *buf = (uint8_t *) malloc(buf_size * sizeof(uint8_t));
-	*buf = indicator;
-	memcpy(++buf, cmd->str, buf_size - 1);
-
-	HAL_UART_Transmit(uart, buf, buf_size, HAL_MAX_DELAY);
-	free(buf);
-}
 
 Command *commands_pop() {
 	Command *ret = cur;

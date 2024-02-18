@@ -1,7 +1,7 @@
 #include "sensors.h"
 
-static const uint8_t GYRO_SENS = GYRO_FULL_SCALE_2000DPS;
-static const uint8_t ACCEL_SENS = ACCEL_FULL_SCALE_16G;
+static const uint8_t GYRO_SENS = GYRO_FULL_SCALE_250DPS;
+static const uint8_t ACCEL_SENS = ACCEL_FULL_SCALE_2G;
 static const float a_accel = 0.8;
 static const float a_heading = 0.65;
 static const float a_mag = 0.9;
@@ -23,6 +23,7 @@ void sensors_init(I2C_HandleTypeDef *i2c_ptr, Sensors *sens_ptr) {
 	ICM20948_readMagnetometer_XY(hi2c1_ptr, magOld); //pre-load magOld values.
 
 	sens_ptr->gyroZ_bias = 0;
+	sens_ptr->accel_bias[0] = sens_ptr->accel_bias[1] = sens_ptr->accel_bias[2] = 0;
 	sens_ptr->heading_bias = 0;
 }
 
@@ -38,11 +39,12 @@ void sensors_read_accel() {
 	float accel_new[3];
 	ICM20948_readAccelerometer_all(hi2c1_ptr, ICM_I2C_ADDR, ACCEL_SENS, accel_new);
 	for (int i = 0; i < 3; i++) {
-		sensors_ptr->accel[i] = lpf(
-			a_accel,
-			sensors_ptr->accel[i],
-			accel_new[i] - sensors_ptr->accel_bias[i]
-		);
+//		sensors_ptr->accel[i] = lpf(
+//			a_accel,
+//			sensors_ptr->accel[i],
+//			accel_new[i] - sensors_ptr->accel_bias[i]
+//		) * GRAVITY;
+		sensors_ptr->accel[i] = (accel_new[i] - sensors_ptr->accel_bias[i]) * GRAVITY;
 	}
 }
 
@@ -71,14 +73,26 @@ void sensors_read_heading(float msElapsed) {
 }
 
 void sensors_set_bias(uint16_t count) {
-	float gyroZTotal = 0, gyroZ = 0, headingTotal = 0;
-	for (uint16_t i = 0; i < count; i++) {
+	uint16_t i;
+	uint8_t j;
+	float gyroZTotal = 0, gyroZ = 0,
+		accelTotal[3] = {0}, accel[3],
+		headingTotal = 0;
+
+	for (i = 0; i < count; i++) {
 		ICM20948_readGyroscope_Z(hi2c1_ptr, ICM_I2C_ADDR, GYRO_SENS, &gyroZ); //gyroscope bias
 		gyroZTotal += gyroZ;
-		ICM20948_readAccelerometer_all(hi2c1_ptr, ICM_I2C_ADDR, ACCEL_SENS, sensors_ptr->accel_bias); //accelerometer bias
+
+		ICM20948_readAccelerometer_all(hi2c1_ptr, ICM_I2C_ADDR, ACCEL_SENS, accel); //accelerometer bias
+		for (j = 0; j < 3; j++) accelTotal[j] += accel[j];
+
 		headingTotal += read_mag_angle(); //heading bias
 	}
 
 	sensors_ptr->gyroZ_bias = gyroZTotal / count;
+
+	for (i = 0; i < 3; i++) sensors_ptr->accel_bias[i] = accelTotal[i] / count;
+	sensors_ptr->accel_bias[2] -= GRAVITY; //normally z accelerometer should read gravity.
+
 	sensors_ptr->heading_bias = headingTotal / count;
 }

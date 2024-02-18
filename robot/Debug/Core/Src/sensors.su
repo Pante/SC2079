@@ -1,7 +1,7 @@
 ../Core/Src/sensors.c:11:14:lpf	24	static
 ../Core/Src/sensors.c:18:6:sensors_init	16	static
-../Core/Src/sensors.c:30:6:sensors_read_gyroZ	16	static
-../Core/Src/sensors.c:37:6:sensors_read_accel	32	static
-../Core/Src/sensors.c:49:14:read_mag_angle	48	static
-../Core/Src/sensors.c:60:6:sensors_read_heading	24	static
-../Core/Src/sensors.c:73:6:sensors_set_bias	32	static
+../Core/Src/sensors.c:31:6:sensors_read_gyroZ	16	static
+../Core/Src/sensors.c:38:6:sensors_read_accel	24	static
+../Core/Src/sensors.c:51:14:read_mag_angle	48	static
+../Core/Src/sensors.c:62:6:sensors_read_heading	24	static
+../Core/Src/sensors.c:75:6:sensors_set_bias	56	static

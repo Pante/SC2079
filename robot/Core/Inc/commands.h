@@ -32,5 +32,5 @@ typedef struct command_t Command;
 
 void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size);
 Command *commands_pop();
-void commands_end(Command *cmd);
+void commands_end(UART_HandleTypeDef *uart, Command *cmd);
 #endif /* INC_COMMANDS_H_ */

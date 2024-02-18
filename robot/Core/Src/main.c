@@ -25,6 +25,7 @@
 #include <math.h>
 #include "convert.h"
 #include "commands.h"
+#include "dist.h"
 
 #include "oled.h"
 #include "sensors.h"
@@ -100,7 +101,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	buf_serial[buf_i++] = byte_serial;
 
 	if (byte_serial == CMD_END) {
-		commands_process(buf_serial, buf_i);
+		commands_process(&huart3, buf_serial, buf_i);
 		buf_i = 0;
 	}
 }
@@ -148,6 +149,8 @@ int main(void)
   sensors_init(&hi2c1, &sensors); 		//initialize motion sensors.
   motor_init(&htim8, &htim2, &htim3); 	//initialize motor PWM and encoders.
   servo_init(&htim1); 					//initialize servo PWM.
+
+  dist_init();							//initialize distance tracking.
   /* ----- End: Initialize libraries ----- */
 
   /* ----- Start: Car setup ----- */
@@ -159,7 +162,10 @@ int main(void)
 
   OLED_ShowString(0, 0, "Press USER when ready...");
   OLED_Refresh_Gram();
-//  while (!user_is_pressed());	//wait for user to place car.
+  while (!user_is_pressed());	//wait for user to place car.
+  OLED_Clear();
+  OLED_ShowString(0, 0, "Setting sensors bias...");
+  OLED_Refresh_Gram();
 
   sensors_set_bias(500); 		// set initial bias.
   OLED_Clear();
@@ -169,6 +175,7 @@ int main(void)
 
   /* ----- Start: OS Parameters ----- */
   Command *cmd = NULL;					//current command.
+  float motorDist = 0, estDist = 0;		//distance estimations.
   float distDiff = 0, brakingDist = 0; 	//current distance difference.
   float wDiff = 0, wTarget = 0;			//current angular velocity difference and target.
   float rBack = 0, rRobot = 0;			//turning radii at the back and centre of robot.
@@ -179,6 +186,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim4);					//start paced loop timer.
   /* ----- End: Interrupts ----- */
 
+  uint8_t buf[20];
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -193,6 +201,7 @@ int main(void)
 		cmd = commands_pop();
 
 		if (cmd != NULL) {
+			dist_reset();
 			motor_setDrive(cmd->dir, cmd->speed);
 			if (cmd->dir != 0) {
 				brakingDist = MOTOR_BRAKING_DIST_CM * cmd->speed / 100;
@@ -209,8 +218,10 @@ int main(void)
 					wTarget = 0;
 				}
 			} else {
-				commands_end(cmd);
+				commands_end(&huart3, cmd);
 				cmd = NULL;
+
+
 			}
 		}
 	}
@@ -218,13 +229,16 @@ int main(void)
 
 	/* ----- Start: Drive PID Control ----- */
 	if (cmd != NULL && cmd->dir != 0) {
+		sensors_read_accel();
 		sensors_read_gyroZ();
 		wDiff = (sensors.gyroZ - wTarget) * MS_FRAME;
 //		wDiff = 0;
 
+		motorDist = motor_getDist();
+		estDist = dist_get_cm(MS_FRAME, cmd->dir * sensors.accel[1], motorDist);
 		switch (cmd->distType) {
 			case TARGET:
-				distDiff = cmd->dist - motor_getDist();
+				distDiff = cmd->dist - estDist;
 				break;
 			case STOP_WITHIN:
 				distDiff = cmd->dist;
@@ -238,8 +252,15 @@ int main(void)
 
 		if (distDiff <= 1) {
 			//target achieved; move to next command.
-			commands_end(cmd);
+			commands_end(&huart3, cmd);
 			cmd = NULL;
+
+			servo_setAngle(0);
+			motor_setDrive(0, 0);
+
+			snprintf(buf, 20, "%.3f|%.3f", motorDist, estDist);
+			OLED_ShowString(0, 0, buf);
+			OLED_Refresh_Gram();
 		}
 	}
 	/* ----- End: Drive PID Control ----- */
@@ -309,7 +330,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -684,18 +705,15 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOE, OLED_SCLK_Pin|OLED_SDIN_Pin|OLED_RESET__Pin|OLED_DATA_COMMAND__Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, MOTORA_IN2_Pin|MOTORA_IN1_Pin|MOTORB_IN1_Pin|MOTORB_IN2_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : OLED_SCLK_Pin OLED_SDIN_Pin OLED_RESET__Pin OLED_DATA_COMMAND__Pin */
   GPIO_InitStruct.Pin = OLED_SCLK_Pin|OLED_SDIN_Pin|OLED_RESET__Pin|OLED_DATA_COMMAND__Pin;
@@ -710,13 +728,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : BUZZER_Pin */
-  GPIO_InitStruct.Pin = BUZZER_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(BUZZER_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BTN_USER_Pin */
   GPIO_InitStruct.Pin = BTN_USER_Pin;

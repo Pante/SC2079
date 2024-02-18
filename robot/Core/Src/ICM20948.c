@@ -183,7 +183,7 @@ void ICM20948_init(I2C_HandleTypeDef * hi2c, uint8_t const selectI2cAddress, uin
 			hi2c,
 			selectI2cAddress,
 			ICM20948__USER_BANK_2__ACCEL_CONFIG__REGISTER,
-			4 << ACCEL_DLPFCFG_BIT|selectAccelSensitivity << ACCEL_FS_SEL_BIT|0x01 << ACCEL_FCHOICE_BIT);
+			1 << ACCEL_DLPFCFG_BIT|selectAccelSensitivity << ACCEL_FS_SEL_BIT|0x01 << ACCEL_FCHOICE_BIT);
 	status = _ICM20948_WriteByte(
 			hi2c,
 			selectI2cAddress,
@@ -237,11 +237,15 @@ void ICM20948_readAccelerometer_all(I2C_HandleTypeDef * hi2c, uint8_t const sele
 	_ICM20948_BrustRead(hi2c, selectI2cAddress, ICM20948__USER_BANK_0__ACCEL_XOUT_H__REGISTER, 6, readData);
 
 
-	int16_t rD[3];
-	rD[X] = readData[X_HIGH_BYTE]<<8|readData[X_LOW_BYTE];
-	rD[Y] = readData[Y_HIGH_BYTE]<<8|readData[Y_LOW_BYTE];
-	rD[Z] = readData[Z_HIGH_BYTE]<<8|readData[Z_LOW_BYTE];
+	int16_t rD_int[3];
+	rD_int[X] = readData[X_HIGH_BYTE]<<8|readData[X_LOW_BYTE];
+	rD_int[Y] = readData[Y_HIGH_BYTE]<<8|readData[Y_LOW_BYTE];
+	rD_int[Z] = readData[Z_HIGH_BYTE]<<8|readData[Z_LOW_BYTE];
 
+	float rD[3];
+	rD[X] = (float) rD_int[X];
+	rD[Y] = (float) rD_int[Y];
+	rD[Z] = (float) rD_int[Z];
 
 	switch (selectAccelSensitivity) {
 		case ACCEL_FULL_SCALE_2G:

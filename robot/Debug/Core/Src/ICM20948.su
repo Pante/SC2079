@@ -9,5 +9,5 @@
 ../Core/Src/ICM20948.c:124:9:ICM20948_isI2cAddress2	24	static
 ../Core/Src/ICM20948.c:134:6:ICM20948_init	24	static
 ../Core/Src/ICM20948.c:208:6:ICM20948_readGyroscope_Z	40	static
-../Core/Src/ICM20948.c:233:6:ICM20948_readAccelerometer_all	48	static
-../Core/Src/ICM20948.c:270:6:ICM20948_readMagnetometer_XY	40	static
+../Core/Src/ICM20948.c:233:6:ICM20948_readAccelerometer_all	64	static
+../Core/Src/ICM20948.c:274:6:ICM20948_readMagnetometer_XY	40	static

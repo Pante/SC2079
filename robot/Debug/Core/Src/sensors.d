@@ -1,7 +1,5 @@
 Core/Src/sensors.o: ../Core/Src/sensors.c ../Core/Inc/sensors.h \
- ../Core/Inc/ICM20948.h ../Core/Inc/ICM20948_ADDR.h \
- ../Core/Inc/ICM20948_OPTIONS.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
+ ../Core/Inc/main.h ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h \
@@ -31,12 +29,11 @@ Core/Src/sensors.o: ../Core/Src/sensors.c ../Core/Inc/sensors.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/mag_cal.h ../Core/Inc/user_input.h ../Core/Inc/main.h \
- ../Core/Inc/oled.h
+ ../Core/Inc/ICM20948.h ../Core/Inc/ICM20948_ADDR.h \
+ ../Core/Inc/ICM20948_OPTIONS.h ../Core/Inc/mag_cal.h \
+ ../Core/Inc/user_input.h ../Core/Inc/oled.h
 ../Core/Inc/sensors.h:
-../Core/Inc/ICM20948.h:
-../Core/Inc/ICM20948_ADDR.h:
-../Core/Inc/ICM20948_OPTIONS.h:
+../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:
@@ -67,7 +64,9 @@ Core/Src/sensors.o: ../Core/Src/sensors.c ../Core/Inc/sensors.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
+../Core/Inc/ICM20948.h:
+../Core/Inc/ICM20948_ADDR.h:
+../Core/Inc/ICM20948_OPTIONS.h:
 ../Core/Inc/mag_cal.h:
 ../Core/Inc/user_input.h:
-../Core/Inc/main.h:
 ../Core/Inc/oled.h:
