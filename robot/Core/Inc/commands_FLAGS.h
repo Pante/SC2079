@@ -27,6 +27,15 @@
  *
  * e.g., to drive backward at speed 20 until within 5cm while wheels are steering left 10 degrees:
  * send 'w20|-10|5\n'
+ *
+ * For return messages, the robot will send back the following:
+ * <INDICATOR><CMD_STR>
+ *
+ * <CMD_STR>: original command string sent (including end char)
+ *
+ * <INDICATOR>:
+ * - CMD_RCV (specified below as 'r'): command has been received
+ * - CMD_FIN (specified below as 'f'): command has been finished
  * */
 
 #define CMD_FULL_STOP 'S'				//bring car to a complete stop. (all other fields are not required, i.e., send 'S\0')
@@ -38,4 +47,6 @@
 
 #define CMD_SEP '|'						//separator.
 #define CMD_END '\n'					//end character.
+#define CMD_RCV 'r'						//received.
+#define CMD_FIN 'f'						//finished.
 #endif /* INC_COMMANDS_FLAGS_H_ */

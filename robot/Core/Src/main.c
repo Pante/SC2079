@@ -209,7 +209,7 @@ int main(void)
 					wTarget = 0;
 				}
 			} else {
-				free(cmd);
+				commands_end(cmd);
 				cmd = NULL;
 			}
 		}
@@ -238,7 +238,7 @@ int main(void)
 
 		if (distDiff <= 1) {
 			//target achieved; move to next command.
-			free(cmd);
+			commands_end(cmd);
 			cmd = NULL;
 		}
 	}

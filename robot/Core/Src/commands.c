@@ -14,10 +14,10 @@ static Command *get_new_cmd() {
 	return new;
 }
 
-void commands_process(uint8_t *buf, uint8_t size) {
+void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 	Command *next = get_new_cmd();
 
-	uint8_t c = *buf;
+	uint8_t c = *buf, *temp = buf;
 
 	//first byte: command flag
 	switch (c) {
@@ -51,13 +51,22 @@ void commands_process(uint8_t *buf, uint8_t size) {
 	}
 
 	if (c != CMD_FULL_STOP) {
-		buf++;
-		next->speed = parse_uint16_t_until(&buf, CMD_SEP, 3);
-		buf++;
-		next->steeringAngle = parse_float_until(&buf, CMD_SEP, 6);
-		buf++;
-		next->dist = parse_float_until(&buf, CMD_END, 6);
+		temp++;
+		next->speed = parse_uint16_t_until(&temp, CMD_SEP, 3);
+		temp++;
+		next->steeringAngle = parse_float_until(&temp, CMD_SEP, 6);
+		temp++;
+		next->dist = parse_float_until(&temp, CMD_END, 6);
 	}
+
+	//copy command.
+	uint8_t str_size = temp - buf;
+	next->str_size = str_size;
+	next->str = (uint8_t *) malloc(str_size * sizeof(uint8_t));
+	memcpy(cmd->str, buf, str_size);
+
+	//acknowledge command.
+	commands_ack(uart, next, CMD_RCV);
 
 	if (cur == NULL) {
 		cur = next;
@@ -68,8 +77,24 @@ void commands_process(uint8_t *buf, uint8_t size) {
 	cur->next = next;
 }
 
+static void commands_ack(UART_HandleTypeDef *uart, Commands *cmd, uint8_t indicator) {
+	uint8_t buf_size = cmd->str_size + 1;
+	uint8_t *buf = (uint8_t *) malloc(buf_size * sizeof(uint8_t));
+	*buf = indicator;
+	memcpy(++buf, cmd->str, buf_size - 1);
+
+	HAL_UART_Transmit(uart, buf, buf_size, HAL_MAX_DELAY);
+	free(buf);
+}
+
 Command *commands_pop() {
 	Command *ret = cur;
 	if (cur != NULL) cur = cur->next;
 	return ret;
+}
+
+void commands_end(UART_HandleTypeDef *uart, Command *cmd) {
+	commands_ack(uart, cmd, CMD_FIN);
+	free(cmd->str);
+	free(cmd);
 }
