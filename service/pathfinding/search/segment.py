@@ -1,13 +1,12 @@
 import heapq
 import math
-import time
 from typing import List, Generator
 
 from pathfinding.search.instructions import Turn, Move, TurnInstruction
 from pathfinding.search.move import move
 from pathfinding.search.turn import turn
-from pathfinding.world.primitives import Vector, Direction, Point
-from pathfinding.world.world import World, Cell, Robot
+from pathfinding.world.primitives import Vector
+from pathfinding.world.world import World, Cell
 
 
 def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List[tuple[Vector, Turn | Move | None]]]:

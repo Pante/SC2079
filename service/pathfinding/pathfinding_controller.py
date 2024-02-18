@@ -60,7 +60,6 @@ class PathfindingResponseSegment(BaseModel):
     image_id: int
     cost: int | None = Field(description='The cost, included only if verbose is true.')
     instructions: list[MiscInstruction | TurnInstruction | PathfindingResponseMoveInstruction]
-    # TODO: change this to vectors
     path: list[PathfindingVector] | None = Field(description='The path (unordered), included only if verbose is true.')
 
     @classmethod

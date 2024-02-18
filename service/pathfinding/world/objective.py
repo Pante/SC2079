@@ -127,3 +127,4 @@ class Objective(Entity):
 
     def __post_init__(self):
         assert 1 <= self.image_id < 36
+        super().__post_init__()
