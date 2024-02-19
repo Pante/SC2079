@@ -8,11 +8,14 @@ import os
 import sys
 from pathlib import Path
 from multiprocessing import Process, Manager
-path_root = Path(__file__).parents[2]
-sys.path.append(str(path_root))
-from RPi.Communication.android import Android, AndroidMessage
-from RPi.Communication.stm import STM
-from RPi.Communication.configuration import API_IP, API_PORT
+
+sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
+
+# ~ path_root = Path(__file__).parents[2]
+# ~ sys.path.append(str(path_root))
+from Communication.android import Android, AndroidMessage
+from Communication.stm import STM
+# ~ from Communication.configuration import API_IP, API_PORT
 
 class RPiAction:
     """
