@@ -17,7 +17,7 @@ try:
         image_sender.send_image(stream.getvalue())
         time.sleep(0.1)  # Adjust the delay based on your needs
 except Exception as e:
-    print(f"An error occurred: {e}")
+    print("Error occured")
 finally:
     stream.close()
     image_sender.close()

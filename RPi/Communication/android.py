@@ -199,8 +199,9 @@ class Android(Link):
                 message = unclean_message.strip().decode("utf-8")
                 print("Message received from Android: %s", str(message))
                 response_data = "Message received successfully!"
-                client_socket.send(response_data.encode('utf-8'))
-                return message
+                self.client_socket.send(response_data.encode('utf-8'))
+                print(message)
+                # ~ return message
         except OSError as e:  # connection broken, try to reconnect
             print("Message failed to be received: %s", str(e))
             raise e
