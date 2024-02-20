@@ -39,13 +39,10 @@ from openapi_client.models.validation_error_model import ValidationErrorModel
 from Communication.link import Link
 # ~ from openapi_client.models import PathfindingResponse, PathfindingResponseMoveInstruction, PathfindingResponseSegment, PathfindingResponseSegmentInstructionsInner, PathfindingVector
 
-
-
-
 class PCFlask(Link):
 	
 	def __init__(self):
-		self.conf = Configuration(host="127.0.0.1:5000")
+		self.conf = Configuration(host="http://192.168.14.13:5000")
 		self.client = ApiClient(configuration=self.conf)
 		
 		self.testAPI()
@@ -77,7 +74,12 @@ class PCFlask(Link):
 		pathfinding_api =  PathfindingApi(api_client=self.client)
 		
 		response = pathfinding_api.pathfinding_post(pathfindingRequest)
-		print("RESPONSE: ", response)
+		
+		segments = response.segments
+		
+		print("SEGMENTS:" ,segments[0])
+		
+		# ~ print("RESPONSE: ", response)
 		
 	def receive(self):
 		pass
