@@ -70,9 +70,8 @@ class BluetoothConnectionTest:
 				# Depending on the message type and value, pass to other processes
 				# e.g. self.stm.send()
 				
-				message: dict = json.loads(message_rcv)
-				print("Message type: ", message['type'])
-				print("Message value: ", message['value'])
+				# ~ if message_rcv == "f":
+					# ~ print("Forward command sent")
 			except OSError:
 				self.android_dropped.set()
 				print("Event set: Bluetooth connection dropped")
