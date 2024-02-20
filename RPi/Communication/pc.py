@@ -4,11 +4,8 @@ import threading
 import socket
 import sys
 import time
-<<<<<<< HEAD
-from pathlib import Path
-=======
 import pathlib as Path
->>>>>>> 720fa344f6e8e98f30f6ef507368cb6207b81caa
+
 # Install pyshine
 import pyshine as ps
 from picamera import PiCamera

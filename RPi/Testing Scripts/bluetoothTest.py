@@ -5,6 +5,8 @@ import socket
 import time
 from pathlib import Path
 from multiprocessing import Process, Manager
+import sys
+sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
 from Communication.android import Android, AndroidMessage
 
 class BluetoothConnectionTest:
