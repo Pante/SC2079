@@ -366,7 +366,9 @@ public class GridMap extends View{
                 case "up":
                     //This makes the coordinates adjustable instead of static
                     op.inMutable = true;
+                    //change icon pic
                     bm =BitmapFactory.decodeResource(getResources(),R.drawable.poke_up, op);
+
                     mapscalable = Bitmap.createScaledBitmap(bm, 51,51, true);
                     xCoord =cells[curCoord[0] - 1][20 - androidRowCoord].startX;
                     yCoord = cells[curCoord[0]][20 - androidRowCoord - 1].startY;

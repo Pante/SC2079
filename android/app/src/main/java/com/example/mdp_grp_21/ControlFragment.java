@@ -114,7 +114,10 @@ public class ControlFragment extends Fragment {
                     if (gridMap.getValidPosition())
                         updateStatus("moving forward");
                     else
+                        MainActivity.printMessage("obstacle");
                         updateStatus("Unable to move forward");
+
+
                     MainActivity.printMessage("f");
                 }
                 else
