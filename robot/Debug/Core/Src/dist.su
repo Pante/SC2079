@@ -2,3 +2,4 @@
 ../Core/Src/dist.c:13:6:dist_reset	4	static
 ../Core/Src/dist.c:20:13:update_state	16	static
 ../Core/Src/dist.c:29:7:dist_get_cm	24	static
+../Core/Src/dist.c:40:7:dist_get_front	24	static

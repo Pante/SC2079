@@ -40,9 +40,9 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 			next->distType = TARGET;
 			break;
 
-		case CMD_FORWARD_DIST_WITHIN:
+		case CMD_FORWARD_DIST_AWAY:
 			next->dir = 1;
-			next->distType = STOP_WITHIN;
+			next->distType = STOP_AWAY;
 			break;
 
 		case CMD_BACKWARD_DIST_TARGET:
@@ -50,9 +50,9 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 			next->distType = TARGET;
 			break;
 
-		case CMD_BACKWARD_DIST_WITHIN:
+		case CMD_BACKWARD_DIST_AWAY:
 			next->dir = -1;
-			next->distType = STOP_WITHIN;
+			next->distType = STOP_AWAY;
 			break;
 
 		default:

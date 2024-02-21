@@ -8,7 +8,7 @@
 
 typedef enum {
 	TARGET,			//drive for this distance
-	STOP_WITHIN		//stop when within this distance
+	STOP_AWAY		//stop when roughly this distance away from front.
 } CmdDistType;
 
 struct command_t {
