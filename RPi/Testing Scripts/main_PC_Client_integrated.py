@@ -6,14 +6,19 @@ from multiprocessing import Process, Manager
 import sys
 sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
 from Communication.pc import PC
+from Communication.android import Android, AndroidMessage
+from Communication.stm import STM
 
 
 class PCSocketTest:
 	def __init__(self):
+		self.stm = STM()
+		self.android = Android()
 		self.pc = PC()
 		self.manager = Manager()
 		self.process_pc_receive = None
 		self.process_pc_stream = None
+		self.process_android_receive = None
 		self.host = "192.168.14.14"
 		self.port = 5000
 		self.HTML ="""
@@ -30,13 +35,17 @@ class PCSocketTest:
 						"""
 	
 	def main(self):
+		# ~ self.android.connect()
+		# ~ self.stm.connect()
 		self.pc.connect()
 		print("PC Successfully connected through socket")
 		self.process_pc_receive = Process(target=self.pc_receive)
 		self.process_pc_stream = Process(target=self.stream_start)
+		# ~ self.process_android_receive = Process(target=self.android_receive)
 		# Start processes
 		self.process_pc_receive.start() # Receive from PC
 		self.process_pc_stream.start() # Start the Stream
+		# ~ self.process_android_receive.start() # Receive from android
 		
 		userInput = 0
 		while userInput < 3:
@@ -68,20 +77,32 @@ class PCSocketTest:
 			try:
 				message_rcv = self.pc.receive()
 				print(message_rcv)
+				
+				split_results = message_rcv.split(",")
+				confidence_level = float(split_results[0])
+				object_id = split_results[1]
+				
+				print("OBJECT ID:" , object_id)
+				
+				if confidence_level > 0.75:
+					if object_id == "marker":
+						# TODO: Confirm is marker, send pathfindingresponse with the obstacle facing the other direction
+						print("MARKER")
+						# TODO: IF MARKER, CALL PATHFINDINGRESPONSE WITH OBSTACLE FACE
+					else:
+						# Not a marker, can just send back to relevant parties (android) - NEED TO TEST
+						action_type = "TARGET_ID"
+						message_content = object_id
+						# TODO: Add in android when testing - UNCOMMENT IN FINAL INTEGRATION
+						# ~ self.android.send(AndroidMessage(action_type, message_content))
+				
 				# Depending on the message type and value, pass to other processes
 				# e.g. self.stm.send()
 				
-				# ~ message: dict = json.loads(message_rcv)
-				# ~ print("Message type: ", message['type'])
-				# ~ print("Message value: ", message['value'])
 			except OSError as e:
 				print("Error in receiving data: {e}")
 				break
-				# ~ self.pc_dropped.set()
-				# ~ print("Event set: Bluetooth connection dropped")
 
-			# ~ if message_rcv is None:
-				# ~ continue
 				
 	def stream_start(self):
 		StreamProps = ps.StreamProps
@@ -103,5 +124,4 @@ class PCSocketTest:
 if __name__ == '__main__':
 	pc = PCSocketTest() #init
 	pc.main()
-	# ~ pc.stream_start()
 	threads = [] # Keeps track of the list of threads
