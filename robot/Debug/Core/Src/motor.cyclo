@@ -4,6 +4,6 @@
 ../Core/Src/motor.c:53:13:resetPwmParams	1
 ../Core/Src/motor.c:58:13:resetEncoders	1
 ../Core/Src/motor.c:63:7:motor_getDist	3
-../Core/Src/motor.c:78:6:motor_pwmCorrection	9
-../Core/Src/motor.c:111:13:setDriveDir	3
-../Core/Src/motor.c:134:6:motor_setDrive	4
+../Core/Src/motor.c:78:6:motor_pwmCorrection	11
+../Core/Src/motor.c:120:13:setDriveDir	3
+../Core/Src/motor.c:143:6:motor_setDrive	4

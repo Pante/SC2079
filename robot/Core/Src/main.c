@@ -213,13 +213,12 @@ int main(void)
 
   OLED_ShowString(0, 0, "Press USER when ready...");
   OLED_Refresh_Gram();
-  while (!user_is_pressed());	//wait for user to place car.
+//  while (!user_is_pressed());	//wait for user to place car.
   OLED_Clear();
   OLED_ShowString(0, 0, "Setting sensors bias...");
   OLED_Refresh_Gram();
 
   sensors_set_bias(500); 		// set initial bias.
-  sensors_dist_warmup(100);		// warmup distance sensors (LPF).
   OLED_Clear();
   OLED_ShowString(0, 0, "Active.");
   OLED_Refresh_Gram();
@@ -233,7 +232,9 @@ int main(void)
 		  ticksRefresh = ticksUltrasound;
 
   Command *cmd = NULL;							//current command.
-  float motorDist = 0, estDist = 0;				//distance estimations.
+  float motorDist = 0, estDist = 0,
+		estDistOld = 0; 						//distance estimations.
+
   float distDiff = 0, brakingDist = 0; 			//current distance difference.
   float wDiff = 0, wTarget = 0;					//current angular velocity difference and target.
   float rBack = 0, rRobot = 0;					//turning radii at the back and centre of robot.
@@ -246,6 +247,8 @@ int main(void)
   /* ----- End: Interrupts ----- */
 
   uint8_t buf[20];
+  float gt = 0;
+  uint32_t count = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -273,6 +276,8 @@ int main(void)
 
 		if (cmd != NULL) {
 			dist_reset();
+			estDistOld = 0;
+
 			motor_setDrive(cmd->dir, cmd->speed);
 			if (cmd->dir != 0) {
 				distDiff = DIST_DIFF_DEFAULT;
@@ -283,7 +288,6 @@ int main(void)
 				if (steeringAngle != 0) {
 					rBack = get_turning_r_back_cm(steeringAngle);
 					rRobot = get_turning_r_robot_cm(steeringAngle);
-					wTarget = get_w_ms(cmd->speed, rRobot);
 				} else {
 					rBack = 0;
 					rRobot = 0;
@@ -301,10 +305,18 @@ int main(void)
 
 	/* ----- Start: Drive PID Control ----- */
 	if (cmd != NULL && cmd->dir != 0) {
-		wDiff = (sensors.gyroZ - wTarget);
-
+		//calculate distance.
 		motorDist = motor_getDist();
 		estDist = dist_get_cm(MS_FRAME, cmd->dir * sensors.accel[1], motorDist);
+
+		//estimate current speed.
+		float estSpeed = (estDist - estDistOld) / MS_FRAME;
+		estDistOld = estDist;
+
+		//calculate difference in angular velocity.
+		if (rRobot != 0) wTarget = get_w_ms(estSpeed, rRobot);
+		wDiff = (cmd->dir * sensors.gyroZ - wTarget); //gyro is flipped when going backwards.
+
 		switch (cmd->distType) {
 			case TARGET:
 				distDiff = cmd->dist - estDist;
@@ -322,7 +334,7 @@ int main(void)
 				break;
 		}
 
-		motor_pwmCorrection(cmd->dir, wDiff, rBack, rRobot, distDiff, brakingDist); //motor correction.
+		motor_pwmCorrection(wDiff, rBack, rRobot, distDiff, brakingDist); //motor correction.
 
 		if (distDiff <= 0.5) {
 			//target achieved; move to next command.
@@ -331,10 +343,6 @@ int main(void)
 
 			servo_setAngle(0);
 			motor_setDrive(0, 0);
-
-			snprintf(buf, 20, "%.3f|%.3f", motorDist, estDist);
-			OLED_ShowString(0, 0, buf);
-			OLED_Refresh_Gram();
 		}
 	}
 	/* ----- End: Drive PID Control ----- */

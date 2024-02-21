@@ -65,9 +65,9 @@ float get_turning_r_robot_cm(float steeringAngle) {
 	return r;
 }
 
-//angular velocity.
-float get_w_ms(float speed, float turning_r_robot_cm) {
-	return 90.5f * MOTOR_PWM_MAX / MOTOR_PWM_PERIOD * speed / 100 / turning_r_robot_cm *  180 / M_PI / 1000;
+//angular velocity (with actual translational speed).
+float get_w_ms(float speed_cm_ms, float turning_r_robot_cm) {
+	return speed_cm_ms / turning_r_robot_cm *  180 / M_PI;
 }
 
 static float mod_360(float angle) {
