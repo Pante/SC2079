@@ -5,18 +5,16 @@ import socket
 import sys
 import time
 import pathlib as Path
-
+sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
 # Install pyshine
 import pyshine as ps
 from picamera import PiCamera
-path_root = Path(__file__).parents[2]
-sys.path.append(str(path_root))
-from RPi.Communication.link import Link
+from Communication.link import Link
 
 class PC(Link):
 	def __init__(self):
 		self.host = "192.168.14.14"
-		self.port = 12345
+		self.port = 5000
 		self.connected = False
 		self.server_socket = None
 		self.client_socket = None
@@ -84,9 +82,10 @@ class PC(Link):
 			
 	# send data to PC
 	def send(self, message: str) -> None:
+		print("MESSAGE: ", message)
 		try:
 			message_bytes = message.encode('utf-8')
-			self.client_socket.send(message.bytes)
+			self.client_socket.send(message_bytes)
 			print("Sent: %s", str(message))
 		except Exception as e:
 			print("Failed to send message: %s", str(e))
@@ -95,12 +94,16 @@ class PC(Link):
 	def receive(self) -> Optional[str]:
 		try:
 			unclean_message = self.client_socket.recv(1024)
-			message = unclean_message.strip().decode("utf-8")
-			print("Message received from pc: %s" , str(e))
+			message = unclean_message.decode('utf-8')
+			print("Message received from pc: %s" , message)
 			return message
 		except OSError as e:
-			print("Message failed to be received: %s ", str(e))
+			print("Message failed to be received: %s ", message)
 			raise e
+			
+			
+if __name__ == '__main__':
+	pc = PC() #init
 
 # TODO: TRY PYSHINE FOR STREAMING
 # def camera_stream(self):
