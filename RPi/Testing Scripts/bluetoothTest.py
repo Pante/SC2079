@@ -22,6 +22,7 @@ class BluetoothConnectionTest:
 		
 		self.process_android_receive = None
 		
+		
 		# ~ self.ack_count = 0
 		# ~ self.first_result = "temp"
 		# ~ self.second_result = "temp"
