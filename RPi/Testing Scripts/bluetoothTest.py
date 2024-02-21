@@ -19,8 +19,8 @@ class BluetoothConnectionTest:
 		self.unpause = self.manager.Event()
 		
 		self.movement_lock = self.manager.Lock()
-		
 		self.process_android_receive = None
+		
 		
 		# ~ self.ack_count = 0
 		# ~ self.first_result = "temp"
