@@ -40,15 +40,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
+
                     <ImageButton
                         android:id="@+id/changeDirectionBtn"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:layout_marginTop="15dp"
-                        android:scaleType="centerCrop"
                         android:background="@drawable/border_black"
-                        app:srcCompat="@mipmap/compass"/>
-
+                        android:scaleType="centerCrop"
+                        app:srcCompat="@mipmap/compass" />
 
                     <ImageButton
                         android:id="@+id/addObstacleBtn"
@@ -58,8 +58,9 @@
                         android:layout_marginTop="15dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         android:scaleType="centerCrop"
-                        android:background="@drawable/border_black"
-                        app:srcCompat="@mipmap/snorlax" />
+
+                        app:srcCompat="@mipmap/walnut"
+                        android:background="@drawable/border_black" />
 
                 </LinearLayout>
 

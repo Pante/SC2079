@@ -256,12 +256,12 @@
                         android:gravity="center"
                         android:orientation="horizontal">
 
-                        <ImageButton
-                            android:id="@+id/upBtn"
+                        <TextView
+                            android:id="@+id/RoundCircle"
                             android:layout_width="50dp"
                             android:layout_height="50dp"
-                            android:background="@color/transparent"
-                            android:foreground="@drawable/poke_up" />
+                            android:layout_marginStart="15dp" />
+
                     </LinearLayout>
 
                     <LinearLayout
@@ -278,12 +278,15 @@
                             android:background="@color/transparent"
                             android:foreground="@drawable/poke_left" />
 
-                        <TextView
-                            android:id="@+id/RoundCircle"
+                        <!--                        android:background="@drawable/circular_button"-->
+                        <ImageButton
+                            android:id="@+id/upBtn"
                             android:layout_width="50dp"
                             android:layout_height="50dp"
-                            android:layout_marginStart="15dp" />
-                        <!--                        android:background="@drawable/circular_button"-->
+                            android:layout_marginStart="15dp"
+                            android:background="@color/transparent"
+                            android:foreground="@drawable/poke_up" />
+
                         <ImageButton
                             android:id="@+id/rightBtn"
                             android:layout_width="50dp"
@@ -304,6 +307,7 @@
                             android:id="@+id/bleftBtn"
                             android:layout_width="50dp"
                             android:layout_height="50dp"
+
                             android:background="@color/transparent"
                             android:foreground="@drawable/back_turn_left_arrow_icon" />
 
@@ -311,7 +315,7 @@
                             android:id="@+id/downBtn"
                             android:layout_width="50dp"
                             android:layout_height="50dp"
-
+                            android:layout_marginStart="15dp"
                             android:background="@color/transparent"
                             android:foreground="@drawable/poke_down" />
 
@@ -319,7 +323,7 @@
                             android:id="@+id/brightBtn"
                             android:layout_width="50dp"
                             android:layout_height="50dp"
-
+                            android:layout_marginStart="15dp"
                             android:background="@color/transparent"
                             android:foreground="@drawable/back_turn_right_arrow_icon" />
                     </LinearLayout>
@@ -332,15 +336,16 @@
 
                     <ImageButton
                         android:id="@+id/bluetoothButton"
-                        android:layout_width="150dp"
-                        android:layout_height="150dp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
                         android:layout_marginLeft="26dp"
+                        android:layout_weight="1"
                         android:background="@color/white"
                         android:foreground="@drawable/bt_ball"
                         android:scaleType="fitXY" />
 
-
                 </LinearLayout>
+
             </LinearLayout>
         </LinearLayout>
 
