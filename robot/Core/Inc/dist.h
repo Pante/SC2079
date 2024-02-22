@@ -4,7 +4,7 @@
 #include "kalman.h"
 
 #define DIST_S_ACCEL 9.80665e-6f
-#define DIST_S_MOTOR 1.0f
+#define DIST_S_MOTOR 0.25f
 
 //accurate range of IR sensor.
 #define DIST_IR_MIN 10
@@ -17,7 +17,7 @@ typedef struct {
 } DistState;
 
 void dist_init();
-void dist_reset();
+void dist_reset(float v);
 float dist_get_cm(float msElapsed, float accel, float motorDist);
 float dist_get_front(float usDist, float irDist);
 

@@ -26,7 +26,7 @@
 #include "convert.h"
 #include "commands.h"
 #include "dist.h"
-
+#include "angle.h"
 #include "delay_us.h"
 #include "oled.h"
 #include "sensors.h"
@@ -232,9 +232,12 @@ int main(void)
 		  ticksRefresh = ticksUltrasound;
 
   Command *cmd = NULL;							//current command.
+  float steeringAngle = 0;						//current steering angle.
   float motorDist = 0, estDist = 0,
-		estDistOld = 0; 						//distance estimations.
+		  estAngle = 0,
+		  estDistOld = 0; 						//distance estimations.
 
+  float distTarget = 0;							//decide distance target.
   float distDiff = 0, brakingDist = 0; 			//current distance difference.
   float wDiff = 0, wTarget = 0;					//current angular velocity difference and target.
   float rBack = 0, rRobot = 0;					//turning radii at the back and centre of robot.
@@ -246,9 +249,6 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim7);					//start paced loop timer.
   /* ----- End: Interrupts ----- */
 
-  uint8_t buf[20];
-  float gt = 0;
-  uint32_t count = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -268,6 +268,7 @@ int main(void)
 	sensors_read_irDist();
 	sensors_read_accel();
 	sensors_read_gyroZ();
+	sensors_read_heading(MS_FRAME, sensors.gyroZ);
 	/* ----- End: Sensor reading ----- */
 
 	/* ----- Start: Get next command (if any) ----- */
@@ -275,19 +276,22 @@ int main(void)
 		cmd = commands_pop();
 
 		if (cmd != NULL) {
-			dist_reset();
 			estDistOld = 0;
-
+			estAngle = 0;
 			motor_setDrive(cmd->dir, cmd->speed);
 			if (cmd->dir != 0) {
+				distTarget = cmd->val;
 				distDiff = DIST_DIFF_DEFAULT;
 				brakingDist = MOTOR_BRAKING_DIST_CM * cmd->speed / 100;
 
-				float steeringAngle = cmd->steeringAngle;
+				steeringAngle = cmd->steeringAngle;
 				servo_setAngle(steeringAngle);
 				if (steeringAngle != 0) {
 					rBack = get_turning_r_back_cm(steeringAngle);
 					rRobot = get_turning_r_robot_cm(steeringAngle);
+					if (cmd->distType == TARGET) {
+						distTarget = abs_float(get_arc_length(cmd->val, rRobot));
+					}
 				} else {
 					rBack = 0;
 					rRobot = 0;
@@ -315,15 +319,21 @@ int main(void)
 
 		//calculate difference in angular velocity.
 		if (rRobot != 0) wTarget = get_w_ms(estSpeed, rRobot);
-		wDiff = (cmd->dir * sensors.gyroZ - wTarget); //gyro is flipped when going backwards.
+		float wGyro = cmd->dir * sensors.gyroZ;
+		wDiff = (wGyro - wTarget); //gyro is flipped when going backwards.
 
+		estAngle += abs_float(wGyro * MS_FRAME);
 		switch (cmd->distType) {
 			case TARGET:
-				distDiff = cmd->dist - estDist;
+				distDiff = distTarget - estDist;
+				if (rRobot != 0) {
+					distDiff = 0.05 * distDiff +
+						0.95 * abs_float(get_arc_length(cmd->val - estAngle, rRobot));
+				}
 				break;
 			case STOP_AWAY:
 				if (usCaptureComplete) {
-					distDiff = dist_get_front(sensors.usDist, sensors.irDist) - cmd->dist;
+					distDiff = dist_get_front(sensors.usDist, sensors.irDist) - cmd->val;
 					distDiff *= cmd->dir;
 
 					usCaptureComplete = 0;
@@ -334,15 +344,32 @@ int main(void)
 				break;
 		}
 
-		motor_pwmCorrection(wDiff, rBack, rRobot, distDiff, brakingDist); //motor correction.
+		Command *next = commands_peek();
+		float nextAngle = next != NULL ? next->steeringAngle : 0;
+		uint8_t shouldBrake = next != NULL ? next->dir != cmd->dir : 1;
+
+		//motor correction.
+		motor_pwmCorrection(
+			wDiff, rBack, rRobot, distDiff,
+			shouldBrake ? brakingDist : 0
+		);
+
+//		//TODO: smooth transition between servo angles.
+//		if (distDiff <= brakingDist) {
+//			steeringAngle += (nextAngle - steeringAngle) * (1.0f - distDiff / brakingDist);
+//			servo_setAngle(steeringAngle);
+//		}
 
 		if (distDiff <= 0.5) {
 			//target achieved; move to next command.
 			commands_end(&huart3, cmd);
 			cmd = NULL;
 
-			servo_setAngle(0);
-			motor_setDrive(0, 0);
+			if (shouldBrake) {
+				motor_setDrive(0, 0);
+				dist_reset(0);
+			} else dist_reset(estSpeed);
+
 		}
 	}
 	/* ----- End: Drive PID Control ----- */

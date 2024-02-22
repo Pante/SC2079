@@ -1,5 +1,15 @@
 #include "convert.h"
 
+float abs_float(float a) {
+	return a < 0 ? -a : a;
+}
+float square_float(float a) {
+	return a * a;
+}
+float dist_squared(float x1, float x2, float y1, float y2) {
+	return square_float(x1 - x2) + square_float(y1 - y2);
+}
+
 uint16_t get_uint16(char *buf, uint16_t size) {
 	uint16_t ret = 0, i = 0;
 	while (i < size) {
@@ -80,10 +90,22 @@ float add_angle(float old, float change) {
 	return mod_360(old + change);
 }
 
-float angle_diff(float a1, float a2) {
+float angle_diff_180(float a1, float a2) {
 	return mod_360(a1 - a2);
+}
+float angle_diff_dir(float a1, float a2, int8_t dir) {
+	float diff = a1 - a2;
+
+	if (diff < 0 && dir > 0) diff += 360;
+	else if (diff > 0 && dir < 0) diff -= 360;
+
+	return diff;
 }
 
 float get_distance_cm(uint16_t pulses) {
 	return ((float) pulses) / MOTOR_PPR * 2 * M_PI * WHEEL_R_CM;
+}
+
+float get_arc_length(float angle, float r) {
+	return 2 * M_PI * r * angle / 360;
 }

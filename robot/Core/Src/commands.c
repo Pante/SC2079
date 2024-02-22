@@ -7,7 +7,7 @@ static Command *get_new_cmd() {
 	new->dir = 0;
 	new->speed = 0;
 	new->steeringAngle = 0;
-	new->dist = 0;
+	new->val = 0;
 	new->distType = TARGET;
 	new->next = NULL;
 
@@ -24,6 +24,7 @@ static void commands_ack(UART_HandleTypeDef *uart, Command *cmd, uint8_t indicat
 	free(buf);
 }
 
+static uint8_t buf[3];
 void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 	Command *next = get_new_cmd();
 
@@ -66,7 +67,7 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 		temp++;
 		next->steeringAngle = parse_float_until(&temp, CMD_SEP, 6);
 		temp++;
-		next->dist = parse_float_until(&temp, CMD_END, 6);
+		next->val = parse_float_until(&temp, CMD_END, 6);
 	}
 
 	//copy command.
@@ -75,16 +76,19 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 	next->str = (uint8_t *) malloc(str_size * sizeof(uint8_t));
 	memcpy(next->str, buf, str_size);
 
-	//acknowledge command.
-	commands_ack(uart, next, CMD_RCV);
 
 	if (cur == NULL) {
 		cur = next;
-		return;
+	} else {
+		Command *temp = cur;
+		while (temp->next != NULL) {
+			temp = temp->next;
+		}
+		temp->next = next;
 	}
 
-	while (cur->next != NULL) cur = cur->next;
-	cur->next = next;
+	//acknowledge command has been received and queued.
+	commands_ack(uart, next, CMD_RCV);
 }
 
 
@@ -92,6 +96,10 @@ Command *commands_pop() {
 	Command *ret = cur;
 	if (cur != NULL) cur = cur->next;
 	return ret;
+}
+
+Command *commands_peek() {
+	return cur;
 }
 
 void commands_end(UART_HandleTypeDef *uart, Command *cmd) {

@@ -5,6 +5,7 @@
 #include "main.h"
 #include "ICM20948.h"
 #include "oled.h"
+#include "convert.h"
 
 #define MAGCAL_POINTS 100 //points to take along the ellipse.
 

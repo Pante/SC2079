@@ -1,4 +1,5 @@
 "./Core/Src/ICM20948.o"
+"./Core/Src/angle.o"
 "./Core/Src/commands.o"
 "./Core/Src/convert.o"
 "./Core/Src/delay_us.o"

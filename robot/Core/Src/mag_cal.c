@@ -4,13 +4,13 @@ static I2C_HandleTypeDef *hi2c;
 static MagCalParams *params;
 
 static void magcal_preload(MagCalParams *params_ptr) {
-	params_ptr->offset_HI[0] = -3.6;
-	params_ptr->offset_HI[1] = -17.55;
+	params_ptr->offset_HI[0] = 12.3750;
+	params_ptr->offset_HI[1] = -56.4750;
 
-	params_ptr->matrix_SI[0][0] = 1.024;
-	params_ptr->matrix_SI[0][1] = -0.0665;
-	params_ptr->matrix_SI[1][0] = 0.0965;
-	params_ptr->matrix_SI[1][1] = 1.4856;
+	params_ptr->matrix_SI[0][0] = 0.8898;
+	params_ptr->matrix_SI[0][1] = -0.5961;
+	params_ptr->matrix_SI[1][0] = 0.8007;
+	params_ptr->matrix_SI[1][1] = 1.1952;
 }
 
 void magcal_init(I2C_HandleTypeDef *hi2c_ptr, MagCalParams *params_ptr) {
@@ -18,16 +18,6 @@ void magcal_init(I2C_HandleTypeDef *hi2c_ptr, MagCalParams *params_ptr) {
 	params = params_ptr;
 
 	magcal_preload(params_ptr);
-}
-
-float abs_float(float a) {
-	return a < 0 ? -a : a;
-}
-float square_float(float a) {
-	return a * a;
-}
-float dist_squared(float x1, float x2, float y1, float y2) {
-	return square_float(x1 - x2) + square_float(y1 - y2);
 }
 
 //calibration sequence based on: https://www.atlantis-press.com/article/25847616.pdf

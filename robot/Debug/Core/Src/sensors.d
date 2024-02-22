@@ -34,7 +34,9 @@ Core/Src/sensors.o: ../Core/Src/sensors.c ../Core/Inc/sensors.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Core/Inc/ICM20948.h ../Core/Inc/ICM20948_ADDR.h \
  ../Core/Inc/ICM20948_OPTIONS.h ../Core/Inc/mag_cal.h \
- ../Core/Inc/user_input.h ../Core/Inc/oled.h ../Core/Inc/delay_us.h
+ ../Core/Inc/user_input.h ../Core/Inc/oled.h ../Core/Inc/convert.h \
+ ../Core/Inc/motor.h ../Core/Inc/pid.h ../Core/Inc/delay_us.h \
+ ../Core/Inc/angle.h ../Core/Inc/kalman.h
 ../Core/Inc/sensors.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -76,4 +78,9 @@ Core/Src/sensors.o: ../Core/Src/sensors.c ../Core/Inc/sensors.h \
 ../Core/Inc/mag_cal.h:
 ../Core/Inc/user_input.h:
 ../Core/Inc/oled.h:
+../Core/Inc/convert.h:
+../Core/Inc/motor.h:
+../Core/Inc/pid.h:
 ../Core/Inc/delay_us.h:
+../Core/Inc/angle.h:
+../Core/Inc/kalman.h:

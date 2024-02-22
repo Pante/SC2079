@@ -3,7 +3,7 @@
 
 /* COMMAND FORMAT (IN ASCII)
  * NOTE: MAXIMUM LENGTH OF 20 characters.
- * <flag><speed><SEP><angle><SEP><dist><END>
+ * <flag><speed><SEP><angle><SEP><val><END>
  *
  * <flag>: 1 char
  * - use one of the characters below to specify which action to take.
@@ -16,8 +16,10 @@
  * - negative angle: steer left, positive angle: steer right.
  *
  *
- * <dist>: 1+ chars, in cm
+ * <val>: 1+ chars, in cm
  * - specify distance to drive, from 0 to 500 (float).
+ * - (ONLY FOR DIST_TARGET commands) when <angle> != 0:
+ * 		specify turn angle to complete, from 0 to 360 (float).
  *
  * <SEP>: character specified below as CMD_SEP ('|').
  * <END>: character specified below as CMD_END ('\n').
@@ -40,9 +42,9 @@
 
 #define CMD_FULL_STOP 'S'				//bring car to a complete stop. (all other fields are not required, i.e., send 'S\0')
 
-#define CMD_FORWARD_DIST_TARGET 'T'		//go forward for a target distance.
+#define CMD_FORWARD_DIST_TARGET 'T'		//go forward for a target distance/angle.
 #define CMD_FORWARD_DIST_AWAY 'W'		//go forward until within a certain distance.
-#define CMD_BACKWARD_DIST_TARGET 't'	//go backward for a target distance.
+#define CMD_BACKWARD_DIST_TARGET 't'	//go backward for a target distance/angle.
 #define CMD_BACKWARD_DIST_AWAY 'w'		//go backward until a certain distance apart.
 
 #define CMD_SEP '|'						//separator.

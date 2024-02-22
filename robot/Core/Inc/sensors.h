@@ -6,6 +6,7 @@
 #include "mag_cal.h"
 #include <math.h>
 #include "delay_us.h"
+#include "angle.h"
 
 #define ICM_I2C_ADDR 0
 #define GRAVITY 9.80665e-4f //in cm/ms^2
@@ -33,7 +34,7 @@ void sensors_us_trig();
 void sensors_read_usDist(float pulse_s);
 void sensors_read_gyroZ();
 void sensors_read_accel();
-void sensors_read_heading(float msElapsed);
+void sensors_read_heading(float msElapsed, float gyroZ);
 void sensors_set_bias(uint16_t count);
 void sensors_dist_warmup(uint16_t count);
 

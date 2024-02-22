@@ -4,17 +4,14 @@ static KalmanParams kParams;
 static DistState state;
 
 void dist_init() {
-	kalman_init(&kParams, 0, DIST_S_ACCEL, DIST_S_MOTOR);
-
-	state.dist = 0;
-	state.v = 0;
+	dist_reset(0);
 }
 
-void dist_reset() {
+void dist_reset(float v) {
+	kalman_init(&kParams, 0, DIST_S_ACCEL, DIST_S_MOTOR);
 	state.dist = 0;
-	state.v = 0;
-	kParams.last_est = 0;
-	kParams.s_est = DIST_S_ACCEL;
+	state.v = v;
+	state.s_v = 0;
 }
 
 static void update_state(float msElapsed, float accel) {
