@@ -124,13 +124,13 @@ public class BluetoothConnectionService {
                 }
                 Log.d(TAG, "RUN: ConnectThread: could not connect to UUID." + MY_UUID);
                 try {
-                    BluetoothSetUp mBluetoothPopUpActivity = (BluetoothSetUp) mContext;
-                    mBluetoothPopUpActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(mContext, "Failed to connect to the Device.", Toast.LENGTH_LONG).show();
-                        }
-                    });
+//                    BluetoothSetUp mBluetoothPopUpActivity = (BluetoothSetUp) mContext;
+//                    mBluetoothPopUpActivity.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(mContext, "Failed to connect to the Device.", Toast.LENGTH_LONG).show();
+//                        }
+//                    });
                 } catch (Exception z) {
                     z.printStackTrace();
                 }

@@ -1,6 +1,8 @@
 package com.example.mdp_grp_21;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
@@ -18,7 +20,10 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -32,7 +37,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity {
+public class Home extends Fragment {
 
     final Handler handler = new Handler();
     // Declaration Variables
@@ -59,40 +64,45 @@ public class MainActivity extends AppCompatActivity {
 
     private int g_coordX;
     private int g_coordY;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // inflate
+        View root = inflater.inflate(R.layout.home, container, false);
 
-        // Initialization
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getSupportActionBar().hide();
-        setContentView(R.layout.activity_main);
+        // get shared preferences
+        sharedPreferences = getActivity().getSharedPreferences("Shared Preferences",
+                Context.MODE_PRIVATE);
 
-        SectionsPagerAdapter sectionsPagerAdapter2 = new SectionsPagerAdapter(getSupportFragmentManager(),
+
+
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getActivity().getSupportFragmentManager(),
                 FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-//        sectionsPagerAdapter.addFragment(new BluetoothCommunications(),"CHAT");
-        sectionsPagerAdapter2.addFragment(new Home(),"Home");
-        sectionsPagerAdapter2.addFragment(new BluetoothSetUp(),"Bluetooth");
+        sectionsPagerAdapter.addFragment(new BluetoothCommunications(),"CHAT");
+        sectionsPagerAdapter.addFragment(new MappingFragment(),"MAP CONFIG");
+//        sectionsPagerAdapter.addFragment(new ControlFragment(),"CHALLENGE");
+
+        ViewPager viewPager = root.findViewById(R.id.view_pager);
+        viewPager.setAdapter(sectionsPagerAdapter);
+        viewPager.setOffscreenPageLimit(2);
 
 
+        TabLayout tabs = root.findViewById(R.id.tabs);
+        tabs.setupWithViewPager(viewPager);
 
 
-        ViewPager viewPager2 = findViewById(R.id.view_pager2);
-        viewPager2.setAdapter(sectionsPagerAdapter2);
-        viewPager2.setOffscreenPageLimit(2);
-
-
-        TabLayout tabs2 = findViewById(R.id.tabs2);
-        tabs2.setupWithViewPager(viewPager2);
 
         LocalBroadcastManager
-                .getInstance(this)
+                .getInstance(getContext())
                 .registerReceiver(messageReceiver, new IntentFilter("incomingMessage"));
 
         // Set up sharedPreferences
-        MainActivity.context = getApplicationContext();
+        Home.context = getContext();
         sharedPreferences();
         editor.putString("message", "");
         editor.putString("direction","None");
@@ -100,9 +110,59 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
 
         // Toolbar
+        ImageButton bluetoothButton = root.findViewById(R.id.bluetoothButton);
+        bluetoothButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent popup = new Intent(getContext(), BluetoothSetUp.class);
+                startActivity(popup);
+            }
+        });
 
+        // Bluetooth Status
+        bluetoothStatus = root.findViewById(R.id.bluetoothStatus);
+        bluetoothDevice = root.findViewById(R.id.bluetoothConnectedDevice);
 
+        // Map
+        gridMap = new GridMap(getContext());
+        gridMap = root.findViewById(R.id.mapView);
+        xAxisTextView = root.findViewById(R.id.xAxisTextView);
+        yAxisTextView = root.findViewById(R.id.yAxisTextView);
+        directionAxisTextView = root.findViewById(R.id.directionAxisTextView);
 
+        // initialize ITEM_LIST and imageBearings strings
+        for (int i = 0; i < 20; i++) {
+            for (int j = 0; j < 20; j++) {
+                gridMap.ITEM_LIST.get(i)[j] = "";
+                GridMap.imageBearings.get(i)[j] = "";
+            }
+        }
+
+        // Controller
+        upBtn = root.findViewById(R.id.upBtn);
+        downBtn = root.findViewById(R.id.downBtn);
+        leftBtn = root.findViewById(R.id.leftBtn);
+        rightBtn = root.findViewById(R.id.rightBtn);
+        brightBtn = root.findViewById(R.id.brightBtn);
+        bleftBtn = root.findViewById(R.id.bleftBtn);
+
+        // Robot Status
+        robotStatusTextView = root.findViewById(R.id.robotStatus);
+
+        myDialog = new ProgressDialog(getContext());
+        myDialog.setMessage("Waiting for other device to reconnect...");
+        myDialog.setCancelable(false);
+        myDialog.setButton(
+                DialogInterface.BUTTON_NEGATIVE,
+                "Cancel",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }
+        );
+        return root;
     }
 
     public static GridMap getGridMap() {
@@ -126,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
     public static void toggleTrackRobot() { trackRobot = !trackRobot; }
 
     public static void sharedPreferences() {
-        sharedPreferences = MainActivity.getSharedPreferences(MainActivity.context);
+        sharedPreferences = Home.getSharedPreferences(Home.context);
         editor = sharedPreferences.edit();
     }
 
@@ -201,14 +261,14 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 Log.d(TAG, "mBroadcastReceiver5: Device now connected to "+mDevice.getName());
-                Toast.makeText(MainActivity.this, "Device now connected to "
-                        + mDevice.getName(), Toast.LENGTH_SHORT).show();
+                updateStatus("Device now connected to "
+                        + mDevice.getName());
                 editor.putString("connStatus", "Connected to " + mDevice.getName());
             }
             else if(status.equals("disconnected")){
                 Log.d(TAG, "mBroadcastReceiver5: Disconnected from "+mDevice.getName());
-                Toast.makeText(MainActivity.this, "Disconnected from "
-                        + mDevice.getName(), Toast.LENGTH_SHORT).show();
+                updateStatus("Disconnected from "
+                        + mDevice.getName());
 
                 editor.putString("connStatus", "Disconnected");
 
@@ -280,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode){
@@ -293,32 +353,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy(){
+    public void onDestroy(){
         super.onDestroy();
         try{
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver5);
+            LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(messageReceiver);
+            LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mBroadcastReceiver5);
         } catch(IllegalArgumentException e){
             e.printStackTrace();
         }
     }
 
     @Override
-    protected void onPause(){
+    public void onPause(){
         super.onPause();
         try{
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver5);
+            LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mBroadcastReceiver5);
         } catch(IllegalArgumentException e){
             e.printStackTrace();
         }
     }
 
     @Override
-    protected void onResume(){
+    public void onResume(){
         super.onResume();
         try{
             IntentFilter filter2 = new IntentFilter("ConnectionStatus");
-            LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver5, filter2);
+            LocalBroadcastManager.getInstance(getContext()).registerReceiver(mBroadcastReceiver5, filter2);
         } catch(IllegalArgumentException e){
             e.printStackTrace();
         }
@@ -331,5 +391,10 @@ public class MainActivity extends AppCompatActivity {
 
         outState.putString(TAG, "onSaveInstanceState");
         showLog("Exiting onSaveInstanceState");
+    }
+    private void updateStatus(String message) {
+        Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP,0, 0);
+        toast.show();
     }
 }

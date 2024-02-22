@@ -27,7 +27,7 @@ public class ControlFragment extends Fragment {
     SharedPreferences sharedPreferences;
 
     // Control Button
-    ImageButton moveForwardImageBtn, turnRightImageBtn, moveBackImageBtn, turnLeftImageBtn;
+    ImageButton moveForwardImageBtn, turnRightImageBtn, moveBackImageBtn, turnLeftImageBtn,turnbleftImageBtn,turnbrightImageBtn;
     ImageButton exploreResetButton, fastestResetButton;
     private static long exploreTimer, fastestTimer;
     public static ToggleButton exploreButton, fastestButton;
@@ -90,6 +90,8 @@ public class ControlFragment extends Fragment {
         turnRightImageBtn = MainActivity.getRightBtn();
         moveBackImageBtn = MainActivity.getDownBtn();
         turnLeftImageBtn = MainActivity.getLeftBtn();
+        turnbleftImageBtn = MainActivity.getbLeftBtn();
+        turnbrightImageBtn = MainActivity.getbRightBtn();
         exploreTimeTextView = root.findViewById(R.id.exploreTimeTextView2);
         fastestTimeTextView = root.findViewById(R.id.fastestTimeTextView2);
         exploreButton = root.findViewById(R.id.exploreToggleBtn2);
@@ -111,11 +113,11 @@ public class ControlFragment extends Fragment {
                     gridMap.moveRobot("forward");
                     MainActivity.refreshLabel();    // update x and y coordinate displayed
                     // display different statuses depending on validity of robot action
-                    if (gridMap.getValidPosition())
-                        updateStatus("moving forward");
-                    else
-                        MainActivity.printMessage("obstacle");
-                        updateStatus("Unable to move forward");
+                            if (gridMap.getValidPosition())
+                                updateStatus("moving forward");
+                            else
+                                MainActivity.printMessage("obstacle");
+                                updateStatus("Unable to move forward");
 
 
                     MainActivity.printMessage("f");
@@ -133,12 +135,27 @@ public class ControlFragment extends Fragment {
                 if (gridMap.getCanDrawRobot()) {
                     gridMap.moveRobot("right");
                     MainActivity.refreshLabel();
-                    MainActivity.printMessage("r");
+                    MainActivity.printMessage("fr");
                     System.out.println(Arrays.toString(gridMap.getCurCoord()));
                 }
                 else
                     updateStatus("Please press 'SET START POINT'");
                 showLog("Exiting turnRightImageBtn");
+            }
+        });
+        turnbrightImageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showLog("Clicked turnbRightImageBtn");
+                if (gridMap.getCanDrawRobot()) {
+                    gridMap.moveRobot("backright");
+                    MainActivity.refreshLabel();
+                    MainActivity.printMessage("br");
+                    System.out.println(Arrays.toString(gridMap.getCurCoord()));
+                }
+                else
+                    updateStatus("Please press 'SET START POINT'");
+                showLog("Exiting turnbRightImageBtn");
             }
         });
 
@@ -174,6 +191,21 @@ public class ControlFragment extends Fragment {
                 else
                     updateStatus("Please press 'SET START POINT'");
                 showLog("Exiting turnLeftImageBtn");
+            }
+        });
+        turnbleftImageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showLog("Clicked turnbLeftImageBtn");
+                if (gridMap.getCanDrawRobot()) {
+                    gridMap.moveRobot("backleft");
+                    MainActivity.refreshLabel();
+                    updateStatus("turning left");
+                    MainActivity.printMessage("bl");
+                }
+                else
+                    updateStatus("Please press 'SET START POINT'");
+                showLog("Exiting turnbLeftImageBtn");
             }
         });
 
