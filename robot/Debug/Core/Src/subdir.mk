@@ -6,8 +6,12 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Core/Src/ICM20948.c \
+../Core/Src/angle.c \
 ../Core/Src/commands.c \
 ../Core/Src/convert.c \
+../Core/Src/delay_us.c \
+../Core/Src/dist.c \
+../Core/Src/kalman.c \
 ../Core/Src/mag_cal.c \
 ../Core/Src/main.c \
 ../Core/Src/motor.c \
@@ -24,8 +28,12 @@ C_SRCS += \
 
 OBJS += \
 ./Core/Src/ICM20948.o \
+./Core/Src/angle.o \
 ./Core/Src/commands.o \
 ./Core/Src/convert.o \
+./Core/Src/delay_us.o \
+./Core/Src/dist.o \
+./Core/Src/kalman.o \
 ./Core/Src/mag_cal.o \
 ./Core/Src/main.o \
 ./Core/Src/motor.o \
@@ -42,8 +50,12 @@ OBJS += \
 
 C_DEPS += \
 ./Core/Src/ICM20948.d \
+./Core/Src/angle.d \
 ./Core/Src/commands.d \
 ./Core/Src/convert.d \
+./Core/Src/delay_us.d \
+./Core/Src/dist.d \
+./Core/Src/kalman.d \
 ./Core/Src/mag_cal.d \
 ./Core/Src/main.d \
 ./Core/Src/motor.d \
@@ -66,7 +78,7 @@ Core/Src/%.o Core/Src/%.su Core/Src/%.cyclo: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/ICM20948.cyclo ./Core/Src/ICM20948.d ./Core/Src/ICM20948.o ./Core/Src/ICM20948.su ./Core/Src/commands.cyclo ./Core/Src/commands.d ./Core/Src/commands.o ./Core/Src/commands.su ./Core/Src/convert.cyclo ./Core/Src/convert.d ./Core/Src/convert.o ./Core/Src/convert.su ./Core/Src/mag_cal.cyclo ./Core/Src/mag_cal.d ./Core/Src/mag_cal.o ./Core/Src/mag_cal.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/motor.cyclo ./Core/Src/motor.d ./Core/Src/motor.o ./Core/Src/motor.su ./Core/Src/oled.cyclo ./Core/Src/oled.d ./Core/Src/oled.o ./Core/Src/oled.su ./Core/Src/pid.cyclo ./Core/Src/pid.d ./Core/Src/pid.o ./Core/Src/pid.su ./Core/Src/sensors.cyclo ./Core/Src/sensors.d ./Core/Src/sensors.o ./Core/Src/sensors.su ./Core/Src/servo.cyclo ./Core/Src/servo.d ./Core/Src/servo.o ./Core/Src/servo.su ./Core/Src/stm32f4xx_hal_msp.cyclo ./Core/Src/stm32f4xx_hal_msp.d ./Core/Src/stm32f4xx_hal_msp.o ./Core/Src/stm32f4xx_hal_msp.su ./Core/Src/stm32f4xx_it.cyclo ./Core/Src/stm32f4xx_it.d ./Core/Src/stm32f4xx_it.o ./Core/Src/stm32f4xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32f4xx.cyclo ./Core/Src/system_stm32f4xx.d ./Core/Src/system_stm32f4xx.o ./Core/Src/system_stm32f4xx.su ./Core/Src/user_input.cyclo ./Core/Src/user_input.d ./Core/Src/user_input.o ./Core/Src/user_input.su
+	-$(RM) ./Core/Src/ICM20948.cyclo ./Core/Src/ICM20948.d ./Core/Src/ICM20948.o ./Core/Src/ICM20948.su ./Core/Src/angle.cyclo ./Core/Src/angle.d ./Core/Src/angle.o ./Core/Src/angle.su ./Core/Src/commands.cyclo ./Core/Src/commands.d ./Core/Src/commands.o ./Core/Src/commands.su ./Core/Src/convert.cyclo ./Core/Src/convert.d ./Core/Src/convert.o ./Core/Src/convert.su ./Core/Src/delay_us.cyclo ./Core/Src/delay_us.d ./Core/Src/delay_us.o ./Core/Src/delay_us.su ./Core/Src/dist.cyclo ./Core/Src/dist.d ./Core/Src/dist.o ./Core/Src/dist.su ./Core/Src/kalman.cyclo ./Core/Src/kalman.d ./Core/Src/kalman.o ./Core/Src/kalman.su ./Core/Src/mag_cal.cyclo ./Core/Src/mag_cal.d ./Core/Src/mag_cal.o ./Core/Src/mag_cal.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/motor.cyclo ./Core/Src/motor.d ./Core/Src/motor.o ./Core/Src/motor.su ./Core/Src/oled.cyclo ./Core/Src/oled.d ./Core/Src/oled.o ./Core/Src/oled.su ./Core/Src/pid.cyclo ./Core/Src/pid.d ./Core/Src/pid.o ./Core/Src/pid.su ./Core/Src/sensors.cyclo ./Core/Src/sensors.d ./Core/Src/sensors.o ./Core/Src/sensors.su ./Core/Src/servo.cyclo ./Core/Src/servo.d ./Core/Src/servo.o ./Core/Src/servo.su ./Core/Src/stm32f4xx_hal_msp.cyclo ./Core/Src/stm32f4xx_hal_msp.d ./Core/Src/stm32f4xx_hal_msp.o ./Core/Src/stm32f4xx_hal_msp.su ./Core/Src/stm32f4xx_it.cyclo ./Core/Src/stm32f4xx_it.d ./Core/Src/stm32f4xx_it.o ./Core/Src/stm32f4xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32f4xx.cyclo ./Core/Src/system_stm32f4xx.d ./Core/Src/system_stm32f4xx.o ./Core/Src/system_stm32f4xx.su ./Core/Src/user_input.cyclo ./Core/Src/user_input.d ./Core/Src/user_input.o ./Core/Src/user_input.su
 
 .PHONY: clean-Core-2f-Src
 

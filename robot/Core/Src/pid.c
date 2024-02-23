@@ -13,10 +13,10 @@ void pid_init(PidDef *def, float Kp, float Ki, float Kd) {
 	def->Kd = Kd;
 }
 
-float pid_adjust(PidDef *def, float error) {
+float pid_adjust(PidDef *def, float error, float scale) {
 	def->errorArea += error;
 	float errorRate = (error - def->errorOld);
 	def->errorOld = error;
 
-	return error * def->Kp + def->errorArea * def->Ki + errorRate * def->Kd;
+	return error * def->Kp * scale + def->errorArea * def->Ki * scale + errorRate * def->Kd * scale;
 }

@@ -7,13 +7,24 @@ static Command *get_new_cmd() {
 	new->dir = 0;
 	new->speed = 0;
 	new->steeringAngle = 0;
-	new->dist = 0;
+	new->val = 0;
 	new->distType = TARGET;
 	new->next = NULL;
 
 	return new;
 }
 
+static void commands_ack(UART_HandleTypeDef *uart, Command *cmd, uint8_t indicator) {
+	uint8_t buf_size = cmd->str_size + 1;
+	uint8_t *buf = (uint8_t *) malloc(buf_size * sizeof(uint8_t));
+	*buf = indicator;
+	memcpy(buf + 1, cmd->str, buf_size - 1);
+
+	HAL_UART_Transmit(uart, buf, buf_size, HAL_MAX_DELAY);
+	free(buf);
+}
+
+static uint8_t buf[3];
 void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 	Command *next = get_new_cmd();
 
@@ -30,9 +41,9 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 			next->distType = TARGET;
 			break;
 
-		case CMD_FORWARD_DIST_WITHIN:
+		case CMD_FORWARD_DIST_AWAY:
 			next->dir = 1;
-			next->distType = STOP_WITHIN;
+			next->distType = STOP_AWAY;
 			break;
 
 		case CMD_BACKWARD_DIST_TARGET:
@@ -40,9 +51,9 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 			next->distType = TARGET;
 			break;
 
-		case CMD_BACKWARD_DIST_WITHIN:
+		case CMD_BACKWARD_DIST_AWAY:
 			next->dir = -1;
-			next->distType = STOP_WITHIN;
+			next->distType = STOP_AWAY;
 			break;
 
 		default:
@@ -56,41 +67,39 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 		temp++;
 		next->steeringAngle = parse_float_until(&temp, CMD_SEP, 6);
 		temp++;
-		next->dist = parse_float_until(&temp, CMD_END, 6);
+		next->val = parse_float_until(&temp, CMD_END, 6);
 	}
 
 	//copy command.
-	uint8_t str_size = temp - buf;
+	uint8_t str_size = temp - buf + 1;
 	next->str_size = str_size;
 	next->str = (uint8_t *) malloc(str_size * sizeof(uint8_t));
-	memcpy(cmd->str, buf, str_size);
+	memcpy(next->str, buf, str_size);
 
-	//acknowledge command.
-	commands_ack(uart, next, CMD_RCV);
 
 	if (cur == NULL) {
 		cur = next;
-		return;
+	} else {
+		Command *temp = cur;
+		while (temp->next != NULL) {
+			temp = temp->next;
+		}
+		temp->next = next;
 	}
 
-	while (cur->next != NULL) cur = cur->next;
-	cur->next = next;
+	//acknowledge command has been received and queued.
+	commands_ack(uart, next, CMD_RCV);
 }
 
-static void commands_ack(UART_HandleTypeDef *uart, Commands *cmd, uint8_t indicator) {
-	uint8_t buf_size = cmd->str_size + 1;
-	uint8_t *buf = (uint8_t *) malloc(buf_size * sizeof(uint8_t));
-	*buf = indicator;
-	memcpy(++buf, cmd->str, buf_size - 1);
-
-	HAL_UART_Transmit(uart, buf, buf_size, HAL_MAX_DELAY);
-	free(buf);
-}
 
 Command *commands_pop() {
 	Command *ret = cur;
 	if (cur != NULL) cur = cur->next;
 	return ret;
+}
+
+Command *commands_peek() {
+	return cur;
 }
 
 void commands_end(UART_HandleTypeDef *uart, Command *cmd) {

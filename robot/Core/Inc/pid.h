@@ -11,6 +11,6 @@ typedef struct {
 
 void pid_reset(PidDef *def);
 void pid_init(PidDef *def, float Kp, float Ki, float Kd);
-float pid_adjust(PidDef *def, float error);
+float pid_adjust(PidDef *def, float error, float scale);
 
 #endif /* INC_PID_H_ */

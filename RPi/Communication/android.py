@@ -6,9 +6,13 @@ import time
 import bluetooth as bt
 from pathlib import Path
 import sys
-path_root = Path(__file__).parents[2]
-sys.path.append(str(path_root))
-from RPi.Communication.link import Link
+# ~ path_root = Path(__file__).parents[2]
+# ~ sys.path.append(str(path_root))
+
+sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
+
+
+from Communication.link import Link
 
 class AndroidMessage:
     """
@@ -193,14 +197,15 @@ class Android(Link):
     def receive(self) -> Optional[str]:
         """Receive message from Android"""
         try:
-            while True:
-				# Default code to receive data from Android in JSON format. - Bryan
-                unclean_message = self.client_socket.recv(1024)
-                message = unclean_message.strip().decode("utf-8")
-                print("Message received from Android: %s", str(message))
-                response_data = "Message received successfully!"
-                client_socket.send(response_data.encode('utf-8'))
-                return message
+            # ~ while True:
+            # Default code to receive data from Android in JSON format. - Bryan
+            unclean_message = self.client_socket.recv(1024)
+            message = unclean_message.strip().decode("utf-8")
+            # ~ print("Message received from Android: %s", str(message))
+            # ~ response_data = "Message received successfully!"
+            # ~ self.client_socket.send(response_data.encode('utf-8'))
+            # ~ print(message)
+            return message
         except OSError as e:  # connection broken, try to reconnect
             print("Message failed to be received: %s", str(e))
             raise e

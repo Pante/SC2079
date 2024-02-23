@@ -19,6 +19,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h \
@@ -31,11 +34,12 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Core/Inc/convert.h ../Core/Inc/motor.h ../Core/Inc/main.h \
  ../Core/Inc/pid.h ../Core/Inc/convert.h ../Core/Inc/commands.h \
- ../Core/Inc/commands_FLAGS.h ../Core/Inc/oled.h ../Core/Inc/sensors.h \
- ../Core/Inc/ICM20948.h ../Core/Inc/ICM20948_ADDR.h \
+ ../Core/Inc/commands_FLAGS.h ../Core/Inc/dist.h ../Core/Inc/kalman.h \
+ ../Core/Inc/angle.h ../Core/Inc/delay_us.h ../Core/Inc/oled.h \
+ ../Core/Inc/sensors.h ../Core/Inc/ICM20948.h ../Core/Inc/ICM20948_ADDR.h \
  ../Core/Inc/ICM20948_OPTIONS.h ../Core/Inc/mag_cal.h \
- ../Core/Inc/user_input.h ../Core/Inc/oled.h ../Core/Inc/motor.h \
- ../Core/Inc/servo.h
+ ../Core/Inc/user_input.h ../Core/Inc/oled.h ../Core/Inc/delay_us.h \
+ ../Core/Inc/angle.h ../Core/Inc/motor.h ../Core/Inc/servo.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -57,6 +61,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h:
@@ -74,6 +81,10 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/convert.h:
 ../Core/Inc/commands.h:
 ../Core/Inc/commands_FLAGS.h:
+../Core/Inc/dist.h:
+../Core/Inc/kalman.h:
+../Core/Inc/angle.h:
+../Core/Inc/delay_us.h:
 ../Core/Inc/oled.h:
 ../Core/Inc/sensors.h:
 ../Core/Inc/ICM20948.h:
@@ -82,5 +93,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/mag_cal.h:
 ../Core/Inc/user_input.h:
 ../Core/Inc/oled.h:
+../Core/Inc/delay_us.h:
+../Core/Inc/angle.h:
 ../Core/Inc/motor.h:
 ../Core/Inc/servo.h:
