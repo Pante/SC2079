@@ -22,6 +22,7 @@ class PCSocketTest:
 		self.process_pc_stream = None
 		self.process_android_receive = None
 		self.android_dropped = self.manager.Event()
+		self.latest_image = None
 		self.host = "192.168.14.14"
 		self.port = 5000
 		self.HTML ="""
@@ -119,8 +120,10 @@ class PCSocketTest:
 									message_content = object_id
 									self.android.send(AndroidMessage(action_type, message_content))
 									prev_image = object_id
+									self.latest_image = prev_image
 								elif prev_image == object_id:
 									# Do nothing, no need to send since the prev image is the same as current image
+									self.latest_image = prev_image
 									pass
 								else:
 									# The current image is new, so can send to Android
@@ -128,6 +131,7 @@ class PCSocketTest:
 									message_content = object_id
 									self.android.send(AndroidMessage(action_type, message_content))
 									prev_image = object_id
+									self.latest_image = prev_image
 							except OSError:
 								self.android_dropped.set()
 								print("Event set: Bluetooth connection dropped")
