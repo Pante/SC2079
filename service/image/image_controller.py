@@ -20,8 +20,12 @@ class ImagePredictionRequest(BaseModel):
 
 
 class ImagePredictionResponse(BaseModel):
-    obstacle_id: int
+    images: list[ImagePredictionResponseImage]
+
+
+class ImagePredictionResponseImage(BaseModel):
     image_id: int
+    confidence: float
 
 
 @api.post('/prediction/task-1', responses={200: ImagePredictionResponse})
