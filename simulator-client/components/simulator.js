@@ -1,49 +1,51 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
 import CustomButton from "./custom-button";
-import QueryAPI from "./query-api";
+import PathfindingApi from "../../openapi-simulator-client/src/api/PathfindingApi";
+import PathfindingRequest from "../../openapi-simulator-client/src/model/PathfindingRequest";
+import PathfindingRequestRobot from "../../openapi-simulator-client/src/model/PathfindingRequestRobot";
+import ApiClient from "../../openapi-simulator-client/src/ApiClient";
 
-//change accordingly to what we set in our algo
 const Direction = {
-  NORTH: 0,
-  EAST: 2,
-  SOUTH: 4,
-  WEST: 6,
-  NONE: 8,
+  NORTH: "NORTH",
+  EAST: "EAST",
+  SOUTH: "SOUTH",
+  WEST: "WEST",
 };
 
-const DirectionToString = {
-  0: "Up",
-  2: "Right",
-  4: "Down",
-  6: "Left",
-  8: "None",
+const Angle = {
+  NORTH: 0,
+  EAST: 90,
+  SOUTH: 180,
+  WEST: 270,
 };
 
 const FORWARD_TIME = 1;
 const TURN_TIME = 1.5;
 
 const transformCoord = (x, y) => {
-  return { x: 19 - y, y: x };
+  return { x: 39 - y, y: x };
 };
 
 export default function Simulator() {
   const [robotState, setRobotState] = useState({
-    x: 1,
-    y: 1,
-    d: Direction.NORTH,
     s: -1,
+    direction: Direction.NORTH,
+    "north_east": { x: 6, y: 6 },
+    "south_west": { x: 0, y: 0 },
   });
-  const [robotX, setRobotX] = useState(1);
-  const [robotY, setRobotY] = useState(1);
-  const [robotDir, setRobotDir] = useState(0);
+  const [robotDir, setRobotDir] = useState("NORTH");
   const [obstacles, setObstacles] = useState([]);
-  const [directionInput, setDirectionInput] = useState(Direction.NORTH);
+  const [directionInput, setDirectionInput] = useState("NORTH");
   const [isGettingPath, setIsGettingPath] = useState(false);
   const [path, setPath] = useState([]);
   const [commands, setCommands] = useState([]);
   const [page, setPage] = useState(0);
-  const [robotPos, setRobotPos] = useState({ x: 1, y: 1, angle: 0 });
+  const [robotPos, setRobotPos] = useState({
+    direction: Direction.NORTH,
+    x: 200,
+    y: 1645
+  });
   const [time, setTime] = useState(0);
 
   const generateRandID = () => {
@@ -65,17 +67,23 @@ export default function Simulator() {
 
   const generateRobotCells = () => {
     const robotCells = [];
-    let markerX = 0;
-    let markerY = 0;
+    let markerSWX = 0;
+    let markerSWY = 0;
+    let markerNEX = 0;
+    let markerNEY = 0;
 
-    if (Number(robotState.d) === Direction.NORTH) {
-      markerY++;
-    } else if (Number(robotState.d) === Direction.EAST) {
-      markerX++;
-    } else if (Number(robotState.d) === Direction.SOUTH) {
-      markerY--;
-    } else if (Number(robotState.d) === Direction.WEST) {
-      markerX--;
+    if (robotState.direction === Direction.NORTH) {
+      markerSWY++;
+      markerNEY++;
+    } else if (robotState.direction === Direction.EAST) {
+      markerSWX++;
+      markerNEX++;
+    } else if (robotState.direction === Direction.SOUTH) {
+      markerSWY--;
+      markerNEY--;
+    } else if (robotState.direction === Direction.WEST) {
+      markerSWX--;
+      markerNEX--;
     }
 
     // Go from i = -1 to i = 1
@@ -83,20 +91,28 @@ export default function Simulator() {
       // Go from j = -1 to j = 1
       for (let j = -1; j < 2; j++) {
         // Transform the coordinates to our coordinate system where (0, 0) is at the bottom left
-        const coord = transformCoord(robotState.x + i, robotState.y + j);
+        // console.log(robotState)
+        const coordNE = transformCoord(
+          robotState["north_east"]["x"] + i,
+          robotState["north_east"]["y"] + j
+        );
+        const coordSW = transformCoord(
+          robotState["south_west"]["x"] + i,
+          robotState["south_west"]["y"] + j
+        );
         // If the cell is the marker cell, add the robot state to the cell
-        if (markerX === i && markerY === j) {
+        if ((markerSWX+markerNEX)/2 === i && (markerSWY+markerNEY)/2 === j) {
           robotCells.push({
-            x: coord.x,
-            y: coord.y,
-            d: robotState.d,
+            direction: robotState.direction,
+            "north_east": coordNE,
+            "south_west": coordSW,
             s: robotState.s,
           });
         } else {
           robotCells.push({
-            x: coord.x,
-            y: coord.y,
-            d: null,
+            direction: null,
+            "north_east": coordNE,
+            "south_west": coordSW,
             s: -1,
           });
         }
@@ -106,44 +122,59 @@ export default function Simulator() {
     return robotCells;
   };
 
-  const onClickObstacle = (obX, obY) => {
+  const onClickObstacle = (obSWX, obSWY, obNEX, obNEY) => {
     // If the input is not valid, return
-    if (!obX && !obY) return;
+    if (!obSWX && !obSWY && !obNEX && !obNEY) return;
     let exists = false;
 
+    // this checks if obstacles already exist, if they do then clicking will change direction
     const newObstacles = obstacles.map((obstacle) => {
-      if (obstacle.x === obX && obstacle.y === obY) {
+      if (
+        obstacle["north_east"].x === obNEX &&
+        obstacle["north_east"].y === obNEY &&
+        obstacle["south_west"].x === obSWX &&
+        obstacle["south_west"].y === obSWY
+      ) {
         exists = true;
-        if (obstacle.d === 6) {
-          obstacle.d = 0;
+        if (obstacle.direction === Direction.WEST) {
+          obstacle.direction = Direction.NORTH;
+        } else if (obstacle.direction === Direction.NORTH) {
+          obstacle.direction = Direction.EAST;
+        } else if (obstacle.direction === Direction.EAST) {
+          obstacle.direction = Direction.SOUTH;
         } else {
-          obstacle.d += 2;
+          obstacle.direction = Direction.WEST;
         }
+
         return {
           ...obstacle,
         };
       }
       return obstacle;
     });
-
+    // adds to obstacles array
     if (exists === false) {
       newObstacles.push({
-        x: obX,
-        y: obY,
-        d: directionInput,
-        id: generateRandID(),
+        direction: directionInput,
+        "north_east": { x: obNEX, y: obNEY },
+        "south_west": { x: obSWX, y: obSWY },
+        image_id: generateRandID(),
       });
     }
-
     setObstacles(newObstacles);
     console.log(newObstacles);
   };
 
   const onResetAll = () => {
-    setRobotX(1);
-    setRobotDir(0);
-    setRobotY(1);
-    setRobotState({ x: 1, y: 1, d: Direction.NORTH, s: -1 });
+    setRobotDir(Direction.NORTH);
+    setRobotState({
+      direction: Direction.NORTH,
+      "north_east": { x: 6, y: 6 },
+      "south_west": { x: 0, y: 0 },
+    });
+    // setRobotPos({direction: Direction.NORTH,
+    // x: 200,
+    // y: 1645});
     setPath([]);
     setCommands([]);
     setPage(0);
@@ -159,7 +190,13 @@ export default function Simulator() {
     const newObstacles = [];
     // Add all the obstacles except the one to remove to the new array
     for (const o of obstacles) {
-      if (o.x === ob.x && o.y === ob.y) continue;
+      if (
+        o["north_east"].x === ob["north_east"].x &&
+        o["north_east"].y === ob["north_east"].y &&
+        o["south_west"].x === ob["south_west"].x &&
+        o["south_west"].y === ob["south_west"].y
+      )
+        continue;
       newObstacles.push(o);
     }
     // Set the obstacles to the new array
@@ -170,23 +207,32 @@ export default function Simulator() {
     let newTime = time;
 
     for (let x of commands) {
-      let units = x.substring(2, 4);
-
-      if (x.startsWith("SF") || x.startsWith("SB")) {
-        // console.log(x[2])
-        newTime += FORWARD_TIME * units;
-        // console.log(newTime)
-      } else if (
-        x.startsWith("RB") ||
-        x.startsWith("LB") ||
-        x.startsWith("RF") ||
-        x.startsWith("LF")
+      // let units = x.substring(2, 4);
+      if (
+        !x.contains("FORWARD_LEFT") &&
+        !x.contains("FORWARD_RIGHT") &&
+        !x.contains("BACKWARD_LEFT") &&
+        !x.contains("BACKWARD_RIGHT")
       ) {
-        newTime += TURN_TIME;
-        // console.log(newTime)
+        newTime += FORWARD_TIME * x;
       } else {
-        continue;
+        newTime += TURN_TIME;
       }
+      // if (x.move === ("FORWARD") || x.move === ("BACKWARD")) {
+      //   // console.log(x[2])
+      //   newTime += FORWARD_TIME * x.amount;
+      //   // console.log(newTime)
+      // } else if (
+      //   x.move === ||
+      //   x.move === ||
+      //   x.move === ||
+      //   x.move ===
+      // ) {
+      //   newTime += TURN_TIME;
+      //   // console.log(newTime)
+      // } else {
+      //   continue;
+      // }
     }
 
     setTime(newTime);
@@ -194,26 +240,44 @@ export default function Simulator() {
 
   const getPath = () => {
     setIsGettingPath(true);
-
-    const api = new QueryAPI("http://localhost:5000");
-    api.query(obstacles, robotX, robotY, robotDir, (data, err) => {
-      if (data) {
-        setPath(data.data.data.path);
-
-        const commands = [];
-        for (let x of data.data.data.commands) {
-          if (x.startsWith("CAP")) {
-            continue;
+    const apiClient = new ApiClient("http://localhost:5000");
+    const pathfindingRequestRobot = new PathfindingRequestRobot(
+      "NORTH",
+      {
+        x: 6,
+        y: 6,
+      },
+      { x: 0, y: 0 }
+    );
+    const pathfindingRequest = new PathfindingRequest(
+      obstacles,
+      pathfindingRequestRobot
+    );
+    const pathfindingAPI = new PathfindingApi(apiClient);
+    pathfindingAPI.pathfindingPost(
+      pathfindingRequest,
+      (error, data, response) => {
+        console.log(response)
+        response = JSON.parse(response.text);
+        let pathArray = [{
+          "direction": robotState.direction,
+          "x": 0,
+          "y": 0,
+          "s" : -1
+        }]
+        for (const arr of response.segments){
+          for (const pathObj of arr.path){
+            pathObj['s'] = -1
+            pathArray.push(pathObj)
           }
-          commands.push(x);
+          console.log(pathArray[-1])
+          pathArray[pathArray.length-1]['s'] = 1
         }
-        setCommands(commands);
-        getTime(commands);
-        console.log(commands);
+        setPath(pathArray);
+        console.log(pathArray);
+        setIsGettingPath(false);
       }
-
-      setIsGettingPath(false);
-    });
+    );
   };
 
   const createGrid = () => {
@@ -222,25 +286,33 @@ export default function Simulator() {
     const robotCells = generateRobotCells();
 
     // Generate the grid
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 40; i++) {
       const cells = [
         // Axis
         <td key={i} className="w-5 h-5 md:w-8 md:h-8">
           <span className="text-sky-900 font-bold text-[0.6rem] md:text-base ">
-            {19 - i}
+            {39 - i}
           </span>
         </td>,
       ];
 
-      for (let j = 0; j < 20; j++) {
+      for (let j = 0; j < 40; j++) {
         let foundOb = null;
         let foundRobotCell = null;
 
-        const transformed = transformCoord(j, i);
+        const transformedSW = transformCoord(j, i);
+        const transformedNE = transformCoord(j + 2, i - 2);
 
         for (const ob of obstacles) {
-          const obTransformed = transformCoord(ob.x, ob.y);
-          if (obTransformed.x === i && obTransformed.y === j) {
+          const obTransformedSW = transformCoord(
+            ob["south_west"].x,
+            ob["south_west"].y
+          );
+          const obTransformedNE = transformCoord(
+            ob["north_east"].x,
+            ob["north_east"].y
+          );
+          if (obTransformedSW.x >= i && i > obTransformedNE.x && obTransformedSW.y <= j && j < obTransformedNE.y) {
             foundOb = ob;
             break;
           }
@@ -248,7 +320,7 @@ export default function Simulator() {
 
         if (!foundOb) {
           for (const cell of robotCells) {
-            if (cell.x === i && cell.y === j) {
+            if ((cell["south_west"].x+cell["north_east"].x)/2 === i && (cell["south_west"].y+cell["north_east"].y)/2 === j) {
               foundRobotCell = cell;
               break;
             }
@@ -256,46 +328,75 @@ export default function Simulator() {
         }
 
         if (foundOb) {
-          if (foundOb.d === Direction.WEST) {
+          if (foundOb.direction === Direction.WEST) {
             cells.push(
               <td className="border border-l-4 border-l-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700">
                 <CustomButton
-                  onClick={() => onClickObstacle(transformed.y, transformed.x)}
+                  onClick={() =>
+                    onClickObstacle(
+                      transformedSW.y,
+                      transformedSW.x,
+                      transformedNE.y,
+                      transformedNE.x
+                    )
+                  }
                 />
               </td>
             );
-          } else if (foundOb.d === Direction.EAST) {
+          } else if (foundOb.direction === Direction.EAST) {
             cells.push(
               <td className="border border-r-4 border-r-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700">
                 <CustomButton
-                  onClick={() => onClickObstacle(transformed.y, transformed.x)}
+                  onClick={() =>
+                    onClickObstacle(
+                      transformedSW.y,
+                      transformedSW.x,
+                      transformedNE.y,
+                      transformedNE.x
+                    )
+                  }
                 />
               </td>
             );
-          } else if (foundOb.d === Direction.NORTH) {
+          } else if (foundOb.direction === Direction.NORTH) {
             cells.push(
               <td className="border border-t-4 border-t-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700">
                 <CustomButton
-                  onClick={() => onClickObstacle(transformed.y, transformed.x)}
+                  onClick={() =>
+                    onClickObstacle(
+                      transformedSW.y,
+                      transformedSW.x,
+                      transformedNE.y,
+                      transformedNE.x
+                    )
+                  }
                 />
               </td>
             );
-          } else if (foundOb.d === Direction.SOUTH) {
+          } else if (foundOb.direction === Direction.SOUTH) {
             cells.push(
               <td className="border border-b-4 border-b-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700">
                 <CustomButton
-                  onClick={() => onClickObstacle(transformed.y, transformed.x)}
+                  onClick={() =>
+                    onClickObstacle(
+                      transformedSW.y,
+                      transformedSW.x,
+                      transformedNE.y,
+                      transformedNE.x
+                    )
+                  }
                 />
               </td>
             );
-          } else if (foundOb.d === Direction.SKIP) {
-            cells.push(
-              <td className="border w-5 h-5 md:w-8 md:h-8 bg-blue-700" />
-            );
           }
+          // else if (foundOb.direction === Direction.SKIP) {
+          //   cells.push(
+          //     <td className="border w-5 h-5 md:w-8 md:h-8 bg-blue-700" />
+          //   );
+          // }
         } else if (foundRobotCell) {
           ref_id++;
-          if (foundRobotCell.d !== null) {
+          if (foundRobotCell.direction !== null) {
             cells.push(
               <td className="border-black border w-5 h-5 md:w-8 md:h-8" />
             );
@@ -317,18 +418,25 @@ export default function Simulator() {
           cells.push(
             <td className="border-black border w-5 h-5 md:w-8 md:h-8">
               <CustomButton
-                onClick={() => onClickObstacle(transformed.y, transformed.x)}
+                onClick={() =>
+                  onClickObstacle(
+                    transformedSW.y,
+                    transformedSW.x,
+                    transformedNE.y,
+                    transformedNE.x
+                  )
+                }
               />
             </td>
           );
         }
       }
 
-      rows.push(<tr key={19 - i}>{cells}</tr>);
+      rows.push(<tr key={39 - i}>{cells}</tr>);
     }
 
     const xAxis = [<td key={0} />];
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 40; i++) {
       xAxis.push(
         <td className="w-5 h-5 md:w-8 md:h-8">
           <span className="text-sky-900 font-bold text-[0.6rem] md:text-base ">
@@ -337,7 +445,7 @@ export default function Simulator() {
         </td>
       );
     }
-    rows.push(<tr key={20}>{xAxis}</tr>);
+    rows.push(<tr key={40}>{xAxis}</tr>);
     return rows;
   };
 
@@ -345,25 +453,18 @@ export default function Simulator() {
 
   const updateRobotPosition = () => {
     if (elementToFollowRef.current) {
+      console.log(elementToFollowRef.current)
       const rect = elementToFollowRef.current.getBoundingClientRect();
+      console.log(rect);
       // Calculate the circle's position based on the element's bounding rectangle
-      const circleX = rect.left + rect.width / 2;
-      const circleY = rect.top + rect.height / 2;
-      // Update the robotState or position of the circle
-      let angle = 0;
-      if (robotState["d"] == 0) {
-        angle = 0;
-      } else if (robotState["d"] == 2) {
-        angle = 90;
-      } else if (robotState["d"] == 4) {
-        angle = 180;
-      } else if (robotState["d"] == 6) {
-        angle = 270;
-      }
+      const circleSWX = rect.left + rect.width / 2;
+      const circleNEX = rect.right;
+      const circleSWY = rect.top + rect.height / 2;
+      const circleNEY = rect.bottom;
       setRobotPos({
-        x: circleX,
-        y: circleY,
-        angle: angle,
+        direction: robotState.direction,
+        x: rect.left,
+        y: rect.bottom+rect.height*4,
       });
     }
   };
@@ -374,7 +475,18 @@ export default function Simulator() {
 
   useEffect(() => {
     if (page >= path.length) return;
-    setRobotState(path[page]);
+    setRobotState({
+      direction: path[page]["direction"],
+      "north_east": {
+        x: path[page].x + 6,
+        y: path[page].y + 6,
+      },
+      "south_west": {
+        x: path[page].x,
+        y: path[page].y,
+      },
+      s: path[page].s
+    });
   }, [page, path]);
 
   return (
@@ -386,11 +498,15 @@ export default function Simulator() {
       </table>
 
       <div
-        className="w-32 h-32 bg-blue-500 rounded-full absolute transition-transform duration-500 transform -translate-x-1/2 -translate-y-1/2"
+        className="w-64 h-64 bg-blue-500 rounded-full absolute transition-transform duration-500 transform -translate-x-1/2 -translate-y-1/2"
         style={{
+          // top: "1645px",
+          // left: "200px",
           top: `${robotPos.y}px`, // Adjust as needed
           left: `${robotPos.x}px`, // Adjust as needed
-          transform: `translate(-50%, -50%) rotate(${robotPos.angle}deg)`,
+          transform: `translate(-50%, -50%) rotate(${
+            Angle[robotPos.direction]
+          }deg)`,
           transition: "none",
         }}
       >
@@ -401,7 +517,7 @@ export default function Simulator() {
         ></div>
       </div>
 
-      <div className="py-4 px-20 space-x-4">
+      <div className="py-4 px-20 space-x-4" display="flex">
         {/* Reset button */}
         <button className="btn" onClick={onResetAll}>
           Reset All
@@ -418,9 +534,9 @@ export default function Simulator() {
                 className="badge flex flex-row text-black bg-sky-100 rounded-xl text-xs md:text-sm h-max w-max border-cyan-500"
               >
                 <div flex flex-col>
-                  <div>X: {ob.x}</div>
-                  <div>Y: {ob.y}</div>
-                  <div>D: {DirectionToString[ob.d]}</div>
+                  <div>X: {ob["south_west"].x}</div>
+                  <div>Y: {ob["south_west"].y}</div>
+                  <div>D: {ob.direction}</div>
                 </div>
                 <button>
                   <svg
