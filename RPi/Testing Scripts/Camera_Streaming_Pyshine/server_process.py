@@ -8,7 +8,7 @@ import multiprocessing
 import time
 
 # Load YOLOv8
-model = YOLO('v6.pt')
+model = YOLO('v9_task1.pt')
 
 def process_frame(frame, queue):
     # Perform inference

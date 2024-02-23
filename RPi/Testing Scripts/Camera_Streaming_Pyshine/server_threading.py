@@ -7,7 +7,7 @@ import asyncio
 import threading
 import queue
 
-model = YOLO('v6.pt')
+model = YOLO('v9_task1.pt')
 
 class ImageRecognitionThread(threading.Thread):
     def __init__(self, frame, queue):
