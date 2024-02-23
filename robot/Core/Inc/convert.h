@@ -5,7 +5,7 @@
 #include <math.h>
 #include "motor.h"
 
-#define MOTOR_PPR 772 //encoder pulses per revolution
+#define MOTOR_PPR 1535 //encoder pulses per revolution
 #define WHEEL_R_CM 3.25f
 #define CHASSIS_CM 14.5f
 #define WHEELBASE_CM 16.2f

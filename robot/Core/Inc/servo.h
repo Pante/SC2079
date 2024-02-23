@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-#define SERVO_WIDTH 25 //degrees L/R
+#define SERVO_WIDTH 25.0f //degrees L/R
 #define SERVO_PULSE_L 3600 //-SERVO_WIDTH
 #define SERVO_PULSE_0 4850
 #define SERVO_PULSE_R 7200 //+SERVO_WIDTH

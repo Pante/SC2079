@@ -10,7 +10,7 @@
 #define MOTOR_PWM_MAX 6000 //safe value!
 #define MOTOR_PWM_MIN 250 //minimum speed
 #define MOTOR_PWM_ACCEL 15
-#define MOTOR_BRAKING_DIST_CM 15 //15cm at max speed
+#define MOTOR_BRAKING_DIST_CM 16.0f //16cm at max speed
 
 //L, R PWM Channels
 #define L_CHANNEL TIM_CHANNEL_1

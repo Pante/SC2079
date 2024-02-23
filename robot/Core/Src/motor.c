@@ -9,13 +9,13 @@ static uint16_t pwmValAccel = 0, pwmValTarget = 0,
 
 static PidDef pidMatch;
 const static float Kp_match = 1.5e4;
-const static float Ki_match = 8.0e2;
-const static float Kd_match = 9.25e3;
+const static float Ki_match = 8.5e2;
+const static float Kd_match = 1.0e4;
 
 static PidDef pidDist;
-const static float Kp_dist = 0.47;
-const static float Ki_dist = 0;
-const static float Kd_dist = 0.05;
+const static float Kp_dist = 0.21;
+const static float Ki_dist = 0.0009;
+const static float Kd_dist = 0.1;
 
 void motor_init(TIM_HandleTypeDef *pwm, TIM_HandleTypeDef *l_enc, TIM_HandleTypeDef *r_enc) {
 	//assign timer pointers.
@@ -69,7 +69,7 @@ float motor_getDist() {
 	if (rCount < 0) rCount = -rCount;
 
 	uint16_t pulses = ((uint16_t) lCount) + ((uint16_t) rCount);
-	pulses >>= 2;
+	pulses >>= 1;
 
 	return get_distance_cm(pulses);
 }

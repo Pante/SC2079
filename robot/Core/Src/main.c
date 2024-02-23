@@ -249,6 +249,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim7);					//start paced loop timer.
   /* ----- End: Interrupts ----- */
 
+  uint8_t buf[20];
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -327,7 +328,8 @@ int main(void)
 			case TARGET:
 				distDiff = distTarget - estDist;
 				if (rRobot != 0) {
-					distDiff = 0.05 * distDiff +
+					if (estAngle >= cmd->val) distDiff = 0;
+					else distDiff = 0.05 * distDiff +
 						0.95 * abs_float(get_arc_length(cmd->val - estAngle, rRobot));
 				}
 				break;
@@ -346,7 +348,10 @@ int main(void)
 
 		Command *next = commands_peek();
 		float nextAngle = next != NULL ? next->steeringAngle : 0;
-		uint8_t shouldBrake = next != NULL ? next->dir != cmd->dir : 1;
+		uint8_t shouldBrake = next != NULL
+				? (next->dir != cmd->dir || abs_float(next->steeringAngle - cmd->steeringAngle) > SERVO_WIDTH)
+				: 1;
+		shouldBrake = 1;
 
 		//motor correction.
 		motor_pwmCorrection(
@@ -354,16 +359,17 @@ int main(void)
 			shouldBrake ? brakingDist : 0
 		);
 
-//		//TODO: smooth transition between servo angles.
-//		if (distDiff <= brakingDist) {
-//			steeringAngle += (nextAngle - steeringAngle) * (1.0f - distDiff / brakingDist);
-//			servo_setAngle(steeringAngle);
-//		}
-
-		if (distDiff <= 0.5) {
+		if (distDiff < (shouldBrake ? 0.1 : 0.85 * cmd->speed / 100) * brakingDist) servo_setAngle(nextAngle);
+		if (distDiff <= 0) {
 			//target achieved; move to next command.
 			commands_end(&huart3, cmd);
 			cmd = NULL;
+
+			snprintf(buf, 20, "%7.3f", motorDist);
+			OLED_ShowString(0, 0, buf);
+			snprintf(buf, 20, "%7.3f", estDist);
+			OLED_ShowString(0, 10, buf);
+			OLED_Refresh_Gram();
 
 			if (shouldBrake) {
 				motor_setDrive(0, 0);
@@ -611,11 +617,11 @@ static void MX_TIM2_Init(void)
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
-  sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
   sConfig.IC1Filter = 0;
-  sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
   sConfig.IC2Filter = 0;
@@ -660,14 +666,14 @@ static void MX_TIM3_Init(void)
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
-  sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 10;
-  sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
+  sConfig.IC1Filter = 0;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 10;
+  sConfig.IC2Filter = 0;
   if (HAL_TIM_Encoder_Init(&htim3, &sConfig) != HAL_OK)
   {
     Error_Handler();

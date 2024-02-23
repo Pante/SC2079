@@ -2,5 +2,5 @@
 ../Core/Src/commands.c:17:13:commands_ack	32	static
 ../Core/Src/commands.c:28:6:commands_process	40	static
 ../Core/Src/commands.c:95:10:commands_pop	16	static
-../Core/Src/commands.c:101:9:commands_shouldBrake	16	static
-../Core/Src/commands.c:107:6:commands_end	16	static
+../Core/Src/commands.c:101:10:commands_peek	4	static
+../Core/Src/commands.c:105:6:commands_end	16	static

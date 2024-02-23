@@ -4,7 +4,7 @@
 #include "kalman.h"
 
 #define DIST_S_ACCEL 9.80665e-6f
-#define DIST_S_MOTOR 0.25f
+#define DIST_S_MOTOR 0.75f
 
 //accurate range of IR sensor.
 #define DIST_IR_MIN 10
