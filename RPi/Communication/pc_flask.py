@@ -8,6 +8,9 @@ import time
 # ~ from picamera import PiCamera
 from pathlib import Path
 import sys
+
+from RPi.Communication.android import AndroidMessage
+
 # ~ path_root = Path(__file__).parents[2]
 # ~ sys.path.append(str(path_root))
 sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
@@ -139,6 +142,7 @@ class PCFlask(Link):
 					
 					print("Final Instruction ", inst)
 					if isinstance(inst, MiscInstruction) and str(inst.value) == "CAPTURE_IMAGE":
+<<<<<<< HEAD
 						print("LATEST IMAGE: ", self.latest_image)
 						
 						if self.latest_image == "NONE":
@@ -172,6 +176,14 @@ class PCFlask(Link):
 						
 						
 						break
+=======
+						while self.latest_image is None:
+							pass
+
+						if self.latest_image != 'marker':
+							self.android.send(AndroidMessage('TARGET', self.latest_image))
+
+>>>>>>> 95593618845d2263a92d3fa69e5e4059dc799a4b
 					elif isinstance(inst, TurnInstruction):
 						# TODO: Send instruction to the STM to turn
 						inst_send = inst.value
