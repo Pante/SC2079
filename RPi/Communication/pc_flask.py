@@ -78,16 +78,30 @@ class PCFlask(Link):
 		obstacleArr = []
 		direction_one = Direction("SOUTH")
 		image_id_1 = 1
-		north_east = PathfindingPoint(x=1, y=7)
-		south_west =  PathfindingPoint(x=0,y=6)
+		north_east = PathfindingPoint(x=20, y=20)
+		south_west =  PathfindingPoint(x=21,y=21)
 		pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
 		# Replace with path_finding_obstacle_1 and path_finding_obstacle_2 when ready
 		obstacleArr.append(pathObstacle)
 		
 		image_id_2 = 1
 		direction_two = Direction("EAST")
-		north_east = PathfindingPoint(x=1, y=7)
-		south_west =  PathfindingPoint(x=0,y=6)
+		north_east = PathfindingPoint(x=20, y=20)
+		south_west =  PathfindingPoint(x=21,y=21)
+		pathObstacle =  PathfindingRequestObstacle(direction=direction_two, image_id = image_id_2, north_east = north_east, south_west = south_west)
+		obstacleArr.append(pathObstacle)
+  
+		image_id_2 = 1
+		direction_two = Direction("NORTH")
+		north_east = PathfindingPoint(x=20, y=20)
+		south_west =  PathfindingPoint(x=21,y=21)
+		pathObstacle =  PathfindingRequestObstacle(direction=direction_two, image_id = image_id_2, north_east = north_east, south_west = south_west)
+		obstacleArr.append(pathObstacle)
+  
+		image_id_2 = 1
+		direction_two = Direction("WEST")
+		north_east = PathfindingPoint(x=20, y=20)
+		south_west =  PathfindingPoint(x=21,y=21)
 		pathObstacle =  PathfindingRequestObstacle(direction=direction_two, image_id = image_id_2, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
 		
@@ -160,49 +174,7 @@ class PCFlask(Link):
 						print("Sending move instruction to stm: ", inst_send)
 						# ~ self.stm.send("MOVE")
 				
-			
-		
-
 	
-	# Takes in 2 PathfindingRequestObstacle and one PathfindingRequestRobot objects
-	def haveMarker(self, path_finding_obstacle_1, path_finding_obstacle_2, current_robot_position):
-		
-		# ~ instructionsArr = []
-		# ~ obstacleArr = []
-		# ~ counter = 0
-		
-		# ~ direction_one = Direction("SOUTH")
-		# ~ image_id_1 = 1
-		# ~ north_east = PathfindingPoint(x=1, y=7)
-		# ~ south_west =  PathfindingPoint(x=0,y=6)
-		# ~ pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
-		# ~ # Replace with path_finding_obstacle_1 and path_finding_obstacle_2 when ready
-		# ~ obstacleArr.append(pathObstacle)
-		
-		# ~ image_id_2 = 1
-		# ~ direction_two = Direction("EAST")
-		# ~ north_east = PathfindingPoint(x=1, y=7)
-		# ~ south_west =  PathfindingPoint(x=0,y=6)
-		# ~ pathObstacle =  PathfindingRequestObstacle(direction=direction_two, image_id = image_id_2, north_east = north_east, south_west = south_west)
-		# ~ obstacleArr.append(pathObstacle)
-		
-		# ~ robot_direction = Direction("NORTH")
-		# ~ robot_north_east =  PathfindingPoint(x=1,y=1)
-		# ~ robot_south_west =  PathfindingPoint(x=0,y=0)
-		# ~ # Replace with current_robot_position when ready
-		# ~ pathRobot =  PathfindingRequestRobot(direction = robot_direction, north_east = robot_north_east, south_west = robot_south_west)
-		
-		
-		# ~ print(obstacleArr)
-		
-		# ~ pathfindingRequest =  PathfindingRequest(obstacles=obstacleArr, robot=pathRobot)
-		# ~ pathfinding_api =  PathfindingApi(api_client=self.client)
-		
-		# ~ response = pathfinding_api.pathfinding_post(pathfindingRequest)
-		
-							
-
-		
 	def receive(self):
 		pass
 		
