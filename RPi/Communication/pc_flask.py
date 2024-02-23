@@ -140,6 +140,9 @@ class PCFlask(Link):
 					print("Final Instruction ", inst)
 					if isinstance(inst, MiscInstruction) and str(inst.value) == "CAPTURE_IMAGE":
 						print("LATEST IMAGE: ", self.latest_image)
+						
+						if self.latest_image == "NONE":
+							# No image detected, so need to wait until it's detected
 						# ~ if self.latest_image == "marker":
 							
 							

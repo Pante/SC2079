@@ -78,26 +78,29 @@ class PCSocketTest:
 				message_rcv = self.pc.receive()
 				print(message_rcv)
 				
-				split_results = message_rcv.split(",")
-				confidence_level = float(split_results[0])
-				object_id = split_results[1]
-				
-				print("OBJECT ID:" , object_id)
-				
-				if confidence_level > 0.75:
-					if object_id == "marker":
-						# TODO: Confirm is marker, send pathfindingresponse with the obstacle facing the other direction
-						print("MARKER")
-						# TODO: IF MARKER, CALL PATHFINDINGRESPONSE WITH OBSTACLE FACE
-					else:
-						# Not a marker, can just send back to relevant parties (android) - NEED TO TEST
-						action_type = "TARGET_ID"
-						message_content = object_id
-						# TODO: Add in android when testing - UNCOMMENT IN FINAL INTEGRATION
-						# ~ self.android.send(AndroidMessage(action_type, message_content))
-				
-				# Depending on the message type and value, pass to other processes
-				# e.g. self.stm.send()
+				if message_rcv == "NONE":
+					print("No image detected")
+				else:
+					split_results = message_rcv.split(",")
+					confidence_level = float(split_results[0])
+					object_id = split_results[1]
+					
+					print("OBJECT ID:" , object_id)
+					
+					if confidence_level > 0.75:
+						if object_id == "marker":
+							# TODO: Confirm is marker, send pathfindingresponse with the obstacle facing the other direction
+							print("MARKER")
+							# TODO: IF MARKER, CALL PATHFINDINGRESPONSE WITH OBSTACLE FACE
+						else:
+							# Not a marker, can just send back to relevant parties (android) - NEED TO TEST
+							action_type = "TARGET_ID"
+							message_content = object_id
+							# TODO: Add in android when testing - UNCOMMENT IN FINAL INTEGRATION
+							# ~ self.android.send(AndroidMessage(action_type, message_content))
+					
+					# Depending on the message type and value, pass to other processes
+					# e.g. self.stm.send()
 				
 			except OSError as e:
 				print("Error in receiving data: {e}")
@@ -112,7 +115,7 @@ class PCSocketTest:
 		with picamera.PiCamera(resolution='640x480', framerate=30) as camera:
 			output = ps.StreamOut()
 			StreamProps.set_Output(StreamProps,output)
-			camera.rotation = 0
+			camera.rotation = 180
 			camera.start_recording(output, format='mjpeg')
 			try:
 				server = ps.Streamer(address, StreamProps)
