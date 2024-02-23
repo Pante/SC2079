@@ -8,6 +8,9 @@ import time
 # ~ from picamera import PiCamera
 from pathlib import Path
 import sys
+
+from RPi.Communication.android import AndroidMessage
+
 # ~ path_root = Path(__file__).parents[2]
 # ~ sys.path.append(str(path_root))
 sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
@@ -139,36 +142,12 @@ class PCFlask(Link):
 					
 					print("Final Instruction ", inst)
 					if isinstance(inst, MiscInstruction) and str(inst.value) == "CAPTURE_IMAGE":
-						print("LATEST IMAGE: ", self.latest_image)
-						# ~ if self.latest_image == "marker":
-							
-							
-							
-							
-							# ~ self.haveMarker()
-							
-							
-						# TODO: Take in the image recognised and send it to the android
-						# Since got image recognised, then no need to traverse the next segment already, so break
-						# ~ if self.latest_image == "marker":
-							# ~ # TODO: Have marker, need to go to the next side
-							# ~ # Need to get the id of the one with the marker
-							
-							
-							# ~ index = self.directions.index(self.last_direction)
-							# ~ new_direction = (index+ 1) % len(self.directions)
-							
-							# ~ # CONTINUE 23/2/2024: CREATE OBJECTS TO POPULATE haveMarker()
-							# ~ self.haveMarker()
-						# ~ elif self.latest_image == "NONE":
-							# ~ pass
-						# ~ else:
-							# ~ # Normal image detected, send the image_id to android and calculate new path to take based on latest x, y and direction
-							# ~ self.android.send()
-							
-						
-						
-						break
+						while self.latest_image is None:
+							pass
+
+						if self.latest_image != 'marker':
+							self.android.send(AndroidMessage('TARGET', self.latest_image))
+
 					elif isinstance(inst, TurnInstruction):
 						# TODO: Send instruction to the STM to turn
 						inst_send = inst.value
