@@ -7,7 +7,7 @@ from ultralytics import YOLO
 import pyshine as ps # pip install pyshine==0.0.9
 import json
 
-class PCMain:
+class PCMainIntegrated:
     def __init__(self):
         # self.manager = Manager()
         self.process_PC_receive = None
@@ -20,9 +20,9 @@ class PCMain:
         self.host = '192.168.14.14'
         self.port = 5000
         self.client_socket = None
-        self.model = YOLO('v6.pt')
+        self.model = YOLO('v9_task1.pt')
     
-    def main(self):
+    def start(self):
         # self.process_PC_receive = Process(target=self.pc_receive)
         # self.process_PC_stream = Process(target=self.stream_start)
         
@@ -57,23 +57,51 @@ class PCMain:
     def stream_start(self):
         cap = cv2.VideoCapture()
         cap.open("http://192.168.14.14:5005/stream.mjpg")
+        prev_image = None
         while True:
             success, frame = cap.read()
             if success:
                 # Perform inference
                 # results = model(frame)
-                results = self.model.predict(frame, save=False, imgsz=640, conf=0.7)
+                results = self.model.predict(frame, save=False, imgsz=640, conf=0.1)
                 names = results[0].names
                 
                 if len(results[0].boxes.conf) > 0:
                     print("CONFIDENCE LEVEL: ", results[0].boxes[0].conf.item())
                     print("CLASS: ", names[int(results[0].boxes[0].cls[0].item())])
                     
-                    # TODO: Pass this data to RPI through the PC socket - Flask API
-                    message_content = str(results[0].boxes[0].conf.item()) + names[int(results[0].boxes[0].cls[0].item())]
-                    # self.client_socket.send(message_content.encode('utf-8'))
-                    self.client_socket.send(message_content.encode('utf-8'))
-                
+                    if results[0].boxes[0].conf.item() > 0.7:
+                        if prev_image is None:
+                            # New image, can send over
+                            # Only if the confidence is > 0.7 then pass to the PC
+                            # TODO: Pass this data to RPI through the PC socket - Flask API
+                            message_content = str(results[0].boxes[0].conf.item()) + "," + names[int(results[0].boxes[0].cls[0].item())]
+                            # self.client_socket.send(message_content.encode('utf-8'))
+                            self.client_socket.send(message_content.encode('utf-8'))
+                            prev_image = names[int(results[0].boxes[0].cls[0].item())]
+                            print("FIRST: ", prev_image)
+                        else:
+                            # There is a previous image, compare the new image with the previous one
+                            if names[int(results[0].boxes[0].cls[0].item())] == prev_image:
+                                # Do nothing
+                                pass
+                            else:
+                                # New image, can send over
+                                message_content = str(results[0].boxes[0].conf.item()) + "," + names[int(results[0].boxes[0].cls[0].item())]
+                                # self.client_socket.send(message_content.encode('utf-8'))
+                                self.client_socket.send(message_content.encode('utf-8'))
+                                prev_image = names[int(results[0].boxes[0].cls[0].item())]
+                                print("SECOND: ", prev_image)
+                else:
+                    if prev_image == "NONE":
+                        # Dont sent over, it's already NONE
+                        pass
+                    else:
+                        # No obejct detected, send "NONE" over
+                        # Upon capture image, if no object is detected -- "NONE", continue to wait until a object is detected (not "NONE")
+                        message_content = "NONE"
+                        self.client_socket.send(message_content.encode('utf-8'))
+                        prev_image = "NONE"
                 
                 # print(boxes)
                 annotated_frame = results[0].plot()
@@ -121,8 +149,8 @@ class PCMain:
                     break
         
 if __name__ == '__main__':
-    pcMain = PCMain()
-    pcMain.main()
+    pcMain = PCMainIntegrated()
+    pcMain.start()
     
         
 
