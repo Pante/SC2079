@@ -242,7 +242,7 @@ export default function Simulator() {
     setIsGettingPath(true);
     const apiClient = new ApiClient("http://localhost:5000");
     const pathfindingRequestRobot = new PathfindingRequestRobot(
-      "NORTH",
+      robotState.direction,
       {
         x: 6,
         y: 6,
