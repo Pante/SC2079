@@ -36,6 +36,7 @@ class PathfindingApi:
             api_client = ApiClient.get_default()
         self.api_client = api_client
 
+
     @validate_call
     def pathfinding_post(
         self,

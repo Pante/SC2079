@@ -17,22 +17,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, Field, StrictBool
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
-from openapi_client.models.pathfinding_request_obstacle import PathfindingRequestObstacle
-from openapi_client.models.pathfinding_request_robot import PathfindingRequestRobot
+from pydantic import BaseModel, StrictFloat, StrictInt
+from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-class PathfindingRequest(BaseModel):
+class ImagePredictionResponseImage(BaseModel):
     """
-    PathfindingRequest
+    ImagePredictionResponseImage
     """ # noqa: E501
-    obstacles: Annotated[List[PathfindingRequestObstacle], Field(min_length=1)]
-    robot: PathfindingRequestRobot = Field(description="The initial position of the robot.")
-    verbose: Optional[StrictBool] = Field(default=True, description="Whether to attach the path and cost alongside the movement instructions in the response.")
-    __properties: ClassVar[List[str]] = ["obstacles", "robot", "verbose"]
+    confidence: Union[StrictFloat, StrictInt]
+    image_id: StrictInt
+    __properties: ClassVar[List[str]] = ["confidence", "image_id"]
 
     model_config = {
         "populate_by_name": True,
@@ -52,7 +48,7 @@ class PathfindingRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of PathfindingRequest from a JSON string"""
+        """Create an instance of ImagePredictionResponseImage from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,21 +69,11 @@ class PathfindingRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in obstacles (list)
-        _items = []
-        if self.obstacles:
-            for _item in self.obstacles:
-                if _item:
-                    _items.append(_item.to_dict())
-            _dict['obstacles'] = _items
-        # override the default output from pydantic by calling `to_dict()` of robot
-        if self.robot:
-            _dict['robot'] = self.robot.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of PathfindingRequest from a dict"""
+        """Create an instance of ImagePredictionResponseImage from a dict"""
         if obj is None:
             return None
 
@@ -95,9 +81,8 @@ class PathfindingRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "obstacles": [PathfindingRequestObstacle.from_dict(_item) for _item in obj["obstacles"]] if obj.get("obstacles") is not None else None,
-            "robot": PathfindingRequestRobot.from_dict(obj["robot"]) if obj.get("robot") is not None else None,
-            "verbose": obj.get("verbose") if obj.get("verbose") is not None else True
+            "confidence": obj.get("confidence"),
+            "image_id": obj.get("image_id")
         })
         return _obj
 
