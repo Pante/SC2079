@@ -151,7 +151,8 @@ class TaskA5:
 	def stream_start(self):
 		StreamProps = ps.StreamProps
 		StreamProps.set_Page(StreamProps,self.HTML)
-		address = ('192.168.14.14',5005) # Enter your IP address 
+		address = ('192.168.14.14',5005) # IP Address of RPi
+		# NOTE: Port 5000 is for PC socket, 5005 is for live stream
 		StreamProps.set_Mode(StreamProps,'picamera')    
 		with picamera.PiCamera(resolution='640x480', framerate=30) as camera:
 			output = ps.StreamOut()
@@ -256,9 +257,9 @@ class TaskA5:
 					
 					# Send instructions to stm
 					if move_direction == "FORWARD":
-						self.stm.send("T70|0|" + str(amt_to_move) + "\n")
+						self.stm.send("T60|0|" + str(amt_to_move) + "\n")
 					elif move_direction == "BACKWARD":
-						self.stm.send("t70|0|" + str(amt_to_move) + "\n")
+						self.stm.send("t60|0|" + str(amt_to_move) + "\n")
 
 				else:
 					try:
@@ -268,7 +269,8 @@ class TaskA5:
 					
 					print("Final Instruction ", inst)
 					if isinstance(inst, MiscInstruction) and str(inst.value) == "CAPTURE_IMAGE":
-
+						# latest.image stores the last image recognised by the image rec algo 
+						# if the image rec algo doesn't detect anything, latest.image = "NONE", else, latest_image = image_id of the recognised image
 						print("LATEST IMAGE: ", self.latest_image)
 						while self.latest_image is None:
 							pass
@@ -279,14 +281,14 @@ class TaskA5:
 					elif isinstance(inst, TurnInstruction):
 						# TODO: Send instruction to the STM to turn
 						if inst.value == "FORWARD_LEFT":
-							self.stm.send("T70|-25|90\n")
+							self.stm.send("T60|-25|90\n")
 						elif inst.value == "FORWARD_RIGHT":
-							self.stm.send("T70|25|90\n")
+							self.stm.send("T60|25|90\n")
 						elif inst.value == "BACKWARD_LEFT":
-							self.stm.send("t70|-25|90\n")
+							self.stm.send("t60|-25|90\n")
 						else:
 							# BACKWARD_RIGHT
-							self.stm.send("t70|25|90\n")
+							self.stm.send("t60|25|90\n")
 						
 						print("Sent turning instruction to stm: ", inst.value)
 					else:
