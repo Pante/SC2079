@@ -87,17 +87,17 @@ class AndroidToSTMTest:
 				# ~ self.stm.send("T50|0|30\n")
 				
 				if message_rcv == "f":
-					self.stm.send("T70|0|20\n")
+					self.stm.send("T60|0|20\n")
 				elif message_rcv == "b":
-					self.stm.send("t70|0|20\n")
+					self.stm.send("t60|0|20\n")
 				elif message_rcv == "fr":
-					self.stm.send("T70|25|90\n")
+					self.stm.send("T60|25|90\n")
 				elif message_rcv == "fl":
-					self.stm.send("T70|-25|90\n")
+					self.stm.send("T60|-25|90\n")
 				elif message_rcv == "bl":
-					self.stm.send("t70|-25|90\n")
+					self.stm.send("t60|-25|90\n")
 				elif message_rcv == "br":
-					self.stm.send("t70|25|90\n")
+					self.stm.send("t60|25|90\n")
 				
 				# ~ command_send = message_rcv + "\n"
 				

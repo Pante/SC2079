@@ -50,28 +50,9 @@ class PCFlask(Link):
 		
 		# Added in
 		# Last location of robot
-		self.last_robot_x = 0
-		self.last_robot_y = 0
-		self.last_robot_direction = None
+
 		self.latest_image = None
-		self.directions = ["NORTH", "EAST", "SOUTH", "WEST"]
-		self.current_direction_index = 0
 		self.normalPathfinding()
-		# ~ self.API_PATH = "127.0.0.1"
-		# ~ self.port = 5000
-		# ~ self.connected = False
-	
-	# Get the data from android side
-	
-	# Android receive side will call the populatePathFinding with it's details
-	
-	
-	# ~ def populatePathFinding(self, populateDetails):
-		
-		# ~ # TODO: Receive from android side then populate all of this - initialization
-		
-		
-		# ~ return obstacleArr, pathRobot
 		
 	
 	def normalPathfinding(self):
@@ -81,7 +62,6 @@ class PCFlask(Link):
 		north_east = PathfindingPoint(x=20, y=20)
 		south_west =  PathfindingPoint(x=21,y=21)
 		pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
-		# Replace with path_finding_obstacle_1 and path_finding_obstacle_2 when ready
 		obstacleArr.append(pathObstacle)
 		
 		image_id_2 = 1
@@ -104,6 +84,9 @@ class PCFlask(Link):
 		south_west =  PathfindingPoint(x=21,y=21)
 		pathObstacle =  PathfindingRequestObstacle(direction=direction_two, image_id = image_id_2, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
+		
+		
+		
 		
 		robot_direction = Direction("NORTH")
 		robot_north_east =  PathfindingPoint(x=1,y=1)
@@ -156,48 +139,16 @@ class PCFlask(Link):
 					
 					print("Final Instruction ", inst)
 					if isinstance(inst, MiscInstruction) and str(inst.value) == "CAPTURE_IMAGE":
-<<<<<<< HEAD
+
 						print("LATEST IMAGE: ", self.latest_image)
-						
-						if self.latest_image == "NONE":
-							# No image detected, so need to wait until it's detected
-						# ~ if self.latest_image == "marker":
-							
-							
-							
-							
-							# ~ self.haveMarker()
-							
-							
-						# TODO: Take in the image recognised and send it to the android
-						# Since got image recognised, then no need to traverse the next segment already, so break
-						# ~ if self.latest_image == "marker":
-							# ~ # TODO: Have marker, need to go to the next side
-							# ~ # Need to get the id of the one with the marker
-							
-							
-							# ~ index = self.directions.index(self.last_direction)
-							# ~ new_direction = (index+ 1) % len(self.directions)
-							
-							# ~ # CONTINUE 23/2/2024: CREATE OBJECTS TO POPULATE haveMarker()
-							# ~ self.haveMarker()
-						# ~ elif self.latest_image == "NONE":
-							# ~ pass
-						# ~ else:
-							# ~ # Normal image detected, send the image_id to android and calculate new path to take based on latest x, y and direction
-							# ~ self.android.send()
-							
-						
-						
-						break
-=======
 						while self.latest_image is None:
 							pass
+						
 
 						if self.latest_image != 'marker':
 							self.android.send(AndroidMessage('TARGET', self.latest_image))
 
->>>>>>> 95593618845d2263a92d3fa69e5e4059dc799a4b
+
 					elif isinstance(inst, TurnInstruction):
 						# TODO: Send instruction to the STM to turn
 						inst_send = inst.value
