@@ -11,7 +11,7 @@ from python_tsp.exact import solve_tsp_dynamic_programming
 from pathfinding.search.instructions import Turn, TurnInstruction, Move, MoveInstruction, MiscInstruction
 from pathfinding.search.segment import segment
 from pathfinding.world.objective import Objective
-from pathfinding.world.primitives import Vector, Point
+from pathfinding.world.primitives import Vector
 from pathfinding.world.world import Robot, World, GRID_CELL_SIZE
 
 
@@ -26,16 +26,14 @@ def __hamiltonian_path(entities: List[Robot | Objective]) -> tuple[List[int], fl
     Returns the hamiltonian path of the initial robot and the objectives.
     This is used as a heuristic to determine the optimal visitation order of the objectives.
 
-    :param robot: The robot (initial point).
-    :param entities: The objectives to visit.
+    :param entities: The robot and objectives to visit.
     :return:
         The indexes of the robot (0) and objectives (1:N) in the order of visitation.
         The total distance the optimal permutation produces.
     """
-    # TODO: Clarify whether we need to return back to starting position.
-    #       Can be switched to use open TSP algorithm otherwise.
     positions = [[entity.south_west.x, entity.south_west.y] for entity in entities]
     distance_matrix = euclidean_distance_matrix(np.array(positions))
+    distance_matrix[:, 0] = 0
     permutation, distance = solve_tsp_dynamic_programming(distance_matrix)
     return permutation, distance
 
@@ -68,8 +66,7 @@ class Segment:
                     instructions.append(movement.turn)
                     vectors.extend(movement.vectors)
 
-                case Move() if instructions and instructions[-1] is MoveInstruction and instructions[
-                    -1].move == movement:
+                case Move() if instructions and isinstance(instructions[-1], MoveInstruction) and instructions[-1].move == movement:
                     vectors.append(vector)
                     instructions[-1].amount += GRID_CELL_SIZE
 
@@ -77,7 +74,6 @@ class Segment:
                     vectors.append(vector)
                     instructions.append(MoveInstruction(movement, GRID_CELL_SIZE))
 
-        # TODO: This might need to be tweaked if we need to move back to starting point
         instructions.append(MiscInstruction.CAPTURE_IMAGE)
 
         return cls(image_id, cost, instructions, vectors)

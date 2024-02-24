@@ -9,7 +9,7 @@ import numpy as np
 from pathfinding.world.primitives import Direction, Point, Vector
 
 # The dimensions of the square grid (in number of cells).
-GRID_SIZE = 20
+GRID_SIZE = 40
 # The length & width of each square grid cell (in cm).
 GRID_CELL_SIZE = 5
 
@@ -80,7 +80,7 @@ class Entity(ABC):
     def __post_init__(self):
         assert 0 <= self.south_west.x <= self.north_east.x
         assert 0 <= self.south_west.y <= self.north_east.y
-        assert self.north_east.y - self.south_west.y == self.north_east.x - self.south_east.x
+        assert (self.north_east.y - self.south_west.y) == (self.north_east.x - self.south_west.x)
 
     @property
     def vector(self) -> Vector:
@@ -88,11 +88,11 @@ class Entity(ABC):
 
     @property
     def north_west(self) -> Point:
-        return Point(self.north_east.x, self.south_west.y)
+        return Point(self.south_west.x, self.north_east.y)
 
     @property
     def south_east(self) -> Point:
-        return Point(self.south_west.x, self.north_east.y)
+        return Point(self.north_east.x, self.south_west.y)
 
     @property
     def clearance(self):
@@ -131,3 +131,4 @@ class Obstacle(Entity):
 
     def __post_init__(self):
         assert 1 <= self.image_id < 36
+        super().__post_init__()
