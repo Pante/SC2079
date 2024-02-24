@@ -1,27 +1,6 @@
 
 #include "ICM20948.h"
 
-#define X 0
-#define Y 1
-#define Z 2
-
-#define X_HIGH_BYTE 0
-#define X_LOW_BYTE 1
-#define Y_HIGH_BYTE 2
-#define Y_LOW_BYTE 3
-#define Z_HIGH_BYTE 4
-#define Z_LOW_BYTE 5
-
-#define T_HIGH_BYTE 0
-#define T_LOW_BYTE 1
-
-#define ONE_BYTE 8
-
-#define ICM20948_RESET 0x80
-#define ICM20948_DISABLE_SENSORS 0x00
-#define ICM20948_ENABLE_SENSORS 0x3F
-#define ICM20948_AUTO_SELECT_CLOCK 0x01
-
 HAL_StatusTypeDef _ICM20948_SelectUserBank(I2C_HandleTypeDef * hi2c, uint8_t const selectI2cAddress, int userBankNum) {
 	HAL_StatusTypeDef status = HAL_OK;
 	uint8_t writeData = userBankNum << BIT_4;
@@ -192,7 +171,7 @@ void ICM20948_init(I2C_HandleTypeDef * hi2c, uint8_t const selectI2cAddress, uin
 			hi2c,
 			selectI2cAddress,
 			ICM20948__USER_BANK_2__GYRO_CONFIG_1__REGISTER,
-			4 << GYRO_DLPFCFG_BIT|selectGyroSensitivity << GYRO_FS_SEL_BIT|EN_GRYO_DLPF << GYRO_FCHOICE_BIT);
+			0 << GYRO_DLPFCFG_BIT|selectGyroSensitivity << GYRO_FS_SEL_BIT|EN_GRYO_DLPF << GYRO_FCHOICE_BIT);
 	status = _ICM20948_WriteByte(
 			hi2c,
 			selectI2cAddress,
@@ -204,7 +183,7 @@ void ICM20948_init(I2C_HandleTypeDef * hi2c, uint8_t const selectI2cAddress, uin
 			hi2c,
 			selectI2cAddress,
 			ICM20948__USER_BANK_2__ACCEL_CONFIG__REGISTER,
-			4 << ACCEL_DLPFCFG_BIT|selectAccelSensitivity << ACCEL_FS_SEL_BIT|0x01 << ACCEL_FCHOICE_BIT);
+			1 << ACCEL_DLPFCFG_BIT|selectAccelSensitivity << ACCEL_FS_SEL_BIT|0x01 << ACCEL_FCHOICE_BIT);
 	status = _ICM20948_WriteByte(
 			hi2c,
 			selectI2cAddress,
@@ -226,33 +205,14 @@ void ICM20948_init(I2C_HandleTypeDef * hi2c, uint8_t const selectI2cAddress, uin
 			0x08);
 }
 
-
-// moving average trackers.
-int16_t gyroZ_a[5];
-int16_t accel_a[3][5];
-int16_t mag_a[2][5];
-
-float movingAvg(int16_t src, int16_t dst[5]) {
-	int32_t total = 0;
-
-	for (int i = 0; i < 4; i++) {
-		total += dst[i+1];
-		dst[i] = dst[i+1];
-	}
-
-	total += dst[4];
-	dst[4] = src;
-
-	return ((float) total) / 5;
-}
-
 void ICM20948_readGyroscope_Z(I2C_HandleTypeDef * hi2c, uint8_t const selectI2cAddress, uint8_t const selectGyroSensitivity, float *gyroZ) {
 	uint8_t readData[2];
 
 //	_ICM20948_SelectUserBank(hi2c, selectI2cAddress, USER_BANK_0);
 	_ICM20948_BrustRead(hi2c, selectI2cAddress, ICM20948__USER_BANK_0__GYRO_ZOUT_H__REGISTER, 2, readData);
 
-	*gyroZ = movingAvg(readData[0]<<8 | readData[1], gyroZ_a);
+	int16_t reading = readData[0]<<8 | readData[1];
+	*gyroZ = (float) -reading;
 	switch (selectGyroSensitivity) {
 		case GYRO_FULL_SCALE_250DPS:
 			*gyroZ /= GRYO_SENSITIVITY_SCALE_FACTOR_250DPS;
@@ -277,11 +237,15 @@ void ICM20948_readAccelerometer_all(I2C_HandleTypeDef * hi2c, uint8_t const sele
 	_ICM20948_BrustRead(hi2c, selectI2cAddress, ICM20948__USER_BANK_0__ACCEL_XOUT_H__REGISTER, 6, readData);
 
 
-	float rD[3];
-	rD[X] = movingAvg(readData[X_HIGH_BYTE]<<8|readData[X_LOW_BYTE], accel_a[X]);
-	rD[Y] = movingAvg(readData[Y_HIGH_BYTE]<<8|readData[Y_LOW_BYTE], accel_a[Y]);
-	rD[Z] = movingAvg(readData[Z_HIGH_BYTE]<<8|readData[Z_LOW_BYTE], accel_a[Z]);
+	int16_t rD_int[3];
+	rD_int[X] = readData[X_HIGH_BYTE]<<8|readData[X_LOW_BYTE];
+	rD_int[Y] = readData[Y_HIGH_BYTE]<<8|readData[Y_LOW_BYTE];
+	rD_int[Z] = readData[Z_HIGH_BYTE]<<8|readData[Z_LOW_BYTE];
 
+	float rD[3];
+	rD[X] = (float) rD_int[X];
+	rD[Y] = (float) rD_int[Y];
+	rD[Z] = (float) rD_int[Z];
 
 	switch (selectAccelSensitivity) {
 		case ACCEL_FULL_SCALE_2G:
@@ -314,7 +278,10 @@ void ICM20948_readMagnetometer_XY(I2C_HandleTypeDef * hi2c, float magXY[2]) {
 	//read status register to mark end of data read.
 	uint8_t st2;
 	_AK09916_ReadByte(hi2c, AK09916__ST2__REGISTER, &st2);
-
-	for (int i = 0; i < 2; i++) magXY[i] = movingAvg(readData[1+2*i]<<8|readData[2*i], mag_a[i]) * MAG_SENSITIVITY_SCALE_FACTOR;
+	int16_t reading;
+	for (uint8_t i = 0; i < 2; i++) {
+		reading = readData[1+2*i]<<8|readData[2*i];
+		magXY[i] = reading * MAG_SENSITIVITY_SCALE_FACTOR;
+	}
 }
 

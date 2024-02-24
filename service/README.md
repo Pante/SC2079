@@ -13,6 +13,11 @@ Else, change to service directory:
 cd service
 ```
 
+To install pipenv:
+```shell
+pip install pipenv
+```
+
 To install dependencies:
 ```shell
 pipenv install
@@ -21,6 +26,11 @@ pipenv install
 To run the server:
 ```shell
 python -m flask run
+```
+
+To change the IP address and port:
+```shell
+python -m flask run --host=<ip address> --port=<port>
 ```
 
 The Swagger documentation can be found at `http://localhost:5000/openapi/swagger`. Alternatively, the OpenAPI definitions 

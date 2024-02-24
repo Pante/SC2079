@@ -70,7 +70,7 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
             north_west = obstacle.north_west
             return Objective.from_obstacle(
                 Direction.SOUTH,
-                Point(north_west.x - alignment, north_west.y + gap),
+                Point(max(north_west.x - alignment, 0), max(north_west.y + gap, 0)),
                 clearance,
                 clearance,
                 obstacle.image_id
@@ -79,7 +79,7 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
         case Direction.EAST:
             return Objective.from_obstacle(
                 Direction.WEST,
-                Point(obstacle.north_east.x + gap, obstacle.north_east.x - clearance + alignment),
+                Point(max(obstacle.north_east.x + gap, 0), max(obstacle.north_east.x - clearance + alignment, 0)),
                 clearance,
                 clearance,
                 obstacle.image_id
@@ -89,7 +89,7 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
             south_east = obstacle.south_east
             return Objective.from_obstacle(
                 Direction.NORTH,
-                Point(obstacle.north_east.x - clearance + alignment, south_east.y - gap - clearance),
+                Point(max(obstacle.north_east.x - clearance + alignment, 0), max(south_east.y - gap - clearance, 0)),
                 clearance,
                 clearance,
                 obstacle.image_id
@@ -98,7 +98,7 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
         case Direction.WEST:
             return Objective.from_obstacle(
                 Direction.EAST,
-                Point(obstacle.south_west.x - gap - clearance, obstacle.south_west.y - alignment),
+                Point(max(obstacle.south_west.x - gap - clearance, 0), max(obstacle.south_west.y - alignment, 0)),
                 clearance,
                 clearance,
                 obstacle.image_id
@@ -127,3 +127,6 @@ class Objective(Entity):
 
     def __post_init__(self):
         assert 1 <= self.image_id < 36
+        print(self.north_east)
+        print(self.south_west)
+        super().__post_init__()

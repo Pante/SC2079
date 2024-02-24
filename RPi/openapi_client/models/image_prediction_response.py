@@ -17,8 +17,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, StrictInt
+from pydantic import BaseModel
 from typing import Any, ClassVar, Dict, List
+from openapi_client.models.image_prediction_response_image import ImagePredictionResponseImage
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,9 +27,8 @@ class ImagePredictionResponse(BaseModel):
     """
     ImagePredictionResponse
     """ # noqa: E501
-    image_id: StrictInt
-    obstacle_id: StrictInt
-    __properties: ClassVar[List[str]] = ["image_id", "obstacle_id"]
+    images: List[ImagePredictionResponseImage]
+    __properties: ClassVar[List[str]] = ["images"]
 
     model_config = {
         "populate_by_name": True,
@@ -69,6 +69,13 @@ class ImagePredictionResponse(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in images (list)
+        _items = []
+        if self.images:
+            for _item in self.images:
+                if _item:
+                    _items.append(_item.to_dict())
+            _dict['images'] = _items
         return _dict
 
     @classmethod
@@ -81,8 +88,7 @@ class ImagePredictionResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "image_id": obj.get("image_id"),
-            "obstacle_id": obj.get("obstacle_id")
+            "images": [ImagePredictionResponseImage.from_dict(_item) for _item in obj["images"]] if obj.get("images") is not None else None
         })
         return _obj
 

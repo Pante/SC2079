@@ -37,6 +37,7 @@ from openapi_client.models.direction import Direction
 from openapi_client.models.error_context import ErrorContext
 from openapi_client.models.error_type import ErrorType
 from openapi_client.models.image_prediction_response import ImagePredictionResponse
+from openapi_client.models.image_prediction_response_image import ImagePredictionResponseImage
 from openapi_client.models.location import Location
 from openapi_client.models.message import Message
 from openapi_client.models.misc_instruction import MiscInstruction

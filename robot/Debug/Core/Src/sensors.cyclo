@@ -1,0 +1,11 @@
+../Core/Src/sensors.c:12:14:lpf	1
+../Core/Src/sensors.c:21:14:read_mag_angle	2
+../Core/Src/sensors.c:33:6:sensors_init	1
+../Core/Src/sensors.c:52:6:sensors_us_trig	1
+../Core/Src/sensors.c:62:6:sensors_read_usDist	1
+../Core/Src/sensors.c:66:6:sensors_read_irDist	1
+../Core/Src/sensors.c:75:6:sensors_read_gyroZ	1
+../Core/Src/sensors.c:82:6:sensors_read_accel	2
+../Core/Src/sensors.c:90:6:sensors_read_heading	1
+../Core/Src/sensors.c:97:6:sensors_set_bias	4
+../Core/Src/sensors.c:124:6:sensors_dist_warmup	2
