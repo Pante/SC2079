@@ -16,7 +16,7 @@ gradle-app.setting
 .gradletasknamecache
 
 # Ignore the WAV file
-# /music/song.wav
+/music/song.wav
 
 # Eclipse Gradle plugin generated files
 # Eclipse Core
