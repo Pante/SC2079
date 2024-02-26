@@ -23,7 +23,7 @@ public class PathTranslator {
     private String dir;
 
     public PathTranslator() {
-        this.gridMap = MainActivity.getGridMap();
+        this.gridMap = Home.getGridMap();
     }
 
     public PathTranslator(GridMap gridMap) {
@@ -43,7 +43,7 @@ public class PathTranslator {
         int moves = 0;
         switch(commandType) {
             case 'f':   // forward
-                MainActivity.refreshMessageReceivedNS("==========================\nForward " + commandValue);
+                Home.refreshMessageReceivedNS("==========================\nForward " + commandValue);
                 moves = commandValue / CELL_LENGTH;
                 switch(dir) {
                     case "up":
@@ -62,7 +62,7 @@ public class PathTranslator {
 //                gridMap.setCurCoord(curX, curY, dir);
                 break;
             case 'b':   // backward
-                MainActivity.refreshMessageReceivedNS("==========================\nBackward " + commandValue);
+                Home.refreshMessageReceivedNS("==========================\nBackward " + commandValue);
                 moves = commandValue / CELL_LENGTH;
                 switch(dir) {
                     case "up":
@@ -81,7 +81,7 @@ public class PathTranslator {
 //                gridMap.setCurCoord(curX, curY, dir);
                 break;
             case 'd':   // 90 deg right
-                MainActivity.refreshMessageReceivedNS("==========================\nRight turn");
+                Home.refreshMessageReceivedNS("==========================\nRight turn");
                 moves = RIGHT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 switch(dir) {
                     case "up":
@@ -108,7 +108,7 @@ public class PathTranslator {
 //                gridMap.setCurCoord(curX, curY, dir);
                 break;
             case 'a':   // 90 deg left
-                MainActivity.refreshMessageReceivedNS("==========================\nLeft turn");
+                Home.refreshMessageReceivedNS("==========================\nLeft turn");
                 moves = LEFT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 switch(dir) {
                     case "up":
@@ -135,7 +135,7 @@ public class PathTranslator {
 //                gridMap.setCurCoord(curX, curY, dir);
                 break;
             case 'q':   // 90 deg back-left
-                MainActivity.refreshMessageReceivedNS("==========================\nBack-left turn");
+                Home.refreshMessageReceivedNS("==========================\nBack-left turn");
                 moves = BLEFT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 switch(dir) {
                     case "up":
@@ -162,7 +162,7 @@ public class PathTranslator {
 //                gridMap.setCurCoord(curX, curY, dir);
                 break;
             case 'e':   // 90 deg back-right
-                MainActivity.refreshMessageReceivedNS("==========================\nBack-right turn");
+                Home.refreshMessageReceivedNS("==========================\nBack-right turn");
                 moves = BRIGHT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 switch(dir) {
                     case "up":
@@ -214,7 +214,7 @@ public class PathTranslator {
         int moves = 0;
         switch(commandType) {
             case 'f':   // forward
-                MainActivity.refreshMessageReceivedNS("==========================\nForward " + commandValue);
+                Home.refreshMessageReceivedNS("==========================\nForward " + commandValue);
                 moves = commandValue / CELL_LENGTH;  // each cell is (assumed) to be 10 (cm?) long
                 for(int i = 0; i < moves; i++) {
                     gridMap.moveRobot("forward");
@@ -227,7 +227,7 @@ public class PathTranslator {
                 }
                 break;
             case 'b':   // backwards
-                MainActivity.refreshMessageReceivedNS("==========================\nBackward " + commandValue);
+                Home.refreshMessageReceivedNS("==========================\nBackward " + commandValue);
                 moves = commandValue / CELL_LENGTH;  // each cell is (assumed) to be 10 (cm?) long
                 for(int i = 0; i < moves; i++) {
                     gridMap.moveRobot("back");
@@ -240,7 +240,7 @@ public class PathTranslator {
                 }
                 break;
             case 'd':   // 90 deg right
-                MainActivity.refreshMessageReceivedNS("==========================\nRight turn");
+                Home.refreshMessageReceivedNS("==========================\nRight turn");
                 moves = RIGHT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 // forward movement
                 for(int i = 0; i < moves - 1; i++) {
@@ -272,7 +272,7 @@ public class PathTranslator {
                 }
                 break;
             case 'a':   // 90 deg left
-                MainActivity.refreshMessageReceivedNS("==========================\nLeft turn");
+                Home.refreshMessageReceivedNS("==========================\nLeft turn");
                 moves = LEFT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 // forward movement
                 for(int i = 0; i < moves - 1; i++) {
@@ -304,7 +304,7 @@ public class PathTranslator {
                 }
                 break;
             case 'q':   // 90 deg back-left
-                MainActivity.refreshMessageReceivedNS("==========================\nBack-left turn");
+                Home.refreshMessageReceivedNS("==========================\nBack-left turn");
                 moves = BLEFT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 // backward movement
                 for(int i = 0; i < moves - 1; i++) {
@@ -336,7 +336,7 @@ public class PathTranslator {
                 }
                 break;
             case 'e':   // 90 deg back-right
-                MainActivity.refreshMessageReceivedNS("==========================\nBack-right turn");
+                Home.refreshMessageReceivedNS("==========================\nBack-right turn");
                 moves = BRIGHT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 // backward movement
                 for(int i = 0; i < moves - 1; i++) {

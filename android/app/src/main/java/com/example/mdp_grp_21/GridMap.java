@@ -15,6 +15,7 @@ import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.DragEvent;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -464,6 +465,8 @@ public class GridMap extends View{
 
     // receives col and row values that are just +1 of the visual col and row value (x & y)
     public void setStartCoord(int col, int row) {
+        String dir;
+        int x,y;
         showLog("Entering setStartCoord");
         startCoord[0] = col;
         startCoord[1] = row;
@@ -473,6 +476,14 @@ public class GridMap extends View{
         }
         if (this.getStartCoordStatus())
             this.setCurCoord(col, row, direction);
+
+        dir= (direction.equals("up"))?"NORTH":(direction.equals("down"))?"SOUTH":(direction.equals("left"))?"WEST":"EAST";
+
+        Home.printMessage("ROBOT " + (col - 2)*2 + (row - 1)*2 + dir);
+        // "robot", <x value> , <y value> , <bearing>
+
+        updateStatus(col-2 + "," + (row - 1)+ ", Bearing: " + dir); // south west
+        updateStatus(col + "," + (row + 1)+ ", Bearing: " + dir); // north east
         showLog("Exiting setStartCoord");
     }
 
@@ -570,6 +581,7 @@ public class GridMap extends View{
         xAxisTextView.setText(String.valueOf(col-1));
         yAxisTextView.setText(String.valueOf(row-1));
         directionAxisTextView.setText(direction);
+        //updateStatus((col-1)+","+(row-1)+","+direction);
     }
 
     public void setObstacleCoord(int col, int row) {
@@ -583,7 +595,12 @@ public class GridMap extends View{
         int obstacleNumber = GridMap.obstacleCoord.size();
 
         // DEBUG msg (can remove) //
-        MainActivity.printMessage("COORD of Obstacle ID " + obstacleNumber + ":" + (col - 1) + "," + (19 - row) + ", Bearing: " + imageBearings.get(19 - row)[col - 1]);
+        Home.printMessage("OBSTACLE" + obstacleNumber + ":" + (col - 1)*2 + "," + (19 - row)*2 + ", Bearing: " + imageBearings.get(19 - row)[col - 1]);
+
+
+        updateStatus(obstacleNumber + "," + (col - 1)+ "," + (19 - row)+", Bearing: " + imageBearings.get(19 - row)[col - 1]); // north east
+//        Home.printMessage({"key":"hello","value":"hello"});
+
     }
 
     private ArrayList<int[]> getObstacleCoord() {
@@ -842,7 +859,7 @@ public class GridMap extends View{
                             showLog("tCol - 1 = " + (tCol - 1));
                             showLog("newID = " + newID);
                             showLog("newBearing = " + newBearing);
-                            MainActivity.printMessage("COORD of Image ID " + newID + ":" + (tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
+                            Home.printMessage("COORD of Image ID " + newID + ":" + (tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
                             String oldObstacleId = UUID.randomUUID().toString();
                             if (val2IdxMap.containsKey(oldItem)) {
                                 oldObstacleId = val2IdxMap.get(oldItem);
@@ -1579,4 +1596,10 @@ public class GridMap extends View{
         this.invalidate();
         return true;
     }
+    private void updateStatus(String message) {
+        Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP,0, 0);
+        toast.show();
+    }
+
 }

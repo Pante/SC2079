@@ -33,6 +33,10 @@ import android.widget.Toast;
 
 import com.google.android.material.tabs.TabLayout;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -85,7 +89,7 @@ public class Home extends Fragment {
                 FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         sectionsPagerAdapter.addFragment(new BluetoothCommunications(),"CHAT");
         sectionsPagerAdapter.addFragment(new MappingFragment(),"MAP CONFIG");
-//        sectionsPagerAdapter.addFragment(new ControlFragment(),"CHALLENGE");
+        sectionsPagerAdapter.addFragment(new ControlFragment(),"CHALLENGE");
 
         ViewPager viewPager = root.findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
@@ -225,15 +229,44 @@ public class Home extends Fragment {
         showLog("Exiting printMessage");
     }
 
+    // Send message to bluetooth (not shown on chat box)
+    public static void printMessage(JSONArray message) {
+        showLog("Entering printMessage");
+        editor = sharedPreferences.edit();
+
+ }
+
+
+//        if (BluetoothConnectionService.BluetoothConnectionStatus) {
+////            JSONObject jsonObj = message.getJSONObject("data");
+//        JSONObject js=new JSONObject();
+//        try {
+//            JSONArray ja=new JSONArray();
+//            js.put("key", "floor");
+//            ja.put(js);
+//            BluetoothConnectionService.write(ja);
+//
+//        }
+//        catch (JSONException e) {
+//            showLog("lol!");
+//
+//
+//            //BluetoothConnectionService.write({"key":"test","value":"hello"});
+//        }
+//        //showLog(message);
+//        showLog("Exiting printMessage");
+//    }
+
     // Purely to display a message on the chat box - NOT SENT via BT
     public static void refreshMessageReceivedNS(String message){
         BluetoothCommunications.getMessageReceivedTextView().append(message+ "\n");
     }
 
-    public void refreshDirection(String direction) {
+    public static void refreshDirection(String direction) {
         gridMap.setRobotDirection(direction);
         directionAxisTextView.setText(sharedPreferences.getString("direction",""));
         printMessage("Direction is set to " + direction);
+
     }
 
     public static void refreshLabel() {
@@ -288,6 +321,11 @@ public class Home extends Fragment {
             PathTranslator pathTranslator = new PathTranslator(gridMap);    // For real-time updating on displayed gridmap
             String message = intent.getStringExtra("receivedMessage");
             showLog("receivedMessage: message --- " + message);
+            String[] cmdd = message.split(",");
+            showLog("cmd1 --- " + cmdd[1]);
+            showLog("cmd2 --- " + cmdd[2]);
+
+
             int[] global_store = gridMap.getCurCoord();
             g_coordX = global_store[0];
             g_coordY = global_store[1];
@@ -324,10 +362,18 @@ public class Home extends Fragment {
             }
             //image format from RPI is "TARGET~<obID>~<ImValue>" eg TARGET~3~7
             else if(message.contains("TARGET")) {
-                String[] cmd = message.split("~");
-                BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no. :" + cmd[1] + "Prediction: +" + cmd[2] + "\n");
-                gridMap.updateIDFromRpi(cmd[1], cmd[2]);
-                obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 1);
+                try {
+                    String[] cmd = message.split(",");
+                    BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no. :" + cmd[1]+ "Prediction: +" + cmd[2] + "\n");
+
+
+                    gridMap.updateIDFromRpi(cmd[1], cmd[2]);
+                    obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 1);
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
             // Expects a syntax of e.g. Algo|f010
             if(message.contains("Algo")) {

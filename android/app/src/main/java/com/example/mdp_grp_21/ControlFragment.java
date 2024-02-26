@@ -1,6 +1,6 @@
 package com.example.mdp_grp_21;
 
-import static com.example.mdp_grp_21.MainActivity.refreshMessageReceivedNS;
+import static com.example.mdp_grp_21.Home.refreshMessageReceivedNS;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -45,7 +45,7 @@ public class ControlFragment extends Fragment {
             int minutesExplore = secondsExplore / 60;
             secondsExplore = secondsExplore % 60;
 
-            if (!MainActivity.stopTimerFlag) {
+            if (!Home.stopTimerFlag) {
                 exploreTimeTextView.setText(String.format("%02d:%02d", minutesExplore,
                         secondsExplore));
                 timerHandler.postDelayed(this, 500);
@@ -61,7 +61,7 @@ public class ControlFragment extends Fragment {
             int minutesFastest = secondsFastest / 60;
             secondsFastest = secondsFastest % 60;
 
-            if (!MainActivity.stopWk9TimerFlag) {
+            if (!Home.stopWk9TimerFlag) {
                 fastestTimeTextView.setText(String.format("%02d:%02d", minutesFastest,
                         secondsFastest));
                 timerHandler.postDelayed(this, 500);
@@ -86,23 +86,23 @@ public class ControlFragment extends Fragment {
                 Context.MODE_PRIVATE);
 
         // variable initialization
-        moveForwardImageBtn = MainActivity.getUpBtn();
-        turnRightImageBtn = MainActivity.getRightBtn();
-        moveBackImageBtn = MainActivity.getDownBtn();
-        turnLeftImageBtn = MainActivity.getLeftBtn();
-        turnbleftImageBtn = MainActivity.getbLeftBtn();
-        turnbrightImageBtn = MainActivity.getbRightBtn();
+        moveForwardImageBtn = Home.getUpBtn();
+        turnRightImageBtn = Home.getRightBtn();
+        moveBackImageBtn = Home.getDownBtn();
+        turnLeftImageBtn = Home.getLeftBtn();
+        turnbleftImageBtn = Home.getbLeftBtn();
+        turnbrightImageBtn = Home.getbRightBtn();
         exploreTimeTextView = root.findViewById(R.id.exploreTimeTextView2);
         fastestTimeTextView = root.findViewById(R.id.fastestTimeTextView2);
         exploreButton = root.findViewById(R.id.exploreToggleBtn2);
         fastestButton = root.findViewById(R.id.fastestToggleBtn2);
         exploreResetButton = root.findViewById(R.id.exploreResetImageBtn2);
         fastestResetButton = root.findViewById(R.id.fastestResetImageBtn2);
-        robotStatusTextView = MainActivity.getRobotStatusTextView();
+        robotStatusTextView = Home.getRobotStatusTextView();
         fastestTimer = 0;
         exploreTimer = 0;
 
-        gridMap = MainActivity.getGridMap();
+        gridMap = Home.getGridMap();
 
         // Button Listener
         moveForwardImageBtn.setOnClickListener(new View.OnClickListener() {
@@ -111,16 +111,16 @@ public class ControlFragment extends Fragment {
                 showLog("Clicked moveForwardImageBtn");
                 if (gridMap.getCanDrawRobot()) {
                     gridMap.moveRobot("forward");
-                    MainActivity.refreshLabel();    // update x and y coordinate displayed
+                    Home.refreshLabel();    // update x and y coordinate displayed
                     // display different statuses depending on validity of robot action
-                            if (gridMap.getValidPosition())
-                                updateStatus("moving forward");
-                            else
-                                MainActivity.printMessage("obstacle");
+                            if (gridMap.getValidPosition()){
+                                updateStatus("moving forward");}
+                            else {
+                                Home.printMessage("obstacle");
                                 updateStatus("Unable to move forward");
+                            }
 
-
-                    MainActivity.printMessage("f");
+                    Home.printMessage("f");
                 }
                 else
                     updateStatus("Please press 'SET START POINT'");
@@ -134,8 +134,9 @@ public class ControlFragment extends Fragment {
                 showLog("Clicked turnRightImageBtn");
                 if (gridMap.getCanDrawRobot()) {
                     gridMap.moveRobot("right");
-                    MainActivity.refreshLabel();
-                    MainActivity.printMessage("fr");
+                    Home.refreshLabel();
+                    Home.printMessage("fr");
+                    showLog("test");
                     System.out.println(Arrays.toString(gridMap.getCurCoord()));
                 }
                 else
@@ -149,8 +150,8 @@ public class ControlFragment extends Fragment {
                 showLog("Clicked turnbRightImageBtn");
                 if (gridMap.getCanDrawRobot()) {
                     gridMap.moveRobot("backright");
-                    MainActivity.refreshLabel();
-                    MainActivity.printMessage("br");
+                    Home.refreshLabel();
+                    Home.printMessage("br");
                     System.out.println(Arrays.toString(gridMap.getCurCoord()));
                 }
                 else
@@ -165,12 +166,12 @@ public class ControlFragment extends Fragment {
                 showLog("Clicked moveBackwardImageBtn");
                 if (gridMap.getCanDrawRobot()) {
                     gridMap.moveRobot("back");
-                    MainActivity.refreshLabel();
+                    Home.refreshLabel();
                     if (gridMap.getValidPosition())
                         updateStatus("moving backward");
                     else
                         updateStatus("Unable to move backward");
-                    MainActivity.printMessage("b");
+                    Home.printMessage("b");
                 }
                 else
                     updateStatus("Please press 'SET START POINT'");
@@ -184,9 +185,9 @@ public class ControlFragment extends Fragment {
                 showLog("Clicked turnLeftImageBtn");
                 if (gridMap.getCanDrawRobot()) {
                     gridMap.moveRobot("left");
-                    MainActivity.refreshLabel();
+                    Home.refreshLabel();
                     updateStatus("turning left");
-                    MainActivity.printMessage("l");
+                    Home.printMessage("fl");
                 }
                 else
                     updateStatus("Please press 'SET START POINT'");
@@ -199,9 +200,9 @@ public class ControlFragment extends Fragment {
                 showLog("Clicked turnbLeftImageBtn");
                 if (gridMap.getCanDrawRobot()) {
                     gridMap.moveRobot("backleft");
-                    MainActivity.refreshLabel();
+                    Home.refreshLabel();
                     updateStatus("turning left");
-                    MainActivity.printMessage("bl");
+                    Home.printMessage("bl");
                 }
                 else
                     updateStatus("Please press 'SET START POINT'");
@@ -225,9 +226,9 @@ public class ControlFragment extends Fragment {
                     // Get String value that represents obstacle configuration
                     String msg = gridMap.getObstacles();
                     // Send this String over via BT
-                    MainActivity.printCoords(msg);
+                    Home.printCoords(msg);
                     // Start timer
-                    MainActivity.stopTimerFlag = false;
+                    Home.stopTimerFlag = false;
                     showToast("Auto Movement/ImageRecog timer start!");
 
                     robotStatusTextView.setText("Auto Movement Started");
@@ -255,11 +256,11 @@ public class ControlFragment extends Fragment {
                     showToast("Fastest car timer start!");
                     try {
                         refreshMessageReceivedNS("WEEK 9 START\n");
-                        MainActivity.printMessage(MappingFragment.path);
+                        Home.printMessage(MappingFragment.path);
                     } catch (Exception e) {
                         showLog(e.getMessage());
                     }
-                    MainActivity.stopWk9TimerFlag = false;
+                    Home.stopWk9TimerFlag = false;
                     robotStatusTextView.setText("Fastest Car Started");
                     fastestTimer = System.currentTimeMillis();
                     timerHandler.postDelayed(timerRunnableFastest, 0);

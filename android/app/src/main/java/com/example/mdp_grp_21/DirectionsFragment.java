@@ -59,7 +59,7 @@ public class DirectionsFragment extends DialogFragment {
                 showLog("Clicked saveBtn");
                 String direction = spinner.getSelectedItem().toString();
                 editor.putString("direction",direction);
-                ((MainActivity)getActivity()).refreshDirection(direction);
+                Home.refreshDirection(direction);
                 Toast.makeText(getActivity(), "Saving direction...", Toast.LENGTH_SHORT).show();
                 showLog("Exiting saveBtn");
                 editor.commit();

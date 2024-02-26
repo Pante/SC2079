@@ -55,6 +55,7 @@ public class BluetoothSetUp extends Fragment {
     ListView lvNewDevices;  // otherDevicesListView
     ListView lvPairedDevices;   // pairedDevicesListView
     Button connectBtn;
+    Button btnSearch;
     ProgressDialog myDialog;
 
     private static String[] PERMISSIONS_STORAGE = {
@@ -83,7 +84,12 @@ public class BluetoothSetUp extends Fragment {
 
     boolean retryConnection = false;
     Handler reconnectionHandler = new Handler();
-
+    Context mContext;
+//    public BluetoothSetUp(Context context) {
+//
+//        this.mContext = context;
+//
+//    }
     Runnable reconnectionRunnable = new Runnable() {
         @Override
         public void run() {
@@ -130,6 +136,7 @@ public class BluetoothSetUp extends Fragment {
         mPairedBTDevices = new ArrayList<>();
 
         connectBtn = root.findViewById(R.id.connectBtn);
+        btnSearch = root.findViewById(R.id.scanButton);
 
         int width = dm.widthPixels;
         int height = dm.heightPixels;
@@ -245,6 +252,13 @@ public class BluetoothSetUp extends Fragment {
                 }
             }
         });
+        //ONCLICKLISTENER FOR SEARCH BUTTON
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: search button");
+                toggleButtonScan(view);
+            }
+        });
 
         Button backBtn = root.findViewById(R.id.backBtn);
 
@@ -262,7 +276,7 @@ public class BluetoothSetUp extends Fragment {
                 editor = sharedPreferences.edit();
                 editor.putString("connStatus", connStatusTextView.getText().toString());
                 editor.commit();
-                TextView status = MainActivity.getBluetoothStatus();
+                TextView status = Home.getBluetoothStatus();
                 String s = connStatusTextView.getText().toString();
                 //status.setText(s);
                 getActivity().finish();

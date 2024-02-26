@@ -54,7 +54,7 @@ public class MappingFragment extends Fragment {
             Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.activity_map_config, container,  false);
 
-        gridMap = MainActivity.getGridMap();
+        gridMap = Home.getGridMap();
         final DirectionsFragment directionFragment = new DirectionsFragment();
         final EmergencyFragment emergencyFragment = new EmergencyFragment();
 
@@ -105,7 +105,7 @@ public class MappingFragment extends Fragment {
                         showLog("Click count error!!");
                 }
                 // Display "hidden" message in chat box - in case you forget what each image represents
-                MainActivity.refreshMessageReceivedNS(path);
+                Home.refreshMessageReceivedNS(path);
 //                if(clicks >= THRESHOLD) {
                     // emergency protocol
 

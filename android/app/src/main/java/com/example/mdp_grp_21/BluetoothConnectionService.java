@@ -1,18 +1,23 @@
 package com.example.mdp_grp_21;
 
 import android.app.ProgressDialog;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -106,7 +111,7 @@ public class BluetoothConnectionService {
                 Log.e(TAG, "ConnectThread: Could not create InsecureRfcommSocket " + e.getMessage());
             }
             mmSocket = tmp;
-            mBluetoothAdapter.cancelDiscovery();
+            //mBluetoothAdapter.cancelDiscovery();
 
             try {
                 mmSocket.connect();
@@ -124,13 +129,17 @@ public class BluetoothConnectionService {
                 }
                 Log.d(TAG, "RUN: ConnectThread: could not connect to UUID." + MY_UUID);
                 try {
-//                    BluetoothSetUp mBluetoothPopUpActivity = (BluetoothSetUp) mContext;
-//                    mBluetoothPopUpActivity.runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(mContext, "Failed to connect to the Device.", Toast.LENGTH_LONG).show();
-//                        }
-//                    });
+
+
+
+//                        BluetoothSetUp mBluetoothPopUpActivity = new Intent("");
+//                        mBluetoothPopUpActivity.runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Toast.makeText(mContext, "Failed to connect to the Device.", Toast.LENGTH_LONG).show();
+//                            }
+//                        });
+
                 } catch (Exception z) {
                     z.printStackTrace();
                 }
@@ -198,11 +207,11 @@ public class BluetoothConnectionService {
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(connectionStatus);
             BluetoothConnectionStatus = true;
 
-            TextView status = MainActivity.getBluetoothStatus();
+            TextView status = Home.getBluetoothStatus();
             status.setText("Connected");
             status.setTextColor(Color.GREEN);
 
-            TextView device = MainActivity.getConnectedDevice();
+            TextView device = Home.getConnectedDevice();
             device.setText(mmDevice.getName());
 
             try {
@@ -235,7 +244,7 @@ public class BluetoothConnectionService {
 
                     connectionStatus = new Intent("ConnectionStatus");
                     connectionStatus.putExtra("Status", "disconnected");
-                    TextView status = MainActivity.getBluetoothStatus();
+                    TextView status = Home.getBluetoothStatus();
                     status.setText("Disconnected");
                     status.setTextColor(Color.RED);
                     connectionStatus.putExtra("Device", mmDevice);
@@ -255,6 +264,15 @@ public class BluetoothConnectionService {
                 Log.e(TAG, "Error writing to output stream. "+e.getMessage());
             }
         }
+//        public void writeJson(JSONArray[] bytes){
+//            JSONArray text = new JSONArray("Json",bytes);
+//            Log.d(TAG, "write: Writing to output stream: "+text);
+//            try {
+//                outStream.write(text);
+//            } catch (IOException e) {
+//                Log.e(TAG, "Error writing to output stream. "+e.getMessage());
+//            }
+//        }
 
         public void cancel(){
             Log.d(TAG, "cancel: Closing Client Socket");
