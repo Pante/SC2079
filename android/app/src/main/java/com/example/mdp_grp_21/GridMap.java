@@ -479,11 +479,11 @@ public class GridMap extends View{
 
         dir= (direction.equals("up"))?"NORTH":(direction.equals("down"))?"SOUTH":(direction.equals("left"))?"WEST":"EAST";
 
-        Home.printMessage("ROBOT " + (col - 2)*2 + (row - 1)*2 + dir);
+        Home.printMessage("ROBOT" + "," + (col - 2)*2 + (row - 1)*2 + dir);
         // "robot", <x value> , <y value> , <bearing>
 
         updateStatus(col-2 + "," + (row - 1)+ ", Bearing: " + dir); // south west
-        updateStatus(col + "," + (row + 1)+ ", Bearing: " + dir); // north east
+        //updateStatus(col + "," + (row + 1)+ ", Bearing: " + dir); // north east
         showLog("Exiting setStartCoord");
     }
 
@@ -594,8 +594,8 @@ public class GridMap extends View{
 
         int obstacleNumber = GridMap.obstacleCoord.size();
 
-        // DEBUG msg (can remove) //
-        Home.printMessage("OBSTACLE" + obstacleNumber + ":" + (col - 1)*2 + "," + (19 - row)*2 + ", Bearing: " + imageBearings.get(19 - row)[col - 1]);
+
+        Home.printMessage("OBSTACLE" + "," + obstacleNumber + ":" + (col - 1)*2 + "," + (19 - row)*2 + ", Bearing: " + imageBearings.get(19 - row)[col - 1]);
 
 
         updateStatus(obstacleNumber + "," + (col - 1)+ "," + (19 - row)+", Bearing: " + imageBearings.get(19 - row)[col - 1]); // north east
@@ -685,6 +685,7 @@ public class GridMap extends View{
 
         String tempID, tempBearing, testID;
         endColumn = endRow = -999;
+        int obstacleNumber = GridMap.obstacleCoord.size();
 
         showLog("dragEvent.getAction() == " + dragEvent.getAction());
         showLog("dragEvent.getResult() is " + dragEvent.getResult());
@@ -701,6 +702,10 @@ public class GridMap extends View{
             cells[initialColumn][20-initialRow].setType("unexplored");
             ITEM_LIST.get(initialRow-1)[initialColumn-1] = "";
             imageBearings.get(initialRow-1)[initialColumn-1] = "";
+
+            updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
+            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (initialColumn) + (initialRow) + "-1");
+
         }
         // drop within gridmap
         else if (dragEvent.getAction() == DragEvent.ACTION_DROP) {
@@ -713,6 +718,7 @@ public class GridMap extends View{
                 showLog("Cell is empty");
             }
             // if dropped within mapview but outside drawn grids, remove obstacle from lists
+            // drag to left side of grid
             else if (endColumn <= 0 || endRow <= 0) {
                 for (int i = 0; i < obstacleCoord.size(); i++) {
                     if (Arrays.equals(obstacleCoord.get(i),
@@ -722,6 +728,11 @@ public class GridMap extends View{
                 cells[initialColumn][20-initialRow].setType("unexplored");
                 ITEM_LIST.get(initialRow-1)[initialColumn-1] = "";
                 imageBearings.get(initialRow-1)[initialColumn-1] = "";
+
+
+                updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
+                Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (initialColumn) + (initialRow) + "-1");
+
             }
             // if dropped within gridmap, shift it to new position unless already got existing
             else if ((1 <= initialColumn && initialColumn <= 20)
@@ -748,6 +759,9 @@ public class GridMap extends View{
                     // set the old obstacle's position to "unexplored" and new position to either "obstacle" or "image"
                     cells[endColumn][20 - endRow].setType(cells[initialColumn][20 - initialRow].type);
                     cells[initialColumn][20 - initialRow].setType("unexplored");
+
+                    updateStatus( obstacleNumber + "," + (endColumn-1) + "," + (endRow-1) + ", Bearing: " + tempBearing);
+                    Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (endColumn) + (20 - endRow) + tempBearing);
                 }
             } else {
                 showLog("Drag event failed.");
@@ -758,7 +772,7 @@ public class GridMap extends View{
     }
 
     public void callInvalidate() {
-        showLog("Entering callinvalidate");
+        showLog("Entering call invalidate");
         this.invalidate();
     }
 
@@ -859,15 +873,19 @@ public class GridMap extends View{
                             showLog("tCol - 1 = " + (tCol - 1));
                             showLog("newID = " + newID);
                             showLog("newBearing = " + newBearing);
-                            Home.printMessage("COORD of Image ID " + newID + ":" + (tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
+
+
                             String oldObstacleId = UUID.randomUUID().toString();
                             if (val2IdxMap.containsKey(oldItem)) {
                                 oldObstacleId = val2IdxMap.get(oldItem);
                             }
-                            val2IdxMap.put(newID, oldObstacleId);
-                            if(!newID.equals("Nil")) cells[tCol][20 - tRow].setType("image");
-                            else cells[tCol][20 - tRow].setType("obstacle");
 
+                            val2IdxMap.put(newID, oldObstacleId);
+                            if(!newID.equals("Nil")) cells[tCol][20 - tRow].setType("image"); // if new id is set then show on obstacle on app
+                            else cells[tCol][20 - tRow].setType("obstacle");
+                            int obstacleNumber = GridMap.obstacleCoord.size();
+                            updateStatus( obstacleNumber + "," + newID + ","+(tRow - 1) + "," + (column - 1) + ", Bearing: " + newBearing);
+                            Home.printMessage("OBSTACLE" + "," + obstacleNumber + (tCol - 1) + (tRow - 1) + newBearing);
                             callInvalidate();
                         }
                     });
@@ -954,18 +972,25 @@ public class GridMap extends View{
             // place obstacles on map
             if (setObstacleStatus) {
                 if ((1 <= row && row <= 20) && (1 <= column && column <= 20)) { // if touch is within the grid
-                    // get user input from spinners in MapTabFragment static values
-                    // imageID is "", imageBearing is "North"
-                    String imageID = (MappingFragment.imageID).equals("Nil") ?
-                            "" : MappingFragment.imageID;
-                    String imageBearing = MappingFragment.imageBearing;
 
-                    // after init, at stated col and row, add the id to use as ref to update grid
-                    ITEM_LIST.get(row - 1)[column - 1] = imageID;
-                    imageBearings.get(row - 1)[column - 1] = imageBearing;
+                    if (!ITEM_LIST.get(row - 1)[column - 1].equals("")
+                            || !imageBearings.get(row - 1)[column - 1].equals("")) {
+                        showLog("An obstacle is already at drop location");
+                    } else {
+                        // get user input from spinners in MapTabFragment static values
+                        // imageID is "", imageBearing is "North"
+                        String imageID = (MappingFragment.imageID).equals("Nil") ?
+                                "" : MappingFragment.imageID;
+                        String imageBearing = MappingFragment.imageBearing;
 
-                    // this function affects obstacle turning too
-                    this.setObstacleCoord(column, row);
+                        // after init, at stated col and row, add the id to use as ref to update grid
+                        ITEM_LIST.get(row - 1)[column - 1] = imageID;
+                        imageBearings.get(row - 1)[column - 1] = imageBearing;
+
+
+                        // this function affects obstacle turning too
+                        this.setObstacleCoord(column, row);
+                    }
                 }
                 this.invalidate();
                 return true;
