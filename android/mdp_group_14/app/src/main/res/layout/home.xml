@@ -227,7 +227,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:tabGravity="center"
-                        app:tabIndicator="@drawable/selected_tab"
+                        app:tabIndicator="@drawable/selected_tab2"
                         app:tabIndicatorAnimationMode="elastic"
                         app:tabIndicatorColor="@null"
                         app:tabIndicatorGravity="stretch"

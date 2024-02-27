@@ -358,11 +358,11 @@ public class Home extends Fragment {
             else if(message.contains("TARGET")) {
                 try {
                     String[] cmd = message.split(",");
-                    BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no. :" + cmd[1]+ "Prediction: +" + cmd[2] + "\n");
+                    BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no:" + cmd[1]+ ", Prediction: " + cmd[2] + "\n");
 
 
-                    gridMap.updateIDFromRpi(cmd[1], cmd[2]);
-                    obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 1);
+                    gridMap.updateIDFromRpi(String.valueOf(Integer.valueOf(cmd[1])-1), cmd[2]);
+                    obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 2);
                 }
                 catch(Exception e)
                 {
