@@ -121,12 +121,10 @@ class Objective(Entity):
         return cls(
             direction,
             south_west,
-            Point(south_west.x + width, south_west.y + height),
+            Point(south_west.x + width - 1, south_west.y + height - 1),
             image_id,
         )
 
     def __post_init__(self):
         assert 1 <= self.image_id < 36
-        print(self.north_east)
-        print(self.south_west)
         super().__post_init__()
