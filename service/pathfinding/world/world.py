@@ -55,13 +55,11 @@ class World:
     def __compute_true_clearance(self: World, x: int, y: int) -> int:
         max_size = min(self.width, self.height)
         for size in range(0, max_size):
-            min_x = max(x - size, 0)
             max_x = min(x + size + 1, self.width)
-            min_y = max(y - size, 0)
             max_y = min(y + size + 1, self.height)
 
-            for box_x in range(min_x, max_x):
-                for box_y in range(min_y, max_y):
+            for box_x in range(x, max_x):
+                for box_y in range(y, max_y):
                     if self.grid[box_x, box_y] == 0:
                         return size
 
