@@ -28,6 +28,7 @@ class World:
         self.robot = robot
         self.obstacles = obstacles
 
+        assert height == width
         assert self.__inside(robot)
         assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
 
@@ -46,11 +47,17 @@ class World:
                 for y in range(obstacle.south_west.y, obstacle.north_east.y + 1):
                     self.grid[x, y] = 0
 
-    def __annotate_true_clearance(self: World) -> None:
-        for x in range(0, self.width):
-            for y in range(0, self.height):
-                if self.grid[x, y] != 0:
-                    self.grid[x, y] = self.__compute_true_clearance(x, y)
+    def contains(self, entity: Entity) -> bool:
+        if not self.__inside(entity):
+            return False
+
+        x = entity.south_west.x
+        y = entity.south_west.y
+
+        if self.grid[x, y] == -1:
+            self.grid[x, y] = self.__compute_true_clearance(x, y)
+
+        return entity.clearance <= self.grid[x, y]
 
     def __compute_true_clearance(self: World, x: int, y: int) -> int:
         max_size = min(self.width, self.height)
@@ -64,9 +71,6 @@ class World:
                         return size
 
         return max_size
-
-    def contains(self, entity: Entity) -> bool:
-        return self.__inside(entity) and entity.clearance <= self.grid[entity.south_west.x, entity.south_west.y]
 
 
 @dataclass
