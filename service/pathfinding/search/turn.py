@@ -3,7 +3,7 @@ from pathfinding.world.primitives import Direction, Vector
 from pathfinding.world.world import GRID_CELL_SIZE
 
 # The turning radius (in grid cells). The turning radius is assumed to be 25cm.
-LEFT_TURNING_RADIUS = 15 // GRID_CELL_SIZE
+LEFT_TURNING_RADIUS = 25 // GRID_CELL_SIZE
 
 # The right turning radius (in grid cells). The right turning radius is assumed to be 25cm.
 RIGHT_TURNING_RADIUS = 25 // GRID_CELL_SIZE
@@ -186,7 +186,7 @@ def __curve(start: Vector, end: Vector, centre_x: int, centre_y, quadrant: int) 
     """
     assert 1 <= quadrant <= 4
 
-    x = RIGHT_TURNING_RADIUS
+    x = RIGHT_TURNING_RADIUS  # TODO: Either switch to centre pathfinding algorithm or pass it in via parameter.
     y = 0
     err = 0
 
@@ -222,13 +222,18 @@ def __curve(start: Vector, end: Vector, centre_x: int, centre_y, quadrant: int) 
 
     first_part, second_part = __order(start, a, b)
     second_part.reverse()
-    second_part.append(end)
-
     for vector in first_part:
         vector.direction = start.direction
 
     for vector in second_part:
         vector.direction = end.direction
+
+    # The start & end may contain vectors with the same coordinates but different directions.
+    if first_part[-1].x == second_part[0].x and first_part[-1].y == second_part[0].y:
+        first_part.pop()
+
+    if second_part[-1] != end:
+        second_part.append(end)
 
     return first_part + second_part
 

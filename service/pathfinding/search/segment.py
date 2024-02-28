@@ -55,6 +55,7 @@ def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List
                 case Move():
                     new_cost += + 1
                 case Turn():
+                    # TODO: Should diagonals' cost be 2 instead of 1?
                     new_cost += len(instruction.vectors)
 
             if next not in costs or new_cost < costs[next]:
