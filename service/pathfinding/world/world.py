@@ -33,7 +33,6 @@ class World:
         assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
 
         self.__annotate_obstacles()
-        self.__annotate_true_clearance()
 
     def __inside(self, entity: Entity) -> bool:
         return (0 <= entity.south_west.x < self.width and
