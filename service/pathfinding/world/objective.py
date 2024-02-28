@@ -3,22 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from pathfinding.world.primitives import Direction, Point, Vector
-from pathfinding.world.world import Entity, World, Obstacle, GRID_CELL_SIZE
-
-"""
-The minimum distance (in grid cells) between the obstacle and objective, inclusive. (Total cm / cm per cell).
-"""
-MINIMUM_GAP = 5 // GRID_CELL_SIZE
-"""
-The maximum distance (in grid cells) between the obstacle and objective, exclusive. (Total cm / cm per cell).
-"""
-MAXIMUM_GAP = 25 // GRID_CELL_SIZE
-
-"""
-The minimum left/bottom alignment (in grid cells) between the obstacle and objective, inclusive. 
-(Total cm / cm per cell). This should be increased as the difference in sizes between obstacles & the robot increases.
-"""
-MINIMUM_ALIGNMENT = 0 // GRID_CELL_SIZE
+from pathfinding.world.world import Entity, World, Obstacle
 
 
 def generate_objectives(world: World) -> dict[Obstacle, set[Vector]]:
@@ -43,15 +28,30 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     :return: The valid objectives.
     """
 
+    """
+    The minimum distance (in grid cells) between the obstacle and objective, inclusive. (Total cm / cm per cell).
+    """
+    minimum_gap = 5 // world.cell_size
+    """
+    The maximum distance (in grid cells) between the obstacle and objective, exclusive. (Total cm / cm per cell).
+    """
+    maximum_gap = 25 // world.cell_size
+
+    """
+    The minimum left/bottom alignment (in grid cells) between the obstacle and objective, inclusive. 
+    (Total cm / cm per cell). This should be increased as the difference in sizes between obstacles & the robot increases.
+    """
+    minimum_alignment = 0 // world.cell_size
+
     # Max alignment computation assumes that obstacle clearance is less than robot. It stops when the robot is
     # left-aligned with the obstacle. This excludes valid positions to the right if the obstacle is larger than the
     # robot.
-    assert MINIMUM_ALIGNMENT < world.robot.clearance
+    assert minimum_alignment < world.robot.clearance
     assert obstacle.clearance < world.robot.clearance
 
     objectives: set[Vector] = set()
-    for alignment in range(MINIMUM_ALIGNMENT, world.robot.clearance + 1):
-        for gap in range(MINIMUM_GAP, MAXIMUM_GAP):
+    for alignment in range(minimum_alignment, world.robot.clearance + 1):
+        for gap in range(minimum_gap, maximum_gap):
             objective = __suggest_objective(world, obstacle, gap + 1, alignment)
             if world.contains(objective):
                 objectives.add(objective.vector)
@@ -105,7 +105,8 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
         case Direction.WEST:
             return __Objective.from_obstacle(
                 Direction.EAST,
-                Point(max(obstacle.south_west.x - gap - clearance, 0), max(obstacle.south_west.y + clearance - alignment, 0)),
+                Point(max(obstacle.south_west.x - gap - clearance, 0),
+                      max(obstacle.south_west.y + clearance - alignment, 0)),
                 clearance,
                 clearance,
             )

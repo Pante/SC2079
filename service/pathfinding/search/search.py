@@ -11,7 +11,7 @@ from python_tsp.exact import solve_tsp_dynamic_programming
 from pathfinding.search.instructions import Turn, TurnInstruction, Move, MoveInstruction, MiscInstruction
 from pathfinding.search.segment import segment
 from pathfinding.world.primitives import Vector
-from pathfinding.world.world import Robot, World, GRID_CELL_SIZE, Obstacle
+from pathfinding.world.world import Robot, World, Obstacle
 
 
 def search(world: World, objectives: dict[Obstacle, set[Vector]]) -> List[Segment]:
@@ -20,6 +20,7 @@ def search(world: World, objectives: dict[Obstacle, set[Vector]]) -> List[Segmen
     return __segments(world, [entities[i] for i in permutation], objectives)
 
 
+# TODO: We should replace this function path with better search heuristics to prevent edge cases.
 def __hamiltonian_path(entities: List[Robot | Obstacle], objectives: dict[Obstacle, set[Vector]]) -> tuple[
     List[int], float]:
     """
@@ -56,7 +57,7 @@ def __segments(world: World, entities: List[Robot | Obstacle], objectives: dict[
     segments = []
     for a, b in pairwise(entities):
         tuple = segment(world, a.vector, objectives[b])
-        segments.append(Segment.compress(b.image_id if isinstance(b, Obstacle) else None, tuple))
+        segments.append(Segment.compress(world, b.image_id if isinstance(b, Obstacle) else None, tuple))
 
     return segments
 
@@ -69,7 +70,7 @@ class Segment:
     vectors: list[Vector]
 
     @classmethod
-    def compress(cls, image_id: int | None, information: tuple[int, list[tuple[Vector, Turn | Move]]]) -> Segment:
+    def compress(cls, world: World, image_id: int | None, information: tuple[int, list[tuple[Vector, Turn | Move]]]) -> Segment:
         cost, parts = information
         instructions: List[TurnInstruction | MoveInstruction | MiscInstruction] = []
         vectors: list[Vector] = []
@@ -82,11 +83,11 @@ class Segment:
 
                 case Move() if instructions and isinstance(instructions[-1], MoveInstruction) and instructions[-1].move == movement:
                     vectors.append(vector)
-                    instructions[-1].amount += GRID_CELL_SIZE
+                    instructions[-1].amount += world.cell_size
 
                 case Move():
                     vectors.append(vector)
-                    instructions.append(MoveInstruction(movement, GRID_CELL_SIZE))
+                    instructions.append(MoveInstruction(movement, world.cell_size))
 
         instructions.append(MiscInstruction.CAPTURE_IMAGE)
 

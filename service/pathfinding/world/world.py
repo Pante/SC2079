@@ -8,37 +8,37 @@ import numpy as np
 
 from pathfinding.world.primitives import Direction, Point, Vector
 
-# The dimensions of the square grid (in number of cells).
-GRID_SIZE = 40
-# The length & width of each square grid cell (in cm).
-GRID_CELL_SIZE = 5
-
 
 class World:
     """
-    A world. It applies a Brushfire-like algorithm to compute the true clearance of all cells in a grid.
+    The actual size of the world in centimetres.
+    """
+    __actual_size = 200
+
+    """
+    A world. True clearance computation is optimized for rectangular/square obstacles.
+
+    A Brushfire-like algorithm should be used if irregular shaped obstacles are allowed.
 
     See https://harablog.wordpress.com/2009/01/29/clearance-based-pathfinding/
     """
 
-    def __init__(self, width: int, height: int, robot: Robot, obstacles: List[Obstacle]):
-        self.width = width
-        self.height = height
-        self.grid = np.full((height, width), -1, dtype=np.int32)
+    def __init__(self, size: int, robot: Robot, obstacles: List[Obstacle]):
+        self.size = size
+        self.grid = np.full((size, size), -1, dtype=np.int32)
         self.robot = robot
         self.obstacles = obstacles
 
-        assert height == width
         assert self.__inside(robot)
         assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
 
         self.__annotate_obstacles()
 
     def __inside(self, entity: Entity) -> bool:
-        return (0 <= entity.south_west.x < self.width and
-                0 <= entity.north_east.x < self.width and
-                0 <= entity.south_west.y < self.height and
-                0 <= entity.north_east.y < self.height)
+        return (0 <= entity.south_west.x < self.size and
+                0 <= entity.north_east.x < self.size and
+                0 <= entity.south_west.y < self.size and
+                0 <= entity.north_east.y < self.size)
 
     def __annotate_obstacles(self: World) -> None:
         for obstacle in self.obstacles:
@@ -59,17 +59,21 @@ class World:
         return entity.clearance <= self.grid[x, y]
 
     def __compute_true_clearance(self: World, x: int, y: int) -> int:
-        max_size = min(self.width, self.height)
-        for size in range(0, max_size):
-            max_x = min(x + size + 1, self.width)
-            max_y = min(y + size + 1, self.height)
+        clearance = self.size - x
+        for obstacle in self.obstacles:
+            vector = obstacle.south_west
+            if vector.x < x or vector.y < y:
+                continue
 
-            for box_x in range(x, max_x):
-                for box_y in range(y, max_y):
-                    if self.grid[box_x, box_y] == 0:
-                        return size
+            next_clearance = max(vector.x - x, vector.y - y)
+            if vector.x - x < next_clearance:
+                clearance = next_clearance
 
-        return max_size
+        return clearance
+
+    @property
+    def cell_size(self) -> int:
+        return self.__actual_size // self.size
 
 
 @dataclass
