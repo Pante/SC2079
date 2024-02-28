@@ -123,7 +123,7 @@ class Cell(Entity):
         return self
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Obstacle(Entity):
     image_id: int
 
