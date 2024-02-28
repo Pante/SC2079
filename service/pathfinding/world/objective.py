@@ -42,10 +42,16 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     :param obstacle: The obstacle.
     :return: The valid objectives.
     """
+
+    # Max alignment computation assumes that obstacle clearance is less than robot. It stops when the robot is
+    # left-aligned with the obstacle. This excludes valid positions to the right if the obstacle is larger than the
+    # robot.
     assert MINIMUM_ALIGNMENT < world.robot.clearance
+    assert obstacle.clearance < world.robot.clearance
+    max_alignment = world.robot.clearance - obstacle.clearance
 
     objectives: set[Vector] = set()
-    for alignment in range(MINIMUM_ALIGNMENT, world.robot.clearance):
+    for alignment in range(MINIMUM_ALIGNMENT, max_alignment):
         for gap in range(MINIMUM_GAP, MAXIMUM_GAP):
             objective = __suggest_objective(world, obstacle, gap + 1, alignment)
             if world.contains(objective):
@@ -75,7 +81,7 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
             north_west = obstacle.north_west
             return __Objective.from_obstacle(
                 Direction.SOUTH,
-                Point(max(north_west.x - alignment, 0), max(north_west.y + gap, 0)),
+                Point(max(north_west.x + clearance - alignment, 0), max(north_west.y + gap, 0)),
                 clearance,
                 clearance,
             )
@@ -92,7 +98,7 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
             south_east = obstacle.south_east
             return __Objective.from_obstacle(
                 Direction.NORTH,
-                Point(max(obstacle.north_east.x - clearance + alignment, 0), max(south_east.y - gap - clearance, 0)),
+                Point(max(south_east.x - clearance + alignment, 0), max(south_east.y - gap - clearance, 0)),
                 clearance,
                 clearance,
             )
@@ -100,7 +106,7 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
         case Direction.WEST:
             return __Objective.from_obstacle(
                 Direction.EAST,
-                Point(max(obstacle.south_west.x - gap - clearance, 0), max(obstacle.south_west.y - alignment, 0)),
+                Point(max(obstacle.south_west.x - gap - clearance, 0), max(obstacle.south_west.y + clearance - alignment, 0)),
                 clearance,
                 clearance,
             )
