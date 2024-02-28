@@ -48,10 +48,9 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     # robot.
     assert MINIMUM_ALIGNMENT < world.robot.clearance
     assert obstacle.clearance < world.robot.clearance
-    max_alignment = world.robot.clearance - obstacle.clearance
 
     objectives: set[Vector] = set()
-    for alignment in range(MINIMUM_ALIGNMENT, max_alignment):
+    for alignment in range(MINIMUM_ALIGNMENT, world.robot.clearance + 1):
         for gap in range(MINIMUM_GAP, MAXIMUM_GAP):
             objective = __suggest_objective(world, obstacle, gap + 1, alignment)
             if world.contains(objective):
@@ -73,7 +72,7 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
     :param alignment: An alignment (in grid cells) to adjust the suggested objective's placement by.
     :return: An objective.
     """
-    assert alignment < world.robot.clearance
+    assert alignment <= world.robot.clearance
 
     clearance = world.robot.clearance
     match obstacle.direction:
