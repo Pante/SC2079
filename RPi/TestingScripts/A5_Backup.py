@@ -252,54 +252,56 @@ class TaskA5:
 				continue
 				
 	def normalPathfinding(self):
-		obstacleArr = []
+		# obstacleArr = []
 		
-		for dir_str in ["SOUTH", "EAST", "NORTH", "WEST"]:		
-			direction_one = Direction(dir_str)
-			image_id_1 = 1
-			south_west =  PathfindingPoint(x=20,y=20)
-			north_east = PathfindingPoint(x=20,y=20)
-			pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
-			obstacleArr.append(pathObstacle)
+		# for dir_str in ["SOUTH", "EAST", "NORTH", "WEST"]:		
+		# 	direction_one = Direction(dir_str)
+		# 	image_id_1 = 1
+		# 	south_west =  PathfindingPoint(x=20,y=20)
+		# 	north_east = PathfindingPoint(x=20,y=20)
+		# 	pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
+		# 	obstacleArr.append(pathObstacle)
 		
-		robot_direction = Direction("NORTH")
-		robot_south_west =  PathfindingPoint(x=19,y=0)
-		robot_north_east =  PathfindingPoint(x=22,y=3)
-		# Replace with current_robot_position when ready
-		pathRobot =  PathfindingRequestRobot(direction = robot_direction, north_east = robot_north_east, south_west = robot_south_west)
+		# robot_direction = Direction("NORTH")
+		# robot_south_west =  PathfindingPoint(x=19,y=0)
+		# robot_north_east =  PathfindingPoint(x=22,y=3)
+		# # Replace with current_robot_position when ready
+		# pathRobot =  PathfindingRequestRobot(direction = robot_direction, north_east = robot_north_east, south_west = robot_south_west)
 		
-		pathfindingRequest =  PathfindingRequest(obstacles=obstacleArr, robot=pathRobot)
-		pathfinding_api =  PathfindingApi(api_client=self.client)
+		# pathfindingRequest =  PathfindingRequest(obstacles=obstacleArr, robot=pathRobot)
+		# pathfinding_api =  PathfindingApi(api_client=self.client)
 		
-		response = pathfinding_api.pathfinding_post(pathfindingRequest)
-		segments = response.segments
+		# response = pathfinding_api.pathfinding_post(pathfindingRequest)
+		# segments = response.segments
 		# ~ print(segments)
-		j = 1
-		i = 1
-		counter = 0
+		# j = 1
+		# i = 1
+		# counter = 0
 		
 		instArr1 = [
-			('W', 40, 0, 20),
+			('W', 40, 0, 30),
 			('S', 0, 0, 0)
 		]
 		instArr2 = [
 			('t', 40, -25, 180),
-			# ('T', 40, 0, 5),
+			('t', 40, 0, 11.5),
 			('t', 40, 25, 90),
-			('W', 40, 0, 20),
+			('W', 40, 0, 30),
 			('S', 0, 0, 0)
 		]
 		
-		for a, segment in enumerate(segments):
-			print(f"On segment {a+1} of {len(segments)}:")
+		# for a, segment in enumerate(segments):
+		for a in range(4):
+			# print(f"On segment {a+1} of {len(segments)}:")
+			print(f"On segment {a+1} of 4:")
 			self.set_stm_stop(False) # Reset to false upon starting the new segment
 			
-			# ~ print("PATH ", i, ": ", segment.path.actual_instance[0])
-			print("PATH ", i, ": ", segment.path.actual_instance)
-			print("Segment ", i , ": " , segment.instructions)
-			# ~ print(segment.instructions[0])
-			print("SEGMENT NUMBER ", i)
-			i = i + 1
+			# # ~ print("PATH ", i, ": ", segment.path.actual_instance[0])
+			# print("PATH ", i, ": ", segment.path.actual_instance)
+			# print("Segment ", i , ": " , segment.instructions)
+			# # ~ print(segment.instructions[0])
+			# print("SEGMENT NUMBER ", i)
+			# i = i + 1
 			
 			instArr = instArr2 if a > 0 else instArr1
 			
@@ -327,7 +329,7 @@ class TaskA5:
 				continue
 			else:
 				# ~ self.android.send(AndroidMessage('TARGET,', segment.image_id, ",", self.last_image))
-				msg_str = f"TARGET,{segment.image_id},{last_image}"
+				msg_str = f"TARGET,1,{last_image}"
 				self.android.send(msg_str)
 				# ~ self.android.send('TARGET: ' + self.last_image)
 				# Image found, break out of this and don't send anymore instructions to the STM

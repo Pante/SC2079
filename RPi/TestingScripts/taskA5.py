@@ -251,13 +251,13 @@ class TaskA5:
 			direction_one = Direction(dir_str)
 			image_id_1 = 1
 			south_west =  PathfindingPoint(x=20,y=20)
-			north_east = PathfindingPoint(x=20,y=20)
+			north_east = PathfindingPoint(x=21,y=21)
 			pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
 			obstacleArr.append(pathObstacle)
 		
 		robot_direction = Direction("NORTH")
-		robot_south_west =  PathfindingPoint(x=19,y=0)
-		robot_north_east =  PathfindingPoint(x=22,y=3)
+		robot_south_west =  PathfindingPoint(x=20,y=0)
+		robot_north_east =  PathfindingPoint(x=24,y=4)
 		# Replace with current_robot_position when ready
 		pathRobot =  PathfindingRequestRobot(direction = robot_direction, north_east = robot_north_east, south_west = robot_south_west)
 		
@@ -375,5 +375,5 @@ class TaskA5:
 
 if __name__ == '__main__':
 	pc = TaskA5() #init
-	pc.main()
+	# pc.main()
 	threads = [] # Keeps track of the list of threads
