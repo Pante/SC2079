@@ -147,17 +147,19 @@ class TaskA5:
 					except ValueError:
 						confidence_level = None
 							
-					object_id = split_results[1]
+					object_id = "NONE"
+					if len(split_results) > 1:
+						object_id = split_results[1]
 					
 					print("OBJECT ID:" , object_id)
 					
-					if confidence_level > 0.7 and confidence_level is not None:
+					if confidence_level is not None and confidence_level > 0.7:
 						if object_id == "marker":
 							print("MARKER")
 							action_type = "TARGET"
 							message_content = object_id
 							# ~ self.android.send(AndroidMessage(action_type, message_content))
-							prev_image = object_id
+							self.prev_image = object_id
 							self.set_last_image(object_id)
 						elif object_id == "NONE":
 							self.set_last_image("NONE")
@@ -172,7 +174,7 @@ class TaskA5:
 									# ~ self.android.send(AndroidMessage(action_type, message_content))
 									self.prev_image = object_id
 									self.set_last_image(object_id)
-								elif prev_image == object_id:
+								elif self.prev_image == object_id:
 									# Do nothing, no need to send since the prev image is the same as current image
 									self.set_last_image(object_id)
 									pass

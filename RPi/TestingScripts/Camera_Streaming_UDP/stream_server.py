@@ -18,6 +18,7 @@ class StreamServer():
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.BUFF_SIZE)
         self.sock.bind(self.HOST_ADDR)
+        print(f"Bound stream server to {self.HOST_ADDR}.")
         self.sock.settimeout(1)
 
         # define client address (used to send stream to).
@@ -45,7 +46,7 @@ class StreamServer():
         # start main camera.
         with picamera.PiCamera(
             resolution=(640, 480),
-            framerate=15,
+            framerate=20,
         ) as cam:
             time.sleep(0.1)
             cam.hflip = True
@@ -54,7 +55,7 @@ class StreamServer():
             raw = PiRGBArray(cam, cam.resolution)
             for frame in cam.capture_continuous(raw, format="bgr", use_video_port=True):
                 # get encoding.
-                buffer = cv2.imencode('.jpg', frame.array, [cv2.IMWRITE_JPEG_QUALITY, 90])[1]
+                buffer = cv2.imencode('.jpg', frame.array, [cv2.IMWRITE_JPEG_QUALITY, 45])[1]
                 # encode in base64 for further compression.
                 buffer = base64.b64encode(buffer)
                 # send to client address.

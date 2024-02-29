@@ -50,7 +50,7 @@ class PC(Link):
 			self.server_socket.bind((self.host, self.port))
 			print("Socket binded successfully")
 		except socket.error as e:
-			print("Socket inding failed: %s" , str(e))
+			print("Socket inding failed:" , e)
 			self.server_socket.close()
 			sys.exit()
 		
@@ -59,9 +59,9 @@ class PC(Link):
 		try:
 			self.server_socket.listen(128)
 			self.client_socket, client_address = self.server_socket.accept()
-			print("PC connected successfully from client address of %s", str(client_address))
+			print("PC connected successfully from client address of", client_address)
 		except socket.error as e:
-			print("Error in getting server/client socket: %s", str(e))
+			print("Error in getting server/client socket:", e)
 		
 		self.connect = True
 		# Connect to rpi camera - TODO
@@ -78,7 +78,7 @@ class PC(Link):
 			self.connected = False
 			print("Disconnected from PC successfully")
 		except Exception as e:
-			print("Failed to disconnected from PC: %s", str(e))
+			print("Failed to disconnected from PC:", e)
 			
 	# send data to PC
 	def send(self, message: str) -> None:
@@ -86,24 +86,24 @@ class PC(Link):
 		try:
 			message_bytes = message.encode('utf-8')
 			self.client_socket.send(message_bytes)
-			print("Sent: %s", str(message))
+			print("Sent:", message)
 		except Exception as e:
-			print("Failed to send message: %s", str(e))
+			print("Failed to send message:", e)
 			
 	# receive data from PC
 	def receive(self) -> Optional[str]:
 		try:
 			unclean_message = self.client_socket.recv(1024)
 			message = unclean_message.decode('utf-8')
-			print("Message received from pc: %s" , message)
+			# print("Message received from pc:", message)
 			return message
 		except OSError as e:
-			print("Message failed to be received: %s ", message)
+			print("Message failed to be received:", message)
 			raise e
 			
 			
-if __name__ == '__main__':
-	pc = PC() #init
+# if __name__ == '__main__':
+# 	pc = PC() #init
 
 # TODO: TRY PYSHINE FOR STREAMING
 # def camera_stream(self):

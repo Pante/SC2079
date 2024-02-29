@@ -65,23 +65,28 @@ class TaskA5:
 						</html>
 						"""
 		# Rin on 192.168.14.13, Port 5000
-		self.conf = Configuration(host="http://192.168.14.27:5000")
+		self.conf = Configuration(host="http://192.168.14.13:5000")
 		self.client = ApiClient(configuration=self.conf)
 		self.last_image = None
 		self.prev_image = None
 		self.STM_Stopped = False
+		
+		# let stream server start before calling other sockets.
+		self.process_pc_stream = Thread(target=self.stream_start)
+		time.sleep(0.1)
+		self.process_pc_receive.start() # Receive from PC
+
 		self.android.connect()
 		self.stm.connect()
 		self.pc.connect()
+
 		print("PC Successfully connected through socket")
 		self.process_android_receive = Thread(target=self.android_receive)
 		self.process_stm_receive = Thread(target=self.stm_receive)
 		self.process_pc_receive = Thread(target=self.pc_receive)
-		self.process_pc_stream = Thread(target=self.stream_start)
 
 		
 		# Start processes
-		self.process_pc_receive.start() # Receive from PC
 		self.process_android_receive.start() # Receive from android
 		self.process_pc_stream.start()  # Start the Stream
 		self.process_stm_receive.start() # Receive from PC
@@ -148,17 +153,19 @@ class TaskA5:
 					except ValueError:
 						confidence_level = None
 							
-					object_id = split_results[1]
+					object_id = "NONE"
+					if len(split_results) > 1:
+						object_id = split_results[1]
 					
 					print("OBJECT ID:" , object_id)
 					
-					if confidence_level > 0.7 and confidence_level is not None:
+					if confidence_level is not None:
 						if object_id == "marker":
 							print("MARKER")
 							action_type = "TARGET"
 							message_content = object_id
 							# ~ self.android.send(AndroidMessage(action_type, message_content))
-							prev_image = object_id
+							self.prev_image = object_id
 							self.set_last_image(object_id)
 						elif object_id == "NONE":
 							self.set_last_image("NONE")
@@ -173,7 +180,7 @@ class TaskA5:
 									# ~ self.android.send(AndroidMessage(action_type, message_content))
 									self.prev_image = object_id
 									self.set_last_image(object_id)
-								elif prev_image == object_id:
+								elif self.prev_image == object_id:
 									# Do nothing, no need to send since the prev image is the same as current image
 									self.set_last_image(object_id)
 									pass
