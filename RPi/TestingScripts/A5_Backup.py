@@ -284,7 +284,7 @@ class TaskA5:
 		]
 		instArr2 = [
 			('t', 40, -25, 180),
-			('T', 40, 0, 5),
+			# ('T', 40, 0, 5),
 			('t', 40, 25, 90),
 			('W', 40, 0, 20),
 			('S', 0, 0, 0)
@@ -313,7 +313,7 @@ class TaskA5:
 			
 			print("STM stopped, recognising image...")
 			# STM has stopped, recognise image - x seconds to recognise
-			time.sleep(5)
+			time.sleep(2)
 			print("Image recognition delay done.")
 			last_image = self.get_last_image()
 			print("Last image:" , last_image)

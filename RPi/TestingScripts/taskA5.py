@@ -73,8 +73,8 @@ class TaskA5:
 		
 		# let stream server start before calling other sockets.
 		self.process_pc_stream = Thread(target=self.stream_start)
+		self.process_pc_stream.start()  # Start the Stream
 		time.sleep(0.1)
-		self.process_pc_receive.start() # Receive from PC
 
 		self.android.connect()
 		self.stm.connect()
@@ -87,8 +87,8 @@ class TaskA5:
 
 		
 		# Start processes
+		self.process_pc_receive.start() # Receive from PC
 		self.process_android_receive.start() # Receive from android
-		self.process_pc_stream.start()  # Start the Stream
 		self.process_stm_receive.start() # Receive from PC
 		self.normalPathfinding() # Calculate the path
 		
