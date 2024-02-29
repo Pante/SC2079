@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from http import HTTPStatus
 
 from flask import make_response
@@ -10,7 +11,7 @@ from pathfinding.search.instructions import MiscInstruction, TurnInstruction, Mo
 from pathfinding.search.search import Segment, search
 from pathfinding.world.objective import generate_objectives
 from pathfinding.world.primitives import Direction, Point, Vector
-from pathfinding.world.world import Robot, Obstacle, World, GRID_SIZE
+from pathfinding.world.world import Robot, Obstacle, World
 
 api = APIBlueprint(
     '/pathfinding',
@@ -24,6 +25,7 @@ class PathfindingRequest(BaseModel):
     verbose: bool = Field(default=True, description='Whether to attach the path and cost alongside the movement '
                                                     'instructions in the response.')
 
+    size: int | None = Field(default=40, description='The width & height in number of cells.')
     robot: PathfindingRequestRobot = Field(description='The initial position of the robot.')
     obstacles: list[PathfindingRequestObstacle] = Field(min_length=1)
 
@@ -110,9 +112,10 @@ class PathfindingPoint(BaseModel):
 
 @api.post('/', responses={200: PathfindingResponse})
 def pathfinding(body: PathfindingRequest):
+    print(datetime.now())
     robot = body.robot.to_robot()
     obstacles = [obstacle.to_obstacle() for obstacle in body.obstacles]
-    world = World(GRID_SIZE, GRID_SIZE, robot, obstacles)
+    world = World(body.size, robot, obstacles)
 
     objectives = generate_objectives(world)
     segments = search(world, objectives)
@@ -120,6 +123,7 @@ def pathfinding(body: PathfindingRequest):
     pathfinding_response = PathfindingResponse(segments=[
         PathfindingResponseSegment.from_segment(verbose=body.verbose, segment=segment) for segment in segments
     ])
+    print(datetime.now())
 
     response = make_response(pathfinding_response.model_dump(mode='json'), HTTPStatus.OK)
     response.mimetype = "application/json"
