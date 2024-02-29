@@ -1,55 +1,65 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
 
+from pathfinding.world.primitives import Direction, Point, Vector
 from pathfinding.world.world import Entity, World, Obstacle
-from pathfinding.world.primitives import Direction, Point
-
-"""
-The minimum distance (in grid cells) between the obstacle and objective, inclusive.
-"""
-MINIMUM_GAP = 1
-"""
-The ideal distance (in grid cells) between the obstacle and objective.
-"""
-IDEAL_GAP = 3
-"""
-The maximum distance (in grid cells) between the obstacle and objective, exclusive.
-"""
-MAXIMUM_GAP = 5
 
 
-def generate_objectives(world: World) -> List[Objective]:
-    return [
-        objective for obstacle in world.obstacles if (objective := __generate_objective(world, obstacle)) is not None
-    ]
+def generate_objectives(world: World) -> dict[Obstacle, set[Vector]]:
+    objectives: dict[Obstacle, set[Vector]] = {}
+    for obstacle in world.obstacles:
+        generated = __generate_objectives(world, obstacle)
+        if not generated:
+            print(f'WARNING: Could not generate objectives for {obstacle}. Skipping.')
+            continue
+
+        objectives[obstacle] = generated
+
+    return objectives
 
 
-def __generate_objective(world: World, obstacle: Obstacle) -> Objective | None:
+def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     """
-    Tries to place an objective in an ideal location. Failing that, iteratively tries to place the objective in a valid
-    location.
+    Compute all possible objective locations for an obstacle.
 
     :param world: The world.
     :param obstacle: The obstacle.
-    :return: An objective if one can be placed. None otherwise.
+    :return: The valid objectives.
     """
-    ideal = __suggest_objective(world, obstacle, IDEAL_GAP, world.robot.clearance // 2)
-    if world.contains(ideal):
-        return ideal
 
-    # TODO: Can we find a nice way to return objectives closer to ideal first?
-    for alignment in range(0, world.robot.clearance):
-        for gap in range(MINIMUM_GAP, MAXIMUM_GAP):
-            objective = __suggest_objective(world, obstacle, gap, alignment)
+    """
+    The minimum distance (in grid cells) between the obstacle and objective, inclusive. (Total cm / cm per cell).
+    """
+    minimum_gap = 5 // world.cell_size
+    """
+    The maximum distance (in grid cells) between the obstacle and objective, exclusive. (Total cm / cm per cell).
+    """
+    maximum_gap = 25 // world.cell_size
+
+    """
+    The minimum left/bottom alignment (in grid cells) between the obstacle and objective, inclusive. 
+    (Total cm / cm per cell). This should be increased as the difference in sizes between obstacles & the robot increases.
+    """
+    minimum_alignment = 0 // world.cell_size
+
+    # Max alignment computation assumes that obstacle clearance is less than robot. It stops when the robot is
+    # left-aligned with the obstacle. This excludes valid positions to the right if the obstacle is larger than the
+    # robot.
+    assert minimum_alignment < world.robot.clearance
+    assert obstacle.clearance < world.robot.clearance
+
+    objectives: set[Vector] = set()
+    for alignment in range(minimum_alignment, world.robot.clearance + 1):
+        for gap in range(minimum_gap, maximum_gap):
+            objective = __suggest_objective(world, obstacle, gap + 1, alignment)
             if world.contains(objective):
-                return objective
+                objectives.add(objective.vector)
 
-    return None
+    return objectives
 
 
-def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: int) -> Objective:
+def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: int) -> __Objective:
     """
     Creates an objective from this obstacle.
 
@@ -62,52 +72,48 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
     :param alignment: An alignment (in grid cells) to adjust the suggested objective's placement by.
     :return: An objective.
     """
-    assert alignment < world.robot.clearance
+    assert alignment <= world.robot.clearance
 
     clearance = world.robot.clearance
     match obstacle.direction:
         case Direction.NORTH:
             north_west = obstacle.north_west
-            return Objective.from_obstacle(
+            return __Objective.from_obstacle(
                 Direction.SOUTH,
-                Point(max(north_west.x - alignment, 0), max(north_west.y + gap, 0)),
+                Point(max(north_west.x + clearance - alignment, 0), max(north_west.y + gap, 0)),
                 clearance,
                 clearance,
-                obstacle.image_id
             )
 
         case Direction.EAST:
-            return Objective.from_obstacle(
+            return __Objective.from_obstacle(
                 Direction.WEST,
-                Point(max(obstacle.north_east.x + gap, 0), max(obstacle.north_east.x - clearance + alignment, 0)),
+                Point(max(obstacle.north_east.x + gap, 0), max(obstacle.north_east.y - clearance + alignment, 0)),
                 clearance,
                 clearance,
-                obstacle.image_id
             )
 
         case Direction.SOUTH:
             south_east = obstacle.south_east
-            return Objective.from_obstacle(
+            return __Objective.from_obstacle(
                 Direction.NORTH,
-                Point(max(obstacle.north_east.x - clearance + alignment, 0), max(south_east.y - gap - clearance, 0)),
+                Point(max(south_east.x - clearance + alignment, 0), max(south_east.y - gap - clearance, 0)),
                 clearance,
                 clearance,
-                obstacle.image_id
             )
 
         case Direction.WEST:
-            return Objective.from_obstacle(
+            return __Objective.from_obstacle(
                 Direction.EAST,
-                Point(max(obstacle.south_west.x - gap - clearance, 0), max(obstacle.south_west.y - alignment, 0)),
+                Point(max(obstacle.south_west.x - gap - clearance, 0),
+                      max(obstacle.south_west.y + clearance - alignment, 0)),
                 clearance,
                 clearance,
-                obstacle.image_id
             )
 
 
-@dataclass
-class Objective(Entity):
-    image_id: int
+@dataclass()
+class __Objective(Entity):
 
     @classmethod
     def from_obstacle(
@@ -116,15 +122,12 @@ class Objective(Entity):
             south_west: Point,
             width: int,
             height: int,
-            image_id: int,
-    ) -> Objective:
+    ) -> __Objective:
         return cls(
             direction,
             south_west,
             Point(south_west.x + width - 1, south_west.y + height - 1),
-            image_id,
         )
 
     def __post_init__(self):
-        assert 1 <= self.image_id < 36
         super().__post_init__()
