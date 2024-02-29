@@ -66,7 +66,7 @@ class World:
                 continue
 
             next_clearance = max(vector.x - x, vector.y - y)
-            if vector.x - x < next_clearance:
+            if next_clearance < clearance:
                 clearance = next_clearance
 
         return clearance

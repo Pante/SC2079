@@ -41,7 +41,7 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     The minimum left/bottom alignment (in grid cells) between the obstacle and objective, inclusive. 
     (Total cm / cm per cell). This should be increased as the difference in sizes between obstacles & the robot increases.
     """
-    minimum_alignment = 0 // world.cell_size
+    minimum_alignment = 5 // world.cell_size
 
     # Max alignment computation assumes that obstacle clearance is less than robot. It stops when the robot is
     # left-aligned with the obstacle. This excludes valid positions to the right if the obstacle is larger than the
@@ -77,10 +77,10 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
     clearance = world.robot.clearance
     match obstacle.direction:
         case Direction.NORTH:
-            north_west = obstacle.north_west
+            print(obstacle.north_east.x - clearance + alignment, 0)
             return __Objective.from_obstacle(
                 Direction.SOUTH,
-                Point(max(north_west.x + clearance - alignment, 0), max(north_west.y + gap, 0)),
+                Point(max(obstacle.north_east.x - clearance + alignment, 0), max(obstacle.north_west.y + gap, 0)),
                 clearance,
                 clearance,
             )
@@ -103,10 +103,11 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
             )
 
         case Direction.WEST:
+            north_west = obstacle.north_west
             return __Objective.from_obstacle(
                 Direction.EAST,
-                Point(max(obstacle.south_west.x - gap - clearance, 0),
-                      max(obstacle.south_west.y + clearance - alignment, 0)),
+                Point(max(north_west.x - gap - clearance, 0),
+                      max(north_west.y - clearance + alignment, 0)),
                 clearance,
                 clearance,
             )
