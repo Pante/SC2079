@@ -10,18 +10,19 @@ from python_tsp.exact import solve_tsp_dynamic_programming
 
 from pathfinding.search.instructions import Turn, TurnInstruction, Move, MoveInstruction, MiscInstruction
 from pathfinding.search.segment import segment
-from pathfinding.world.objective import Objective
 from pathfinding.world.primitives import Vector
-from pathfinding.world.world import Robot, World, GRID_CELL_SIZE
+from pathfinding.world.world import Robot, World, Obstacle
 
 
-def search(world: World, objectives: List[Objective]) -> List[Segment]:
-    entities = [world.robot] + objectives
-    permutation, _ = __hamiltonian_path(entities)
-    return __segments(world, [entities[i] for i in permutation])
+def search(world: World, objectives: dict[Obstacle, set[Vector]]) -> List[Segment]:
+    entities = [world.robot] + world.obstacles
+    permutation, _ = __hamiltonian_path(entities, objectives)
+    return __segments(world, [entities[i] for i in permutation], objectives)
 
 
-def __hamiltonian_path(entities: List[Robot | Objective]) -> tuple[List[int], float]:
+# TODO: We should replace this function path with better search heuristics to prevent edge cases.
+def __hamiltonian_path(entities: List[Robot | Obstacle], objectives: dict[Obstacle, set[Vector]]) -> tuple[
+    List[int], float]:
     """
     Returns the hamiltonian path of the initial robot and the objectives.
     This is used as a heuristic to determine the optimal visitation order of the objectives.
@@ -30,7 +31,21 @@ def __hamiltonian_path(entities: List[Robot | Objective]) -> tuple[List[int], fl
     :return:
         The indexes of the robot (0) and objectives (1:N) in the order of visitation.
         The total distance the optimal permutation produces.
+
+    11, 29, 9, 13
     """
+
+    positions: list[list[int]] = []
+    for entity in entities:
+        match entity:
+            case r if isinstance(r, Robot):
+                positions.append([entity.south_west.x, entity.south_west.y])
+
+            case o if isinstance(o, Obstacle):
+                # Getting an element from a set is non-deterministic
+                objective = next(iter(objectives[o]))
+                positions.append([objective.x, objective.y])
+
     positions = [[entity.south_west.x, entity.south_west.y] for entity in entities]
     distance_matrix = euclidean_distance_matrix(np.array(positions))
     distance_matrix[:, 0] = 0
@@ -38,11 +53,11 @@ def __hamiltonian_path(entities: List[Robot | Objective]) -> tuple[List[int], fl
     return permutation, distance
 
 
-def __segments(world: World, entities: List[Robot | Objective]) -> List[Segment]:
+def __segments(world: World, entities: List[Robot | Obstacle], objectives: dict[Obstacle, set[Vector]]) -> List[Segment]:
     segments = []
     for a, b in pairwise(entities):
-        tuple = segment(world, a.vector, b.vector)
-        segments.append(Segment.compress(b.image_id if isinstance(b, Objective) else None, tuple))
+        tuple = segment(world, a.vector, objectives[b])
+        segments.append(Segment.compress(world, b.image_id if isinstance(b, Obstacle) else None, tuple))
 
     return segments
 
@@ -55,7 +70,7 @@ class Segment:
     vectors: list[Vector]
 
     @classmethod
-    def compress(cls, image_id: int | None, information: tuple[int, list[tuple[Vector, Turn | Move]]]) -> Segment:
+    def compress(cls, world: World, image_id: int | None, information: tuple[int, list[tuple[Vector, Turn | Move]]]) -> Segment:
         cost, parts = information
         instructions: List[TurnInstruction | MoveInstruction | MiscInstruction] = []
         vectors: list[Vector] = []
@@ -68,11 +83,11 @@ class Segment:
 
                 case Move() if instructions and isinstance(instructions[-1], MoveInstruction) and instructions[-1].move == movement:
                     vectors.append(vector)
-                    instructions[-1].amount += GRID_CELL_SIZE
+                    instructions[-1].amount += world.cell_size
 
                 case Move():
                     vectors.append(vector)
-                    instructions.append(MoveInstruction(movement, GRID_CELL_SIZE))
+                    instructions.append(MoveInstruction(movement, world.cell_size))
 
         instructions.append(MiscInstruction.CAPTURE_IMAGE)
 

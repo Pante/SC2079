@@ -9,7 +9,7 @@ from pathfinding.world.primitives import Vector
 from pathfinding.world.world import World, Cell
 
 
-def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List[tuple[Vector, Turn | Move | None]]]:
+def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int, List[tuple[Vector, Turn | Move | None]]]:
     """
     Finds the shortest path of a segment of the overall path.
 
@@ -26,7 +26,7 @@ def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List
 
     :param world: The world.
     :param initial: The initial vector. Always the south-west corner of the robot.
-    :param objective: The goal vector. Always the south-west corner of an objective.
+    :param objectives: The possible objective vectors. Always the south-west corner of objectives.
     :return:
         The cost of the segment.
         The vectors and corresponding instructions from the initial vector to the objective vector. Vectors that form
@@ -42,11 +42,12 @@ def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List
     instructions[initial] = None
     costs[initial] = 0
     cell = Cell(world.robot.direction, world.robot.south_west, world.robot.north_east)
+    current = initial
 
     while not frontier.empty():
         current = frontier.pop()
 
-        if current == objective:
+        if current in objectives:
             break
 
         for next, instruction in __neighbours(world, cell, current):
@@ -55,16 +56,17 @@ def segment(world: World, initial: Vector, objective: Vector) -> tuple[int, List
                 case Move():
                     new_cost += + 1
                 case Turn():
+                    # TODO: Should diagonals' cost be 2 instead of 1?
                     new_cost += len(instruction.vectors)
 
             if next not in costs or new_cost < costs[next]:
-                frontier.add(new_cost + __heuristic(next, objective), next)
+                frontier.add(new_cost + __heuristic(next, objectives), next)
                 source[next] = current
                 instructions[next] = instruction
                 costs[next] = new_cost
 
     path = []
-    current = objective
+    objective = current
 
     while current is not None:
         path.append((current, instructions.get(current)))
@@ -91,7 +93,7 @@ class __PriorityQueue:
 
 def __neighbours(world: World, cell: Cell, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
     for instruction in TurnInstruction:
-        path = turn(current, instruction)
+        path = turn(world, current, instruction)
         if all(map(lambda p: world.contains(cell.set_vector(p)), path)):
             yield path[-1], Turn(instruction, path)
 
@@ -101,8 +103,8 @@ def __neighbours(world: World, cell: Cell, current: Vector) -> Generator[tuple[V
             yield next, instruction
 
 
-def __heuristic(a: Vector, b: Vector) -> int:
+def __heuristic(current: Vector, objectives: set[Vector]) -> int:
     """
     The Euclidean distance between two vectors. This is preferred over Manhattan distance which is not admissible.
     """
-    return int(math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2))
+    return min(int(math.sqrt((objective.x - current.x) ** 2 + (objective.y - current.y) ** 2)) for objective in objectives)

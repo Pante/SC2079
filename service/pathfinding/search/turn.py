@@ -1,18 +1,13 @@
 from pathfinding.search.instructions import TurnInstruction
 from pathfinding.world.primitives import Direction, Vector
-from pathfinding.world.world import GRID_CELL_SIZE
-
-# The turning radius (in grid cells). The turning radius is assumed to be 25cm.
-LEFT_TURNING_RADIUS = 15 // GRID_CELL_SIZE
-
-# The right turning radius (in grid cells). The right turning radius is assumed to be 25cm.
-RIGHT_TURNING_RADIUS = 25 // GRID_CELL_SIZE
+from pathfinding.world.world import World
 
 
-def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
+def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vector]:
     """
     Performs a turn.
 
+    :param world: The world.
     :param start: The initial vector.
     :param instruction: The turn instruction.
     :return:
@@ -20,13 +15,18 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         the vector after executing the turn
         the quadrant of the turn,
     """
+
+    # The turning radius (in grid cells). The turning radius is assumed to be 25cm.
+    turning_radius = (25 // world.cell_size) - ((world.robot.clearance + 1) // 2)
+
     match (start.direction, instruction):
         # Initially facing north
         case (Direction.NORTH, TurnInstruction.FORWARD_LEFT):
             return __curve(
                 start,
-                Vector(Direction.WEST, start.x - LEFT_TURNING_RADIUS, start.y + LEFT_TURNING_RADIUS),
-                start.x - LEFT_TURNING_RADIUS,
+                turning_radius,
+                Vector(Direction.WEST, start.x - turning_radius, start.y + turning_radius),
+                start.x - turning_radius,
                 start.y,
                 1,
             )
@@ -34,8 +34,9 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         case (Direction.NORTH, TurnInstruction.FORWARD_RIGHT):
             return __curve(
                 start,
-                Vector(Direction.EAST, start.x + RIGHT_TURNING_RADIUS, start.y + RIGHT_TURNING_RADIUS),
-                start.x + RIGHT_TURNING_RADIUS,
+                turning_radius,
+                Vector(Direction.EAST, start.x + turning_radius, start.y + turning_radius),
+                start.x + turning_radius,
                 start.y,
                 2,
             )
@@ -43,8 +44,9 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         case (Direction.NORTH, TurnInstruction.BACKWARD_LEFT):
             return __curve(
                 start,
-                Vector(Direction.EAST, start.x - LEFT_TURNING_RADIUS, start.y - LEFT_TURNING_RADIUS),
-                start.x - LEFT_TURNING_RADIUS,
+                turning_radius,
+                Vector(Direction.EAST, start.x - turning_radius, start.y - turning_radius),
+                start.x - turning_radius,
                 start.y,
                 4,
             )
@@ -52,8 +54,9 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         case (Direction.NORTH, TurnInstruction.BACKWARD_RIGHT):
             return __curve(
                 start,
-                Vector(Direction.WEST, start.x + RIGHT_TURNING_RADIUS, start.y - RIGHT_TURNING_RADIUS),
-                start.x + RIGHT_TURNING_RADIUS,
+                turning_radius,
+                Vector(Direction.WEST, start.x + turning_radius, start.y - turning_radius),
+                start.x + turning_radius,
                 start.y,
                 3,
             )
@@ -62,36 +65,40 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         case (Direction.EAST, TurnInstruction.FORWARD_LEFT):
             return __curve(
                 start,
-                Vector(Direction.NORTH, start.x + LEFT_TURNING_RADIUS, start.y + LEFT_TURNING_RADIUS),
+                turning_radius,
+                Vector(Direction.NORTH, start.x + turning_radius, start.y + turning_radius),
                 start.x,
-                start.y + LEFT_TURNING_RADIUS,
+                start.y + turning_radius,
                 4,
             )
 
         case (Direction.EAST, TurnInstruction.FORWARD_RIGHT):
             return __curve(
                 start,
-                Vector(Direction.SOUTH, start.x + RIGHT_TURNING_RADIUS, start.y - RIGHT_TURNING_RADIUS),
+                turning_radius,
+                Vector(Direction.SOUTH, start.x + turning_radius, start.y - turning_radius),
                 start.x,
-                start.y - RIGHT_TURNING_RADIUS,
+                start.y - turning_radius,
                 1,
             )
 
         case (Direction.EAST, TurnInstruction.BACKWARD_LEFT):
             return __curve(
                 start,
-                Vector(Direction.SOUTH, start.x - LEFT_TURNING_RADIUS, start.y + LEFT_TURNING_RADIUS),
+                turning_radius,
+                Vector(Direction.SOUTH, start.x - turning_radius, start.y + turning_radius),
                 start.x,
-                start.y + LEFT_TURNING_RADIUS,
+                start.y + turning_radius,
                 3,
             )
 
         case (Direction.EAST, TurnInstruction.BACKWARD_RIGHT):
             return __curve(
                 start,
-                Vector(Direction.NORTH, start.x - RIGHT_TURNING_RADIUS, start.y - RIGHT_TURNING_RADIUS),
+                turning_radius,
+                Vector(Direction.NORTH, start.x - turning_radius, start.y - turning_radius),
                 start.x,
-                start.y - RIGHT_TURNING_RADIUS,
+                start.y - turning_radius,
                 2,
             )
 
@@ -99,8 +106,9 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         case (Direction.SOUTH, TurnInstruction.FORWARD_LEFT):
             return __curve(
                 start,
-                Vector(Direction.EAST, start.x + LEFT_TURNING_RADIUS, start.y - LEFT_TURNING_RADIUS),
-                start.x + LEFT_TURNING_RADIUS,
+                turning_radius,
+                Vector(Direction.EAST, start.x + turning_radius, start.y - turning_radius),
+                start.x + turning_radius,
                 start.y,
                 3,
             )
@@ -108,8 +116,9 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         case (Direction.SOUTH, TurnInstruction.FORWARD_RIGHT):
             return __curve(
                 start,
-                Vector(Direction.WEST, start.x - RIGHT_TURNING_RADIUS, start.y - RIGHT_TURNING_RADIUS),
-                start.x - RIGHT_TURNING_RADIUS,
+                turning_radius,
+                Vector(Direction.WEST, start.x - turning_radius, start.y - turning_radius),
+                start.x - turning_radius,
                 start.y,
                 4,
             )
@@ -117,8 +126,9 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         case (Direction.SOUTH, TurnInstruction.BACKWARD_LEFT):
             return __curve(
                 start,
-                Vector(Direction.WEST, start.x + LEFT_TURNING_RADIUS, start.y + LEFT_TURNING_RADIUS),
-                start.x + LEFT_TURNING_RADIUS,
+                turning_radius,
+                Vector(Direction.WEST, start.x + turning_radius, start.y + turning_radius),
+                start.x + turning_radius,
                 start.y,
                 2,
             )
@@ -126,8 +136,9 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         case (Direction.SOUTH, TurnInstruction.BACKWARD_RIGHT):
             return __curve(
                 start,
-                Vector(Direction.EAST, start.x - RIGHT_TURNING_RADIUS, start.y + RIGHT_TURNING_RADIUS),
-                start.x - RIGHT_TURNING_RADIUS,
+                turning_radius,
+                Vector(Direction.EAST, start.x - turning_radius, start.y + turning_radius),
+                start.x - turning_radius,
                 start.y,
                 1,
             )
@@ -136,41 +147,45 @@ def turn(start: Vector, instruction: TurnInstruction) -> list[Vector]:
         case (Direction.WEST, TurnInstruction.FORWARD_LEFT):
             return __curve(
                 start,
-                Vector(Direction.SOUTH, start.x - LEFT_TURNING_RADIUS, start.y - LEFT_TURNING_RADIUS),
+                turning_radius,
+                Vector(Direction.SOUTH, start.x - turning_radius, start.y - turning_radius),
                 start.x,
-                start.y - LEFT_TURNING_RADIUS,
+                start.y - turning_radius,
                 2,
             )
 
         case (Direction.WEST, TurnInstruction.FORWARD_RIGHT):
             return __curve(
                 start,
-                Vector(Direction.NORTH, start.x - RIGHT_TURNING_RADIUS, start.y + RIGHT_TURNING_RADIUS),
+                turning_radius,
+                Vector(Direction.NORTH, start.x - turning_radius, start.y + turning_radius),
                 start.x,
-                start.y + RIGHT_TURNING_RADIUS,
+                start.y + turning_radius,
                 3,
             )
 
         case (Direction.WEST, TurnInstruction.BACKWARD_LEFT):
             return __curve(
                 start,
-                Vector(Direction.NORTH, start.x + LEFT_TURNING_RADIUS, start.y - LEFT_TURNING_RADIUS),
+                turning_radius,
+                Vector(Direction.NORTH, start.x + turning_radius, start.y - turning_radius),
                 start.x,
-                start.y - LEFT_TURNING_RADIUS,
+                start.y - turning_radius,
                 1,
             )
 
         case (Direction.WEST, TurnInstruction.BACKWARD_RIGHT):
             return __curve(
                 start,
-                Vector(Direction.SOUTH, start.x + RIGHT_TURNING_RADIUS, start.y + RIGHT_TURNING_RADIUS),
+                turning_radius,
+                Vector(Direction.SOUTH, start.x + turning_radius, start.y + turning_radius),
                 start.x,
-                start.y + RIGHT_TURNING_RADIUS,
+                start.y + turning_radius,
                 1,
             )
 
 
-def __curve(start: Vector, end: Vector, centre_x: int, centre_y, quadrant: int) -> list[Vector]:
+def __curve(start: Vector, turning_radius: int, end: Vector, centre_x: int, centre_y, quadrant: int) -> list[Vector]:
     """
     Uses a modified Midpoint circle algorithm to determine the curved path of a robot when turning.
 
@@ -186,7 +201,7 @@ def __curve(start: Vector, end: Vector, centre_x: int, centre_y, quadrant: int) 
     """
     assert 1 <= quadrant <= 4
 
-    x = RIGHT_TURNING_RADIUS
+    x = turning_radius
     y = 0
     err = 0
 
@@ -222,13 +237,18 @@ def __curve(start: Vector, end: Vector, centre_x: int, centre_y, quadrant: int) 
 
     first_part, second_part = __order(start, a, b)
     second_part.reverse()
-    second_part.append(end)
-
     for vector in first_part:
         vector.direction = start.direction
 
     for vector in second_part:
         vector.direction = end.direction
+
+    # The start & end may contain vectors with the same coordinates but different directions.
+    if first_part[-1].x == second_part[0].x and first_part[-1].y == second_part[0].y:
+        first_part.pop()
+
+    if second_part[-1] != end:
+        second_part.append(end)
 
     return first_part + second_part
 
