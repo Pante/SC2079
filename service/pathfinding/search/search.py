@@ -56,7 +56,7 @@ def __hamiltonian_path(entities: List[Robot | Obstacle], objectives: dict[Obstac
 def __segments(world: World, entities: List[Robot | Obstacle], objectives: dict[Obstacle, set[Vector]]) -> List[Segment]:
     segments = []
     for a, b in pairwise(entities):
-        tuple = segment(world, a.vector, objectives[b])
+        tuple = segment(world, segments[-1].vectors[-1] if segments else a.vector, objectives[b])
         segments.append(Segment.compress(world, b.image_id if isinstance(b, Obstacle) else None, tuple))
 
     return segments

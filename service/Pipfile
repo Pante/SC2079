@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 flask-openapi3 = "*"
+flask_cors = "*"
 jinja2 = "*"
 marshmallow = "*"
 marshmallow_enum="*"
