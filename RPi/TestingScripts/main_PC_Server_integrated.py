@@ -10,6 +10,7 @@ class PCMainIntegrated:
         self.process_PC_receive = None
         self.process_PC_stream = None
         
+        self.exit = False
         self.pc_receive_thread = None
         self.stream_thread = None
         
@@ -19,6 +20,7 @@ class PCMainIntegrated:
         self.client_socket = None
 
         self.stream_listener = StreamListener('v9_task1.pt')
+        self.prev_image = None
     
     def start(self):
         self.pc_receive_thread = threading.Thread(target=self.pc_receive)
@@ -45,49 +47,44 @@ class PCMainIntegrated:
         self.disconnect()
         
     def stream_start(self):
-        self.stream_listener.start_stream_read(self.on_result, self.on_disconnect, show_video=True)
+        self.stream_listener.start_stream_read(
+            self.on_result, self.on_disconnect,
+            conf_threshold=0.65, 
+            show_video=True
+        )
 
     def on_result(self, result):
-        prev_image = None
+        message_content = None
 
         if result is not None:
             names = result.names
 
-            if prev_image is None:
+            if self.prev_image is None:
                 # New image, can send over
-                # Only if the confidence is > 0.7 then pass to the PC
+                # Only if the confidence is over threshold then pass to the PC
                 # TODO: Pass this data to RPI through the PC socket - Flask API
                 message_content = str(result.boxes[0].conf.item()) + "," + names[int(result.boxes[0].cls[0].item())]
-                # self.client_socket.send(message_content.encode('utf-8'))
-                self.client_socket.send(message_content.encode('utf-8'))
-                prev_image = names[int(result.boxes[0].cls[0].item())]
-                print("FIRST: ", prev_image)
-            else:
-                # There is a previous image, compare the new image with the previous one
-                if names[int(result.boxes[0].cls[0].item())] == prev_image:
-                    # Do nothing
-                    pass
-                else:
-                    # New image, can send over
-                    message_content = str(result.boxes[0].conf.item()) + "," + names[int(result.boxes[0].cls[0].item())]
-                    # self.client_socket.send(message_content.encode('utf-8'))
-                    self.client_socket.send(message_content.encode('utf-8'))
-                    prev_image = names[int(result.boxes[0].cls[0].item())]
-                    print("SECOND: ", prev_image)
-        else:
-            if prev_image == "NONE":
-                # Dont sent over, it's already NONE
-                pass
-            else:
-                # No obejct detected, send "NONE" over
-                # Upon capture image, if no object is detected -- "NONE", continue to wait until a object is detected (not "NONE")
-                message_content = "NONE"
-                self.client_socket.send(message_content.encode('utf-8'))
-                prev_image = "NONE"
+                self.prev_image = names[int(result.boxes[0].cls[0].item())]
+                print("FIRST: ", self.prev_image)
+            elif names[int(result.boxes[0].cls[0].item())] != self.prev_image:
+                # New image, can send over
+                message_content = str(result.boxes[0].conf.item()) + "," + names[int(result.boxes[0].cls[0].item())]
+                self.prev_image = names[int(result.boxes[0].cls[0].item())]
+                print("SECOND: ", self.prev_image)
+        
+        elif self.prev_image != "NONE":
+            # No object detected, send "NONE" over
+            # Upon capture image, if no object is detected -- "NONE", continue to wait until a object is detected (not "NONE")
+            message_content = "NONE"
+            self.prev_image = "NONE"
+
+        if message_content is not None:
+            print("Sending:", message_content)
+            self.client_socket.send(message_content.encode('utf-8'))
     
     def on_disconnect(self):
-        print("Stream disconnected, re-connect.")
-        self.stream_start()
+        print("Stream disconnected, disconnect.")
+        self.disconnect()
     
     def connect(self):
         try:
@@ -98,12 +95,12 @@ class PCMainIntegrated:
             
     def disconnect(self):
         try:
+            self.exit = True
             self.client_socket.shutdown(socket.SHUT_RDWR)
             self.client_socket.close()
             self.client_socket = None
             print("Disconnected from PC successfully")
 
-            self
         except Exception as e:
             print("Failed to disconnected from PC:", e)
         
@@ -111,7 +108,7 @@ class PCMainIntegrated:
         print("PC Socket connection started successfully")
         self.connect()
         # print("Went into the receive function")
-        while True:
+        while not self.exit:
             try:
                 message_rcv = self.client_socket.recv(1024).decode('utf-8')
                 if not message_rcv:
