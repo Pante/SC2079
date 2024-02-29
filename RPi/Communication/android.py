@@ -188,8 +188,10 @@ class Android(Link):
         """Send message to Android"""
         try:
 			# Default code to send a message to Android. - Bryan
-            self.client_socket.send(f"{message.jsonify}\n".encode("utf-8"))
-            print("Sent to Android: %s", str(message.jsonify))
+            # ~ self.client_socket.send(f"{message.jsonify}\n".encode("utf-8"))
+            self.client_socket.send(f"{message}\n".encode("utf-8"))
+            print("Sent to Android: %s", str(message))
+            # ~ print("Sent to Android: %s", str(message.jsonify))
         except OSError as e:
             print("Message sending failed: %s", str(e))
             raise e

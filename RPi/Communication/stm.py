@@ -6,9 +6,9 @@ import sys
 from pathlib import Path
 sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
 from Communication.configuration import SERIAL_PORT, BAUD_RATE
-from Communication.link import Link
+# ~ from Communication.link import Link
 
-class STM(Link):
+class STM():
     """Class for communicating with STM32 microcontroller over UART serial connection.
 
     ### RPi to STM32
@@ -35,6 +35,7 @@ class STM(Link):
         """
         super().__init__()
         self.serial = None
+        self.received = []
 
     def connect(self):
         """Connect to STM32 using serial UART connection, given the serial port and the baud rate"""
@@ -52,25 +53,29 @@ class STM(Link):
         Args:
             message (str): message to send
         """
-        self.serial.write(f"{message}".encode("utf-8"))
-        print("Sent to STM32: %s", str(message))
-
-    def receive(self) -> Optional[str]:
+        self.serial.write(bytes(message, "utf-8"))
+        print("Sent to STM32:", str(message).rstrip())
+    
+    def wait_receive(self, ticks = 5000) -> Optional[str]:
         """Receive a message from STM32, utf-8 decoded
 
         Returns:
             Optional[str]: message received
         """
-        print(self.serial)
-        message = str(self.serial.read(10).decode("utf-8", errors="ignore"))
-        print("Message received from stm: %s", str(message))
+        t = 0
+        message = None
+        while t < ticks:
+            if self.serial.in_waiting > 0:
+                message = str(self.serial.read_all(), "utf-8")
+                break
+
         return message
     
-    def stmTest(self):
-        self.send("SF010")
-        while True:
-            message: str = self.receive()
-            if message != None:
-                print(message)
-                break
+    def send_cmd(self, flag, speed, angle, val):
+        """Send command and wait for acknowledge.
+        """
+
+        cmd = f"{flag}{speed}|{angle}|{val}\n" if flag != 'S' else 'S\n'
+        self.send(cmd)
+        print(f"Sent {cmd} to STM.")
 		

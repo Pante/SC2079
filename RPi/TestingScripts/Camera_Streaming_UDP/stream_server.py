@@ -4,14 +4,10 @@ from threading import Thread
 import time
 
 class StreamServer():
-    # define constants used in this class.
+    # define constants.
     def define_constants(self):
         self.BUFF_SIZE = 65536
-
-        # Raspberry Pi streaming IP and port.
-        self.HOST_ADDR = ('192.168.14.14', 5000)
-
-        # used to signal to server to switch IP to current client.
+        self.HOST_ADDR = ('192.168.14.14', 5005)
         self.REQ_STREAM = b"stream_request"
 
     def __init__(self):
@@ -74,9 +70,9 @@ class StreamServer():
     def close(self):
         self.exit = True
 
-# sample use of this class.
-def stream_server_test():
-    server = StreamServer()
-    server.start()
+# # sample use of this class.
+# def stream_server_test():
+#     server = StreamServer()
+#     server.start()
 
-stream_server_test() # comment this out when actually using!
+# stream_server_test() # comment this out when actually using!
