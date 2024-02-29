@@ -17,7 +17,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
     """
 
     # The turning radius (in grid cells). The turning radius is assumed to be 25cm.
-    turning_radius = (25 // world.cell_size) - ((world.robot.clearance + 1) // 2)
+    turning_radius = (25 // world.cell_size) + 2
 
     match (start.direction, instruction):
         # Initially facing north

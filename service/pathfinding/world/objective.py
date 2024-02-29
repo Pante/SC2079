@@ -41,7 +41,7 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     The minimum left/bottom alignment (in grid cells) between the obstacle and objective, inclusive. 
     (Total cm / cm per cell). This should be increased as the difference in sizes between obstacles & the robot increases.
     """
-    minimum_alignment = 5 // world.cell_size
+    minimum_alignment = 10 // world.cell_size
 
     # Max alignment computation assumes that obstacle clearance is less than robot. It stops when the robot is
     # left-aligned with the obstacle. This excludes valid positions to the right if the obstacle is larger than the
