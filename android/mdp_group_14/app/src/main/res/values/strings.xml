@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">MDP_Group_14</string>
+    <string name="tab_text_1">Bluetooth</string>
+    <string name="tab_text_2">Chat</string>
+    <string name="tab_text_3">Map Config</string>
+    <string name="tab_text_4">Challenge</string>
+
+    <!--  Comms  -->
+    <string name="send">SEND</string>
+    <string name="configure">Reconfigure</string>
+    <string name="f1">F1</string>
+    <string name="f2">F2</string>
+    <string name="bluetooth_connection">Not Connected</string>
+
+    <!-- Dialog -->
+    <string name="reconfiguration">Reconfiguration</string>
+    <string name="f1Title">F1:</string>
+    <string name="f2Title">F2:</string>
+    <string name="f1Placeholder">Enter F1 value</string>
+    <string name="f2Placeholder">Enter F2 value</string>
+    <string name="save">SAVE</string>
+    <string name="cancel">CANCEL</string>
+
+    <!-- Map -->
+    <string name="manual">MANUAL</string>
+    <string name="auto">AUTO</string>
+</resources>

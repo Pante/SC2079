@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/manualFragmentTitleTextView"
+        android:layout_width="500dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="Manual obstacle input"
+        android:textColor="@color/black"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/xTextView"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="85dp"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="X: "
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/manualFragmentTitleTextView" />
+
+    <Spinner
+        android:id="@+id/xDropdownSpinner"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintStart_toEndOf="@+id/xTextView"
+        app:layout_constraintTop_toBottomOf="@+id/manualFragmentTitleTextView" />
+
+    <TextView
+        android:id="@+id/yTextView"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="Y: "
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/xDropdownSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/manualFragmentTitleTextView" />
+
+    <Spinner
+        android:id="@+id/yDropdownSpinner"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintStart_toEndOf="@+id/yTextView"
+        app:layout_constraintTop_toBottomOf="@+id/manualFragmentTitleTextView" />
+
+    <TextView
+        android:id="@+id/directionTextView"
+        android:layout_width="140dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="Direction: "
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/xTextView" />
+
+    <Spinner
+        android:id="@+id/directionDropdownSpinner"
+        android:layout_width="140dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginRight="110dp"
+        android:minWidth="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.16"
+        app:layout_constraintStart_toEndOf="@+id/directionTextView"
+        app:layout_constraintTop_toBottomOf="@+id/xTextView" />
+
+    <Button
+        android:id="@+id/addManualBtn"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="ADD"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.619"
+        app:layout_constraintStart_toEndOf="@+id/cancelManualBtn"
+        app:layout_constraintTop_toBottomOf="@+id/directionDropdownSpinner"
+        app:layout_constraintVertical_bias="0.049"
+        android:background="@drawable/border_black_state"
+        app:backgroundTint="@color/colorYellow"/>
+
+
+    <Button
+        android:id="@+id/cancelManualBtn"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="8dp"
+        android:onClick="Cancel"
+        android:text="CANCEL"
+        android:textSize="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/directionTextView"
+        app:layout_constraintVertical_bias="0.05"
+        android:background="@drawable/border_black_state"
+        app:backgroundTint="@color/colorYellow"
+        />
+
+    <Switch
+        android:id="@+id/isObstSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:text="Obstacle"
+        app:layout_constraintBottom_toBottomOf="@+id/directionDropdownSpinner"
+        app:layout_constraintStart_toEndOf="@+id/directionDropdownSpinner"
+        app:layout_constraintTop_toTopOf="@+id/directionDropdownSpinner" />
+
+</androidx.constraintlayout.widget.ConstraintLayout >

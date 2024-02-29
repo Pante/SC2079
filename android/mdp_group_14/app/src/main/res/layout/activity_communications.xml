@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_comms"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:focusableInTouchMode="true">
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="400dp"
+            android:layout_height="350dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/messageReceivedTitleTextView"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="5dp"
+                android:gravity="bottom"
+                android:scrollbars="vertical"
+                android:textSize="15sp"
+                android:background="@drawable/rounded_corner"/>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/typeBoxEditText"
+                    android:layout_width="302dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center|start"
+                    android:hint="Type something..."
+                    android:paddingStart="10dp"
+                    android:textSize="14sp"
+                    android:background="@drawable/rounded_corner"/>
+
+
+                <ImageButton
+                    android:id="@+id/messageButton"
+                    android:layout_width="75dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="5dp"
+                    android:foregroundGravity="center"
+                    android:paddingStart="20dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="10dp"
+                    android:scaleType="fitCenter"
+                    android:background="@drawable/custom_button2"
+                    android:src="@drawable/pokemon_msg"/>
+
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
