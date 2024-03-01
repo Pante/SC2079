@@ -136,6 +136,7 @@ public class BluetoothConnectionService {
 
                 } catch (Exception z) {
                     z.printStackTrace();
+                    Log.e(TAG,"error here");
                 }
 
             }
@@ -258,15 +259,7 @@ public class BluetoothConnectionService {
                 Log.e(TAG, "Error writing to output stream. "+e.getMessage());
             }
         }
-//        public void writeJson(JSONArray[] bytes){
-//            JSONArray text = new JSONArray("Json",bytes);
-//            Log.d(TAG, "write: Writing to output stream: "+text);
-//            try {
-//                outStream.write(text);
-//            } catch (IOException e) {
-//                Log.e(TAG, "Error writing to output stream. "+e.getMessage());
-//            }
-//        }
+
 
         public void cancel(){
             Log.d(TAG, "cancel: Closing Client Socket");

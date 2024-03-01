@@ -20,7 +20,7 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/pikachu_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MDP_Grp_21">
+        android:theme="@style/Theme.MDP_Grp_14">
         <activity
             android:name="com.example.mdp_group_14.MainActivity"
             android:exported="true">
