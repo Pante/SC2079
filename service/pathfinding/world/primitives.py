@@ -16,18 +16,6 @@ class Point:
     x: int
     y: int
 
-    def direction(self, to: Point) -> Direction:
-        assert self.x != to.x ^ self.y != to.y
-        match (self.x, self.y):
-            case (0, y) if y < 0:
-                return Direction.NORTH
-            case (x, 0) if x < 0:
-                return Direction.EAST
-            case (x, 0) if x > 0:
-                return Direction.WEST
-            case (0, y) if y > 0:
-                return Direction.SOUTH
-
 
 class Direction(str, Enum):
     NORTH = 'NORTH'
