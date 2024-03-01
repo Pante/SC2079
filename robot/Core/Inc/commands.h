@@ -6,10 +6,12 @@
 #include "commands_FLAGS.h"
 #include "convert.h"
 
-typedef enum {
+enum _cmdDistType {
 	TARGET,			//drive for this distance
 	STOP_AWAY		//stop when roughly this distance away from front.
-} CmdDistType;
+};
+
+typedef enum _cmdDistType CmdDistType;
 
 struct command_t {
 	//command string

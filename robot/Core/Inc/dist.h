@@ -7,8 +7,8 @@
 #define DIST_S_MOTOR 0.75f
 
 //accurate range of IR sensor.
-#define DIST_IR_MIN 10
-#define DIST_IR_MAX 70
+#define DIST_IR_MIN 10.0f
+#define DIST_IR_MAX 70.0f
 
 typedef struct {
 	float dist;

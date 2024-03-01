@@ -1,0 +1,3 @@
+../Core/Src/mag_cal.c:16:6:magcal_init	0	static
+../Core/Src/mag_cal.c:24:6:magcal_calc_params	928	static
+../Core/Src/mag_cal.c:151:6:magcal_adjust	0	static

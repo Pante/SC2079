@@ -10,6 +10,10 @@ float dist_squared(float x1, float x2, float y1, float y2) {
 	return square_float(x1 - x2) + square_float(y1 - y2);
 }
 
+uint8_t min_uint8(uint8_t a, uint8_t b) {
+	return a < b ? a : b;
+}
+
 uint16_t get_uint16(char *buf, uint16_t size) {
 	uint16_t ret = 0, i = 0;
 	while (i < size) {

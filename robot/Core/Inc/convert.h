@@ -14,6 +14,8 @@ float abs_float(float a);
 float square_float(float a);
 float dist_squared(float x1, float x2, float y1, float y2);
 
+uint8_t min_uint8(uint8_t a, uint8_t b);
+
 uint16_t get_uint16(char *buf, uint16_t size);
 uint16_t parse_uint16_t_until(uint8_t **buf_ptr, uint8_t until, uint8_t sizeExpected);
 float parse_float_until(uint8_t **buf_ptr, uint8_t until, uint8_t sizeExpected);

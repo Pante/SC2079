@@ -38,7 +38,7 @@ float dist_get_front(float usDist, float irDist) {
 	float dist = usDist;
 	if (usDist > DIST_IR_MIN && usDist < DIST_IR_MAX) {
 		//use IR for averaging.
-		dist = (usDist + irDist) / 2;
+		dist = 0.8 * usDist + 0.2 * irDist;
 	}
 
 	return dist;

@@ -106,7 +106,6 @@ static void MX_TIM7_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-
 //serial in.
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(&huart3, &byte_serial, 1);
@@ -130,8 +129,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 }
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
+	if (htim != &htim4) return;
+
 	if (!isRisingCaptured) {
 		//rising edge
+		usCaptureComplete = 0;
+
 		usWrap = 0;
 		__HAL_TIM_SET_COUNTER(htim, 0);
 
@@ -147,7 +150,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 		__HAL_TIM_SET_CAPTUREPOLARITY(htim, US_IC_CHANNEL, TIM_INPUTCHANNELPOLARITY_RISING);
 
 		usCaptureComplete = 1;
-
 	}
 }
 /* --- End: Timer Management --- */
@@ -213,7 +215,7 @@ int main(void)
 
   OLED_ShowString(0, 0, "Press USER when ready...");
   OLED_Refresh_Gram();
-//  while (!user_is_pressed());	//wait for user to place car.
+  while (!user_is_pressed());	//wait for user to place car.
   OLED_Clear();
   OLED_ShowString(0, 0, "Setting sensors bias...");
   OLED_Refresh_Gram();
@@ -228,7 +230,7 @@ int main(void)
   /* ----- Start: OS Parameters ----- */
   //ticking for longer timing requirements for ultrasound.
   uint8_t ticksElapsed = 0,
-		  ticksUltrasound = (15.0f / MS_FRAME) + 1,
+		  ticksUltrasound = (17.5f / MS_FRAME) + 1,
 		  ticksRefresh = ticksUltrasound;
 
   Command *cmd = NULL;							//current command.
@@ -249,7 +251,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim7);					//start paced loop timer.
   /* ----- End: Interrupts ----- */
 
-  uint8_t buf[20];
+  uint8_t buf[17];
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -272,6 +274,11 @@ int main(void)
 	sensors_read_heading(MS_FRAME, sensors.gyroZ);
 	/* ----- End: Sensor reading ----- */
 
+//	if (usCaptureComplete) {
+//		snprintf(buf, 25, "%7.2f,%7.2f,%7.2f\r\n", sensors.usDist, sensors.irDist, dist_get_front(sensors.usDist, sensors.irDist));
+//		HAL_UART_Transmit(&huart3, buf, sizeof(buf), HAL_MAX_DELAY);
+//	}
+
 	/* ----- Start: Get next command (if any) ----- */
 	if (cmd == NULL) {
 		cmd = commands_pop();
@@ -283,7 +290,10 @@ int main(void)
 			if (cmd->dir != 0) {
 				distTarget = cmd->val;
 				distDiff = DIST_DIFF_DEFAULT;
-				brakingDist = MOTOR_BRAKING_DIST_CM * cmd->speed / 100;
+				brakingDist = (cmd->distType == TARGET
+					? MOTOR_BRAKING_DIST_CM_TARGET
+					: MOTOR_BRAKING_DIST_CM_AWAY
+				) * cmd->speed / 100;
 
 				steeringAngle = cmd->steeringAngle;
 				servo_setAngle(steeringAngle);
@@ -329,16 +339,14 @@ int main(void)
 				distDiff = distTarget - estDist;
 				if (rRobot != 0) {
 					if (estAngle >= cmd->val) distDiff = 0;
-					else distDiff = 0.05 * distDiff +
-						0.95 * abs_float(get_arc_length(cmd->val - estAngle, rRobot));
+					else distDiff = abs_float(get_arc_length(cmd->val - estAngle, rRobot));
 				}
 				break;
 			case STOP_AWAY:
 				if (usCaptureComplete) {
-					distDiff = dist_get_front(sensors.usDist, sensors.irDist) - cmd->val;
+					float frontDist = dist_get_front(sensors.usDist, sensors.irDist);
+					distDiff = frontDist - cmd->val;
 					distDiff *= cmd->dir;
-
-					usCaptureComplete = 0;
 				}
 				break;
 			default:
@@ -348,28 +356,32 @@ int main(void)
 
 		Command *next = commands_peek();
 		float nextAngle = next != NULL ? next->steeringAngle : 0;
-		uint8_t shouldBrake = next != NULL
-				? (next->dir != cmd->dir || abs_float(next->steeringAngle - cmd->steeringAngle) > SERVO_WIDTH)
+		float nextAngleDiff = abs_float(next->steeringAngle - cmd->steeringAngle);
+		uint8_t shouldBrake = cmd->distType == STOP_AWAY
+				? 1
+				: next != NULL
+				? next->dir != cmd->dir || nextAngleDiff > SERVO_WIDTH
 				: 1;
-		shouldBrake = 1;
+		uint8_t turnSpeed = min_uint8(25, next->speed);
 
 		//motor correction.
 		motor_pwmCorrection(
 			wDiff, rBack, rRobot, distDiff,
-			shouldBrake ? brakingDist : 0
+			brakingDist, cmd->distType,
+			shouldBrake ? 0 : turnSpeed
 		);
 
-		if (distDiff < (shouldBrake ? 0.1 : 0.85 * cmd->speed / 100) * brakingDist) servo_setAngle(nextAngle);
+		float turnMs = 144.0f * turnSpeed / 25 * nextAngleDiff / SERVO_WIDTH;
+		uint8_t shouldTurn = shouldBrake
+			? distDiff < 0.025 * brakingDist
+			: estSpeed > 0
+			  	  ? distDiff / estSpeed < turnMs
+				  : 0;
+		if (shouldTurn) servo_setAngle(nextAngle);
 		if (distDiff <= 0) {
 			//target achieved; move to next command.
 			commands_end(&huart3, cmd);
 			cmd = NULL;
-
-			snprintf(buf, 20, "%7.3f", motorDist);
-			OLED_ShowString(0, 0, buf);
-			snprintf(buf, 20, "%7.3f", estDist);
-			OLED_ShowString(0, 10, buf);
-			OLED_Refresh_Gram();
 
 			if (shouldBrake) {
 				motor_setDrive(0, 0);

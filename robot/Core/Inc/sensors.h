@@ -7,6 +7,7 @@
 #include <math.h>
 #include "delay_us.h"
 #include "angle.h"
+#include "dist.h"
 
 #define ICM_I2C_ADDR 0
 #define GRAVITY 9.80665e-4f //in cm/ms^2

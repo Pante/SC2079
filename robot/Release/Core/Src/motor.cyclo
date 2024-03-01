@@ -1,0 +1,6 @@
+../Core/Src/motor.c:47:13:setPwmLR	1
+../Core/Src/motor.c:128:13:setDriveDir.part.0	2
+../Core/Src/motor.c:25:6:motor_init	1
+../Core/Src/motor.c:70:7:motor_getDist	3
+../Core/Src/motor.c:85:6:motor_pwmCorrection	11
+../Core/Src/motor.c:151:6:motor_setDrive	4

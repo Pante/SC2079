@@ -2,8 +2,8 @@
 
 static const uint8_t GYRO_SENS = GYRO_FULL_SCALE_250DPS;
 static const uint8_t ACCEL_SENS = ACCEL_FULL_SCALE_2G;
-static const float a_irDist = 0.8;
-static const float a_usDist = 0.55;
+static const float a_irDist = 0.95;
+static const float a_usDist = 0.75;
 static const float a_accel = 0.8;
 static const float a_mag = 0.9;
 static float magOld[2];
@@ -68,7 +68,12 @@ void sensors_read_irDist() {
 	HAL_ADC_PollForConversion(hadc_ptr, HAL_MAX_DELAY);
 
 	uint16_t value = (uint16_t) HAL_ADC_GetValue(hadc_ptr);
-	float dist = 6.3028 / pow(((float) value) / 4095, 1.226);
+	float div = pow(((float) value) / 4095, 1.226);
+	float dist = (div < 6.3028 / DIST_IR_MAX)
+		? DIST_IR_MAX
+		: 6.3028 / div;
+	if (dist < DIST_IR_MIN) dist = DIST_IR_MIN;
+
 	sensors_ptr->irDist = lpf(a_irDist, sensors_ptr->irDist, dist);
 }
 

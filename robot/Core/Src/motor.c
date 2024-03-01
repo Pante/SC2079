@@ -12,10 +12,15 @@ const static float Kp_match = 1.5e4;
 const static float Ki_match = 8.5e2;
 const static float Kd_match = 1.0e4;
 
-static PidDef pidDist;
-const static float Kp_dist = 0.21;
-const static float Ki_dist = 0.0009;
-const static float Kd_dist = 0.1;
+static PidDef pidDistTarget;
+const static float Kp_distTarget = 0.21;
+const static float Ki_distTarget = 0.0009;
+const static float Kd_distTarget = 0.1;
+
+static PidDef pidDistAway;
+const static float Kp_distAway = 0.975;
+const static float Ki_distAway = 0.00001;
+const static float Kd_distAway = 0.13;
 
 void motor_init(TIM_HandleTypeDef *pwm, TIM_HandleTypeDef *l_enc, TIM_HandleTypeDef *r_enc) {
 	//assign timer pointers.
@@ -31,7 +36,8 @@ void motor_init(TIM_HandleTypeDef *pwm, TIM_HandleTypeDef *l_enc, TIM_HandleType
 
 	//initialize PID values.
 	pid_init(&pidMatch, Kp_match, Ki_match, Kd_match);
-	pid_init(&pidDist, Kp_dist, Ki_dist, Kd_dist);
+	pid_init(&pidDistTarget, Kp_distTarget, Ki_distTarget, Kd_distTarget);
+	pid_init(&pidDistAway, Kp_distAway, Ki_distAway, Kd_distAway);
 }
 
 static void timer_reset(TIM_HandleTypeDef *htim) {
@@ -52,12 +58,20 @@ static void setPwmLR() {
 
 static void resetPwmParams() {
 	pid_reset(&pidMatch);
-	pid_reset(&pidDist);
+	pid_reset(&pidDistTarget);
+	pid_reset(&pidDistAway);
 }
 
 static void resetEncoders() {
 	timer_reset(l_enc_tim);
 	timer_reset(r_enc_tim);
+}
+
+static uint16_t getSpeedPwm(uint8_t speed) {
+	uint16_t val = MOTOR_PWM_MAX / 100 * speed;
+	if (val < MOTOR_PWM_MIN) val = MOTOR_PWM_MIN;
+
+	return val;
 }
 
 float motor_getDist() {
@@ -75,10 +89,12 @@ float motor_getDist() {
 }
 
 //PWM at fixed intervals.
-void motor_pwmCorrection(float wDiff, float rBack, float rRobot, float distDiff, float brakingDist) {
+void motor_pwmCorrection(float wDiff, float rBack, float rRobot, float distDiff, float brakingDist, CmdDistType distType, uint8_t speedNext) {
 	//adjust speed based on distance to drive.
 	if (distDiff < brakingDist) {
-		pwmValAccel = MOTOR_PWM_MIN + pid_adjust(&pidDist, distDiff, 1) / brakingDist * (pwmValTarget - MOTOR_PWM_MIN);
+		PidDef *pidBrake = distType == TARGET ? &pidDistTarget : &pidDistAway;
+		uint16_t pwmValNext = getSpeedPwm(speedNext);
+		if (pwmValNext < pwmValTarget) pwmValAccel = pwmValNext + pid_adjust(pidBrake, distDiff, 1) / brakingDist * (pwmValTarget - pwmValNext);
 	} else if (pwmValAccel < pwmValTarget) pwmValAccel += MOTOR_PWM_ACCEL;
 	if (pwmValAccel > pwmValTarget) pwmValAccel = pwmValTarget;
 
@@ -143,17 +159,17 @@ static void setDriveDir(int8_t dir) {
 void motor_setDrive(int8_t dir, uint8_t speed) {
 	if (dir == 0) {
 		setDriveDir(0);
+		pwmValAccel = 0;
 		return;
 	}
 
 	//derive PWM value.
-	pwmValTarget = MOTOR_PWM_MAX / 100 * speed;
-	if (pwmValTarget > 0) pwmValTarget--;
+	pwmValTarget = getSpeedPwm(speed);
 
-	pwmValAccel = speed > 0
-		? MOTOR_PWM_MIN
-		: 0;
-	lPwmVal = rPwmVal = pwmValAccel;
+//	pwmValAccel = speed > 0
+//		? MOTOR_PWM_MIN
+//		: 0;
+//	lPwmVal = rPwmVal = pwmValAccel;
 
 	//reset.
 	resetEncoders();
