@@ -45,9 +45,11 @@ class BluetoothConnectionTest:
 			user_input = int(input("1: Send a message, 2: Exit"))
 			if user_input == 1:
 				try:
-					action_type = input("Type of action:")
-					message_content = input("Enter message content: ")
-					self.android.send(AndroidMessage(action_type, message_content))
+					obstacle_id = input("Obstacle ID:")
+					target_id = input("Target ID (Image detected):")
+					final_msg_sending = "TARGET," + obstacle_id + "," + target_id
+					self.android.send(final_msg_sending)
+					# ~ self.android.send(AndroidMessage(action_type, message_content))
 					print("message sent")
 					# time.sleep(10)
 				except OSError as e:
@@ -72,9 +74,9 @@ class BluetoothConnectionTest:
 				# Depending on the message type and value, pass to other processes
 				# e.g. self.stm.send()
 				
-				message: dict = json.loads(message_rcv)
-				print("Message type: ", message['type'])
-				print("Message value: ", message['value'])
+				# ~ message: dict = json.loads(message_rcv)
+				# ~ print("Message type: ", message['type'])
+				# ~ print("Message value: ", message['value'])
 			except OSError:
 				self.android_dropped.set()
 				print("Event set: Bluetooth connection dropped")

@@ -5,16 +5,12 @@ from ultralytics import YOLO
 
 # Used to connect to RPi streaming.
 class StreamListener():
-    # define constants used in this class.
+    # define constants.
     def define_constants(self):
         self.BUFF_SIZE = 65536
-
-        # Raspberry Pi streaming IP and port.
-        self.HOST_ADDR = ('192.168.14.14', 5000)
-
-        # used to signal to server to switch IP to current client.
+        self.HOST_ADDR = ('192.168.14.14', 5005)
         self.REQ_STREAM = b"stream_request"
-
+    
     # pass in the weights file for use with YOLO.
     def __init__(self, weights):
         # define constants.
@@ -64,6 +60,8 @@ class StreamListener():
                     annotated_frame = res.plot()
                 
                 on_result(res)
+            else:
+                on_result(None)
 
             if show_video:
                 cv2.imshow("Stream", annotated_frame)
@@ -88,15 +86,15 @@ def handle_result(res):
 def handle_disconnect():
     print("disconnected.")
 
-# sample use of this class.
-def stream_listener_test():
-    # load the StreamListener class with the weights file.
-    listener = StreamListener('v9_task1.pt')
+# # sample use of this class.
+# def stream_listener_test():
+#     # load the StreamListener class with the weights file.
+#     listener = StreamListener('v9_task1.pt')
 
-    # pass in the handlers and start stream reading.
-    listener.start_stream_read(handle_result, handle_disconnect, show_video=False)
+#     # pass in the handlers and start stream reading.
+#     listener.start_stream_read(handle_result, handle_disconnect, show_video=False)
     
-    # release resources on disconnect.
-    listener.close()
+#     # release resources on disconnect.
+#     listener.close()
 
-stream_listener_test() # comment this out when actually using!
+# stream_listener_test() # comment this out when actually using!

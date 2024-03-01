@@ -4,11 +4,38 @@ import picamera
 from pathlib import Path
 from multiprocessing import Process, Manager
 from threading import Thread
+import time
 import sys
 sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
 from Communication.pc import PC
 from Communication.android import Android, AndroidMessage
 from Communication.stm import STM
+
+# Pathfinding
+from openapi_client.configuration import Configuration
+from openapi_client.api_client import ApiClient
+from openapi_client.api.image_recognition_api import ImageRecognitionApi
+from openapi_client.api.pathfinding_api import PathfindingApi
+from openapi_client.models.direction import Direction
+from openapi_client.models.error_context import ErrorContext
+from openapi_client.models.error_type import ErrorType
+from openapi_client.models.image_prediction_response import ImagePredictionResponse
+from openapi_client.models.location import Location
+from openapi_client.models.message import Message
+from openapi_client.models.misc_instruction import MiscInstruction
+from openapi_client.models.move import Move
+from openapi_client.models.path import Path
+from openapi_client.models.pathfinding_point import PathfindingPoint
+from openapi_client.models.pathfinding_request import PathfindingRequest
+from openapi_client.models.pathfinding_request_obstacle import PathfindingRequestObstacle
+from openapi_client.models.pathfinding_request_robot import PathfindingRequestRobot
+from openapi_client.models.pathfinding_response import PathfindingResponse
+from openapi_client.models.pathfinding_response_move_instruction import PathfindingResponseMoveInstruction
+from openapi_client.models.pathfinding_response_segment import PathfindingResponseSegment
+from openapi_client.models.pathfinding_response_segment_instructions_inner import PathfindingResponseSegmentInstructionsInner
+from openapi_client.models.pathfinding_vector import PathfindingVector
+from openapi_client.models.turn_instruction import TurnInstruction
+from openapi_client.models.validation_error_model import ValidationErrorModel
 
 class TaskA5:
 	def __init__(self):
@@ -17,6 +44,7 @@ class TaskA5:
 		self.android = Android()
 		self.pc = PC()
 		self.manager = Manager()
+		self.process_stm_receive = None
 		self.process_pc_receive = None
 		self.process_pc_stream = None
 		self.process_android_receive = None
@@ -35,20 +63,26 @@ class TaskA5:
 						</body>
 						</html>
 						"""
-		self.android.connect()
+		self.conf = Configuration(host="http://192.168.14.13:5000")
+		self.client = ApiClient(configuration=self.conf)
+		self.latest_image = None
+		self.prev_image = None
+		self.STM_Stopped = False
+		# ~ self.android.connect()
 		# ~ self.stm.connect()
 		self.pc.connect()
 		print("PC Successfully connected through socket")
-		self.process_android_receive = Process(target=self.android_receive)
+		# ~ self.process_android_receive = Process(target=self.android_receive)
+		self.process_stm_receive = Process(target=self.stm_receive)
 		self.process_pc_receive = Process(target=self.pc_receive)
 		self.process_pc_stream = Process(target=self.stream_start)
 
 		
 		# Start processes
 		self.process_pc_receive.start() # Receive from PC
-		self.process_android_receive.start() # Receive from android
-		
+		# ~ self.process_android_receive.start() # Receive from android
 		self.process_pc_stream.start() # Start the Stream
+		self.process_stm_receive.start() # Receive from PC
 		self.normalPathfinding() # Calculate the path
 		
 		
@@ -70,7 +104,7 @@ class TaskA5:
 					try:
 						action_type = input("Type of action:")
 						message_content = input("Enter message content: ")
-						self.android.send(AndroidMessage(action_type, message_content))
+						# ~ self.android.send(AndroidMessage(action_type, message_content))
 						print("message sent")
 						# time.sleep(10)
 					except OSError as e:
@@ -89,7 +123,6 @@ class TaskA5:
 	def pc_receive(self) -> None:
 		print("WENT INTO PC RECEIVE FUNCTION")
 		while True:
-			# ~ message_rcv: Optional[str] = None
 			try:
 				message_rcv = self.pc.receive()
 				print(message_rcv)
@@ -108,7 +141,7 @@ class TaskA5:
 							print("MARKER")
 							action_type = "TARGET"
 							message_content = object_id
-							self.android.send(AndroidMessage(action_type, message_content))
+							# ~ self.android.send(AndroidMessage(action_type, message_content))
 							prev_image = object_id
 							self.last_image = object_id
 						elif object_id == "None":
@@ -118,24 +151,24 @@ class TaskA5:
 							# Not a marker, can just send back to relevant parties (android)
 							print("OBJECT ID IS: ", object_id)
 							try:
-								if prev_image == None:
+								if self.prev_image == None:
 									# New image detected, send to Android
 									action_type = "TARGET"
 									message_content = object_id
 									self.android.send(AndroidMessage(action_type, message_content))
-									prev_image = object_id
-									elf.last_image = object_id
+									self.prev_image = object_id
+									self.last_image = object_id
 								elif prev_image == object_id:
 									# Do nothing, no need to send since the prev image is the same as current image
-									elf.last_image = object_id
+									self.last_image = object_id
 									pass
 								else:
 									# The current image is new, so can send to Android
 									action_type = "TARGET"
 									message_content = object_id
 									self.android.send(AndroidMessage(action_type, message_content))
-									prev_image = object_id
-									elf.last_image = object_id
+									self.prev_image = object_id
+									self.last_image = object_id
 							except OSError:
 								self.android_dropped.set()
 								print("Event set: Bluetooth connection dropped")
@@ -174,13 +207,6 @@ class TaskA5:
 			try:
 				message_rcv = self.android.receive()
 				print("Message received from Android:", message_rcv)
-				
-				# Depending on the message type and value, pass to other processes
-				# e.g. self.stm.send()
-				
-				# ~ message: dict = json.loads(message_rcv)
-				# ~ print("Message type: ", message['type'])
-				# ~ print("Message value: ", message['value'])
 
 			except OSError:
 				self.android_dropped.set()
@@ -189,34 +215,49 @@ class TaskA5:
 			if message_rcv is None:
 				continue
 				
+	def stm_receive(self) -> None:
+		print("Went into STM receive function")
+		while True:
+			message_rcv: Optional[str] = None
+			try:
+				message_rcv = self.stm.receive()
+				print("Message received from STM:", message_rcv)
+				if message_rcv == "fS\n":
+					self.STM_Stopped = True # Finished stopping, can start delay to recognise image
+			except OSError as e:
+				print("Error in receiving STM data: {e}")
+
+			if message_rcv is None:
+				continue
+				
 	def normalPathfinding(self):
 		obstacleArr = []
 		direction_one = Direction("SOUTH")
 		image_id_1 = 1
-		north_east = PathfindingPoint(x=20, y=20)
-		south_west =  PathfindingPoint(x=21,y=21)
+		south_west =  PathfindingPoint(x=20,y=20)
+		north_east = PathfindingPoint(x=21, y=21)
 		pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
 		
-		direction_one = Direction("EAST")
-		image_id_2 = 1
-		north_east = PathfindingPoint(x=20, y=20)
-		south_west =  PathfindingPoint(x=21,y=21)
-		pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_2, north_east = north_east, south_west = south_west)
+		image_id_2 = 2
+		direction_two = Direction("EAST")
+		south_west =  PathfindingPoint(x=15,y=15)
+		north_east = PathfindingPoint(x=16, y=16)
+		pathObstacle =  PathfindingRequestObstacle(direction=direction_two, image_id = image_id_2, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
-		
-		direction_one = Direction("NORTH")
-		image_id_3 = 1
-		north_east = PathfindingPoint(x=20, y=20)
-		south_west =  PathfindingPoint(x=21,y=21)
-		pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_3, north_east = north_east, south_west = south_west)
+  
+		image_id_3 = 3
+		direction_three = Direction("NORTH")
+		south_west =  PathfindingPoint(x=20,y=20)
+		north_east = PathfindingPoint(x=21, y=21)
+		pathObstacle =  PathfindingRequestObstacle(direction=direction_three, image_id = image_id_3, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
-		
-		direction_one = Direction("WEST")
-		image_id_4 = 1
-		north_east = PathfindingPoint(x=20, y=20)
-		south_west =  PathfindingPoint(x=21,y=21)
-		pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_4, north_east = north_east, south_west = south_west)
+  
+		image_id_4 = 4
+		direction_four = Direction("WEST")
+		south_west =  PathfindingPoint(x=20,y=20)
+		north_east = PathfindingPoint(x=21, y=21)
+		pathObstacle =  PathfindingRequestObstacle(direction=direction_four, image_id = image_id_4, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
 		
 		
@@ -236,6 +277,7 @@ class TaskA5:
 		i = 1
 		counter = 0
 		for segment in segments:
+			self.STM_Stopped = False # Reset to false upon starting the new segment
 			
 			# ~ print("PATH ", i, ": ", segment.path.actual_instance[0])
 			print("PATH ", i, ": ", segment.path.actual_instance)
@@ -245,6 +287,8 @@ class TaskA5:
 			i = i + 1
 			
 			for instruction in segment.instructions:
+				# TODO 26/2/2024: Only send the instructions after receiving acknowledgements from STM
+				
 				actual_instance = instruction.actual_instance
 				inst = ""
 				if hasattr(actual_instance, 'move'):
@@ -252,15 +296,17 @@ class TaskA5:
 					inst = PathfindingResponseMoveInstruction(amount = actual_instance.amount, move = actual_instance.move)
 					amt_to_move = inst.amount
 					move_direction = inst.move.value
+					# ~ print("IS MOVE: ", inst)
 					print("AMOUNT TO MOVE: ", amt_to_move)
 					print("MOVE DIRECTION: ", move_direction)
-					
 					# Send instructions to stm
 					if move_direction == "FORWARD":
 						self.stm.send("T60|0|" + str(amt_to_move) + "\n")
+						self.current_STM_command = "T60|0|" + str(amt_to_move) + "\n"
 					elif move_direction == "BACKWARD":
 						self.stm.send("t60|0|" + str(amt_to_move) + "\n")
-
+						self.current_STM_command = "t60|0|" + str(amt_to_move) + "\n"
+					
 				else:
 					try:
 						inst = TurnInstruction(actual_instance)
@@ -269,32 +315,49 @@ class TaskA5:
 					
 					print("Final Instruction ", inst)
 					if isinstance(inst, MiscInstruction) and str(inst.value) == "CAPTURE_IMAGE":
-						# latest.image stores the last image recognised by the image rec algo 
-						# if the image rec algo doesn't detect anything, latest.image = "NONE", else, latest_image = image_id of the recognised image
-						print("LATEST IMAGE: ", self.latest_image)
-						while self.latest_image is None:
-							pass
-						
-						if self.latest_image != 'marker':
-							self.android.send(AndroidMessage('TARGET', self.latest_image))
+						self.stm.send("S\n")
+						# ~ time.sleep(3) # When the CAPTURE_IMAGE command is triggered, wait for 3 seconds first to detect the image
+						# ~ print("LATEST IMAGE: ", self.latest_image)
+						# ~ while self.latest_image is "None":
+							# ~ pass
+
+						# ~ if self.latest_image != 'marker':
+							# ~ self.android.send(AndroidMessage('TARGET', self.latest_image))
+							# ~ # Image found, break out of this and don't send anymore instructions to the STM
+							# ~ break
+
 
 					elif isinstance(inst, TurnInstruction):
 						# TODO: Send instruction to the STM to turn
+						inst_send = inst.value
 						if inst.value == "FORWARD_LEFT":
 							self.stm.send("T60|-25|90\n")
+							self.current_STM_command = "T60|-25|90\n"
 						elif inst.value == "FORWARD_RIGHT":
 							self.stm.send("T60|25|90\n")
+							self.current_STM_command = "T60|25|90\n"
 						elif inst.value == "BACKWARD_LEFT":
 							self.stm.send("t60|-25|90\n")
+							self.current_STM_command = "t60|-25|90\n"
 						else:
 							# BACKWARD_RIGHT
 							self.stm.send("t60|25|90\n")
-						
-						print("Sent turning instruction to stm: ", inst.value)
-					else:
-						# A MOVE instruction, pass
-						pass
+							self.current_STM_command = "t60|25|90\n"
+						print("Sending turning instruction to stm: ", inst_send)
+			
+			while self.STM_Stopped == False:
+				# Wait until the STM has execute all the commands and stopped (True), then wait x seconds to recognise image
+				pass
+			
+			# STM has stopped, recognise image - x seconds to recognise
+			time.sleep(2)
+			if self.latest_image == 'marker' or 'None':
+				pass # Perform next segment
+			elif self.latest_image != 'marker':
+				self.android.send(AndroidMessage('TARGET,', segment.image_id, ",", self.latest_image))
 
+				# Image found, break out of this and don't send anymore instructions to the STM
+				break
 
 
 if __name__ == '__main__':

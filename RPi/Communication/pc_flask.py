@@ -8,12 +8,10 @@ import time
 # ~ from picamera import PiCamera
 from pathlib import Path
 import sys
-
-from RPi.Communication.android import AndroidMessage
-
-# ~ path_root = Path(__file__).parents[2]
-# ~ sys.path.append(str(path_root))
 sys.path.insert(1, '/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi')
+from Communication.android import AndroidMessage
+from Communication.link import Link
+
 from openapi_client.configuration import Configuration
 from openapi_client.api_client import ApiClient
 from openapi_client.api.image_recognition_api import ImageRecognitionApi
@@ -39,8 +37,7 @@ from openapi_client.models.pathfinding_vector import PathfindingVector
 from openapi_client.models.turn_instruction import TurnInstruction
 from openapi_client.models.validation_error_model import ValidationErrorModel
 
-from Communication.link import Link
-# ~ from openapi_client.models import PathfindingResponse, PathfindingResponseMoveInstruction, PathfindingResponseSegment, PathfindingResponseSegmentInstructionsInner, PathfindingVector
+
 
 class PCFlask(Link):
 	
@@ -59,34 +56,31 @@ class PCFlask(Link):
 		obstacleArr = []
 		direction_one = Direction("SOUTH")
 		image_id_1 = 1
-		north_east = PathfindingPoint(x=20, y=20)
-		south_west =  PathfindingPoint(x=21,y=21)
+		south_west =  PathfindingPoint(x=20,y=20)
+		north_east = PathfindingPoint(x=21, y=21)
 		pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
 		
-		image_id_2 = 1
+		image_id_2 = 2
 		direction_two = Direction("EAST")
-		north_east = PathfindingPoint(x=20, y=20)
-		south_west =  PathfindingPoint(x=21,y=21)
+		south_west =  PathfindingPoint(x=15,y=15)
+		north_east = PathfindingPoint(x=16, y=16)
 		pathObstacle =  PathfindingRequestObstacle(direction=direction_two, image_id = image_id_2, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
   
-		image_id_2 = 1
-		direction_two = Direction("NORTH")
-		north_east = PathfindingPoint(x=20, y=20)
-		south_west =  PathfindingPoint(x=21,y=21)
-		pathObstacle =  PathfindingRequestObstacle(direction=direction_two, image_id = image_id_2, north_east = north_east, south_west = south_west)
+		image_id_3 = 3
+		direction_three = Direction("NORTH")
+		south_west =  PathfindingPoint(x=20,y=20)
+		north_east = PathfindingPoint(x=21, y=21)
+		pathObstacle =  PathfindingRequestObstacle(direction=direction_three, image_id = image_id_3, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
   
-		image_id_2 = 1
-		direction_two = Direction("WEST")
-		north_east = PathfindingPoint(x=20, y=20)
-		south_west =  PathfindingPoint(x=21,y=21)
-		pathObstacle =  PathfindingRequestObstacle(direction=direction_two, image_id = image_id_2, north_east = north_east, south_west = south_west)
+		image_id_4 = 4
+		direction_four = Direction("WEST")
+		south_west =  PathfindingPoint(x=20,y=20)
+		north_east = PathfindingPoint(x=21, y=21)
+		pathObstacle =  PathfindingRequestObstacle(direction=direction_four, image_id = image_id_4, north_east = north_east, south_west = south_west)
 		obstacleArr.append(pathObstacle)
-		
-		
-		
 		
 		robot_direction = Direction("NORTH")
 		robot_north_east =  PathfindingPoint(x=1,y=1)
@@ -104,7 +98,8 @@ class PCFlask(Link):
 		i = 1
 		counter = 0
 		for segment in segments:
-			
+			# Image ID is the Obstacle ID
+			print("IMAGE ID:" , segment.image_id)
 			# ~ print("PATH ", i, ": ", segment.path.actual_instance[0])
 			print("PATH ", i, ": ", segment.path.actual_instance)
 			print("Segment ", i , ": " , segment.instructions)
@@ -141,13 +136,13 @@ class PCFlask(Link):
 					if isinstance(inst, MiscInstruction) and str(inst.value) == "CAPTURE_IMAGE":
 
 						print("LATEST IMAGE: ", self.latest_image)
-						while self.latest_image is None:
+						while self.latest_image is "None":
 							pass
-						
 
 						if self.latest_image != 'marker':
-							self.android.send(AndroidMessage('TARGET', self.latest_image))
-
+							# ~ self.android.send(AndroidMessage('TARGET,', segment.image_id, ",", self.latest_image))
+							# Image found, break out of this and don't send anymore instructions to the STM
+							break
 
 					elif isinstance(inst, TurnInstruction):
 						# TODO: Send instruction to the STM to turn

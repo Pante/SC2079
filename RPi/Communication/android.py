@@ -188,8 +188,10 @@ class Android(Link):
         """Send message to Android"""
         try:
 			# Default code to send a message to Android. - Bryan
-            self.client_socket.send(f"{message.jsonify}\n".encode("utf-8"))
-            print("Sent to Android: %s", str(message.jsonify))
+            # ~ self.client_socket.send(f"{message.jsonify}\n".encode("utf-8"))
+            self.client_socket.send(f"{message}\n".encode("utf-8"))
+            print("Sent to Android: %s", str(message))
+            # ~ print("Sent to Android: %s", str(message.jsonify))
         except OSError as e:
             print("Message sending failed: %s", str(e))
             raise e
@@ -210,12 +212,12 @@ class Android(Link):
             print("Message failed to be received: %s", str(e))
             raise e
         
-    def repeatMessageTest(self):
-        message = AndroidMessage("general", "Testing, hi from rpi")
-        while True:
-            time.sleep(2)
-            if(self.connected):
-                self.send(message)
-            else:
-                print("no connection")
-                break
+    # ~ def repeatMessageTest(self):
+        # ~ message = AndroidMessage("general", "Testing, hi from rpi")
+        # ~ while True:
+            # ~ time.sleep(2)
+            # ~ if(self.connected):
+                # ~ self.send(message)
+            # ~ else:
+                # ~ print("no connection")
+                # ~ break
