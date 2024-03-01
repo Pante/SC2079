@@ -251,6 +251,7 @@ class TaskA5:
 			direction_one = Direction(dir_str)
 			image_id_1 = 1
 			south_west =  PathfindingPoint(x=20,y=20)
+			# Need to add 4 to x and y from the south_west to get the north_east coords
 			north_east = PathfindingPoint(x=21,y=21)
 			pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
 			obstacleArr.append(pathObstacle)

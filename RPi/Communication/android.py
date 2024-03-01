@@ -212,12 +212,12 @@ class Android(Link):
             print("Message failed to be received: %s", str(e))
             raise e
         
-    def repeatMessageTest(self):
-        message = AndroidMessage("general", "Testing, hi from rpi")
-        while True:
-            time.sleep(2)
-            if(self.connected):
-                self.send(message)
-            else:
-                print("no connection")
-                break
+    # ~ def repeatMessageTest(self):
+        # ~ message = AndroidMessage("general", "Testing, hi from rpi")
+        # ~ while True:
+            # ~ time.sleep(2)
+            # ~ if(self.connected):
+                # ~ self.send(message)
+            # ~ else:
+                # ~ print("no connection")
+                # ~ break
