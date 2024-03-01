@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
 import numpy as np
 
+from pathfinding.grid import Objective
 from pathfinding.world.primitives import Direction, Point, Vector
 
 
@@ -16,16 +17,12 @@ class World:
     __actual_size = 200
 
     """
-    A world. True clearance computation is optimized for rectangular/square obstacles.
-
-    A Brushfire-like algorithm should be used if irregular shaped obstacles are allowed.
-
-    See https://harablog.wordpress.com/2009/01/29/clearance-based-pathfinding/
+    A world. Clearance computation is optimized for rectangular/square obstacles.
     """
 
     def __init__(self, size: int, robot: Robot, obstacles: List[Obstacle]):
         self.size = size
-        self.grid = np.full((size, size), -1, dtype=np.int32)
+        self.grid = np.full((size, size), True)
         self.robot = robot
         self.obstacles = obstacles
 
@@ -36,40 +33,21 @@ class World:
 
     def __inside(self, entity: Entity) -> bool:
         return (0 <= entity.south_west.x < self.size and
-                0 <= entity.north_east.x < self.size and
                 0 <= entity.south_west.y < self.size and
+                0 <= entity.north_east.x < self.size and
                 0 <= entity.north_east.y < self.size)
 
     def __annotate_obstacles(self: World) -> None:
         for obstacle in self.obstacles:
-            for x in range(obstacle.south_west.x, obstacle.north_east.x + 1):
-                for y in range(obstacle.south_west.y, obstacle.north_east.y + 1):
-                    self.grid[x, y] = 0
+            west_x = obstacle.south_west.x - self.robot.east_length
+            east_x = obstacle.north_east.x + self.robot.west_length + 1
+            south_y = obstacle.south_west.y - self.robot.north_length
+            north_y = obstacle.north_east.y + self.robot.south_length + 1
 
-    def contains(self, entity: Entity) -> bool:
-        if not self.__inside(entity):
-            return False
+            self.grid[west_x:east_x, south_y:north_y] = False
 
-        x = entity.south_west.x
-        y = entity.south_west.y
-
-        if self.grid[x, y] == -1:
-            self.grid[x, y] = self.__compute_true_clearance(x, y)
-
-        return entity.clearance <= self.grid[x, y]
-
-    def __compute_true_clearance(self: World, x: int, y: int) -> int:
-        clearance = self.size - x
-        for obstacle in self.obstacles:
-            vector = obstacle.south_west
-            if vector.x < x or vector.y < y:
-                continue
-
-            next_clearance = max(vector.x - x, vector.y - y)
-            if next_clearance < clearance:
-                clearance = next_clearance
-
-        return clearance
+    def contains(self, entity: Robot | Objective) -> bool:
+        return self.__inside(entity) and self.grid[entity.centre.x, entity.centre.y]
 
     @property
     def cell_size(self) -> int:
@@ -81,28 +59,41 @@ class Entity(ABC):
     direction: Direction
     south_west: Point
     north_east: Point
+    centre: Point = field(init=False)
 
     def __post_init__(self):
         assert 0 <= self.south_west.x <= self.north_east.x
         assert 0 <= self.south_west.y <= self.north_east.y
         assert (self.north_east.y - self.south_west.y) == (self.north_east.x - self.south_west.x)
+        self.centre = Point(
+            self.south_west.x + (self.north_east.x - self.south_west.x) // 2,
+            self.south_west.y + (self.north_east.y - self.south_west.y) // 2,
+        )
 
     @property
-    def vector(self) -> Vector:
-        return Vector(self.direction, self.south_west.x, self.south_west.y)
+    def north_length(self) -> int:
+        return self.north_east.y - self.centre.y
 
     @property
-    def north_west(self) -> Point:
-        return Point(self.south_west.x, self.north_east.y)
+    def east_length(self) -> int:
+        return self.north_east.x - self.centre.x
 
     @property
-    def south_east(self) -> Point:
-        return Point(self.north_east.x, self.south_west.y)
+    def south_length(self) -> int:
+        return self.centre.y - self.south_west.y
 
     @property
-    def clearance(self):
-        # Assumes that height & width are the same
-        return self.north_east.y - self.south_west.y + 1
+    def west_length(self) -> int:
+        return self.centre.x - self.south_west.x
+
+    # @property
+    # def vector(self) -> Vector:
+    #     return Vector(self.direction, self.south_west.x, self.south_west.y)
+
+    # @property
+    # def clearance(self):
+    #     # Assumes that height & width are the same
+    #     return self.north_east.y - self.south_west.y + 1
 
 
 @dataclass
