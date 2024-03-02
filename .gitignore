@@ -28,3 +28,7 @@ gradle-app.setting
 
 *.iml
 /service/.venv/
+
+# ignore robot builds
+robot/Debug
+robot/Release
