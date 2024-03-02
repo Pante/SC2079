@@ -231,7 +231,7 @@ int main(void)
   //ticking for longer timing requirements for ultrasound, and servo turning.
   uint8_t ticksElapsed = 0,
 		  ticksUltrasound = (17.5f / MS_FRAME) + 1,
-		  ticksServo = (20.0f / MS_FRAME) + 1,
+		  ticksServo = (SERVO_TURN_PERIOD / MS_FRAME),
 		  ticksRefresh = lcm_uint8(ticksUltrasound, ticksServo);
 
   Command *cmd = NULL;							//current command.
@@ -382,6 +382,14 @@ int main(void)
 
 		if (!(ticksElapsed % ticksServo)) {
 			//TODO: turn a small angle every 20ms + 1 tick.
+			float timeLeft = distDiff / estSpeed;
+			if (timeLeft < (SERVO_TURN_PERIOD) * (nextAngleDiff / SERVO_TURN_STEP)) {
+				//should increment.
+				float step = min_float(SERVO_TURN_STEP, nextAngleDiff);
+				if (nextAngle < steeringAngle) step = -step;
+				steeringAngle += step;
+				servo_setAngle(steeringAngle);
+			}
 		}
 
 		if (distDiff <= 0) {
@@ -389,6 +397,7 @@ int main(void)
 			commands_end(&huart3, cmd);
 			cmd = NULL;
 
+			servo_setAngle(nextAngle);
 			if (shouldBrake) {
 				motor_setDrive(0, 0);
 				dist_reset(0);
