@@ -1,6 +1,0 @@
-../Core/Src/main.c:110:6:HAL_UART_RxCpltCallback	2
-../Core/Src/main.c:121:6:HAL_TIM_PeriodElapsedCallback	3
-../Core/Src/main.c:131:6:HAL_TIM_IC_CaptureCallback	3
-../Core/Src/main.c:411:6:SystemClock_Config	3
-../Core/Src/main.c:163:5:main	48
-../Core/Src/main.c:1019:6:Error_Handler	1
