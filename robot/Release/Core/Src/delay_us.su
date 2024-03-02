@@ -1,2 +1,0 @@
-../Core/Src/delay_us.c:5:6:delay_us_init	0	static
-../Core/Src/delay_us.c:10:6:delay_us_wait	0	static

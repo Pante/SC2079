@@ -1,3 +1,0 @@
-../Core/Src/servo.c:5:6:servo_init	1
-../Core/Src/servo.c:10:13:setServoVal	1
-../Core/Src/servo.c:14:6:servo_setAngle	4

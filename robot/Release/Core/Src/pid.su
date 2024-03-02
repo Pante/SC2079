@@ -1,3 +1,0 @@
-../Core/Src/pid.c:3:6:pid_reset	0	static
-../Core/Src/pid.c:8:6:pid_init	0	static
-../Core/Src/pid.c:16:7:pid_adjust	0	static
