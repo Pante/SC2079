@@ -3,6 +3,8 @@ from pathfinding.world.primitives import Direction, Vector
 from pathfinding.world.world import World
 
 
+# This turning function does not properly account for different points of the robot having different turning radii.
+# I'm too lazy to fix it. The workaround is to ensure that the robot is an odd number of cells.
 def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vector]:
     """
     Performs a turn.
