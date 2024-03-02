@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from pathfinding.world.primitives import Direction, Point, Vector
-from pathfinding.world.world import Entity, World, Obstacle
+from pathfinding.world.world import World, Obstacle, Centerable
 
 
 def generate_objectives(world: World) -> dict[Obstacle, set[Vector]]:
@@ -41,7 +41,7 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     The minimum left/bottom alignment (in grid cells) between the obstacle and objective, inclusive. 
     (Total cm / cm per cell). This should be increased as the difference in sizes between obstacles & the robot increases.
     """
-    minimum_alignment = 10 // world.cell_size
+    minimum_alignment = 0 // world.cell_size
 
     # Max alignment computation assumes that obstacle clearance is less than robot. It stops when the robot is
     # left-aligned with the obstacle. This excludes valid positions to the right if the obstacle is larger than the
@@ -53,7 +53,7 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     for alignment in range(minimum_alignment, world.robot.clearance + 1):
         for gap in range(minimum_gap, maximum_gap):
             objective = __suggest_objective(world, obstacle, gap + 1, alignment)
-            if world.contains(objective):
+            if world.contains(objective.centre):
                 objectives.add(objective.vector)
 
     return objectives
@@ -77,10 +77,9 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
     clearance = world.robot.clearance
     match obstacle.direction:
         case Direction.NORTH:
-            print(obstacle.north_east.x - clearance + alignment, 0)
             return __Objective.from_obstacle(
                 Direction.SOUTH,
-                Point(max(obstacle.north_east.x - clearance + alignment, 0), max(obstacle.north_west.y + gap, 0)),
+                Point(max(obstacle.north_east.x - clearance + alignment, 0), max(obstacle.north_east.y + gap, 0)),
                 clearance,
                 clearance,
             )
@@ -113,8 +112,8 @@ def __suggest_objective(world: World, obstacle: Obstacle, gap: int, alignment: i
             )
 
 
-@dataclass()
-class __Objective(Entity):
+@dataclass
+class __Objective(Centerable):
 
     @classmethod
     def from_obstacle(

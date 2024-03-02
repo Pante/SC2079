@@ -6,7 +6,6 @@ from typing import List
 
 import numpy as np
 
-from pathfinding.grid import Objective
 from pathfinding.world.primitives import Direction, Point, Vector
 
 
@@ -46,8 +45,8 @@ class World:
 
             self.grid[west_x:east_x, south_y:north_y] = False
 
-    def contains(self, entity: Robot | Objective) -> bool:
-        return self.__inside(entity) and self.grid[entity.centre.x, entity.centre.y]
+    def contains(self, position: Point | Vector) -> bool:
+        return self.grid[position.x, position.y]
 
     @property
     def cell_size(self) -> int:
@@ -59,16 +58,49 @@ class Entity(ABC):
     direction: Direction
     south_west: Point
     north_east: Point
-    centre: Point = field(init=False)
 
     def __post_init__(self):
         assert 0 <= self.south_west.x <= self.north_east.x
         assert 0 <= self.south_west.y <= self.north_east.y
         assert (self.north_east.y - self.south_west.y) == (self.north_east.x - self.south_west.x)
+
+    @property
+    def clearance(self):
+        # Assumes that height & width are the same
+        return self.north_east.y - self.south_west.y + 1
+
+    @property
+    def north_west(self) -> Point:
+        return Point(self.south_west.x, self.north_east.y)
+
+    @property
+    def south_east(self) -> Point:
+        return Point(self.north_east.x, self.south_west.y)
+
+
+@dataclass(unsafe_hash=True)
+class Obstacle(Entity):
+    image_id: int
+
+    def __post_init__(self):
+        assert 1 <= self.image_id < 36
+        super().__post_init__()
+
+
+@dataclass
+class Centerable(Entity):
+    centre: Point = field(init=False)
+
+    def __post_init__(self):
+        super().__post_init__()
         self.centre = Point(
             self.south_west.x + (self.north_east.x - self.south_west.x) // 2,
             self.south_west.y + (self.north_east.y - self.south_west.y) // 2,
         )
+
+    @property
+    def vector(self) -> Vector:
+        return Vector(self.direction, self.centre.x, self.centre.y)
 
     @property
     def north_length(self) -> int:
@@ -86,45 +118,8 @@ class Entity(ABC):
     def west_length(self) -> int:
         return self.centre.x - self.south_west.x
 
-    # @property
-    # def vector(self) -> Vector:
-    #     return Vector(self.direction, self.south_west.x, self.south_west.y)
-
-    # @property
-    # def clearance(self):
-    #     # Assumes that height & width are the same
-    #     return self.north_east.y - self.south_west.y + 1
-
 
 @dataclass
-class Robot(Entity):
-    direction: Direction
-    south_west: Point
-    north_east: Point
-
-
-@dataclass
-class Cell(Entity):
-    def set_vector(self, vector: Vector) -> Cell:
-        clearance = self.clearance - 1
-
-        self.direction = vector.direction
-        self.south_west = Point(vector.x, vector.y)
-        self.north_east = Point(vector.x + clearance, vector.y + clearance)
-        return self
-
-    def set_point(self, point: Point) -> Cell:
-        clearance = self.clearance - 1
-
-        self.south_west = point
-        self.north_east = Point(point.x + clearance, point.y + clearance)
-        return self
-
-
-@dataclass(unsafe_hash=True)
-class Obstacle(Entity):
-    image_id: int
-
+class Robot(Centerable):
     def __post_init__(self):
-        assert 1 <= self.image_id < 36
         super().__post_init__()
