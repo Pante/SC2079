@@ -142,11 +142,13 @@ class Android(Link):
             # Initialize server socket
             #port = 1 # port 1 is commonly used, but we already specified port 1 as default when setting up RFCOMM.
             self.server_socket = bt.BluetoothSocket(bt.RFCOMM)
-            self.server_socket.bind((self.hostId, bt.PORT_ANY))
+            # ~ self.server_socket.bind((self.hostId, bt.PORT_ANY))
+            self.server_socket.bind((self.hostId, 1))
             self.server_socket.listen(1)
 
             # Parameters
             port = self.server_socket.getsockname()[1]
+            # ~ port = 1
 
             # Advertise
             bt.advertise_service(self.server_socket, "MDPGroup14 RPi", service_id=self.uuid, service_classes=[self.uuid, bt.SERIAL_PORT_CLASS], profiles=[bt.SERIAL_PORT_PROFILE])
