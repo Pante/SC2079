@@ -228,10 +228,11 @@ int main(void)
   /* ----- End: Car setup ----- */
 
   /* ----- Start: OS Parameters ----- */
-  //ticking for longer timing requirements for ultrasound.
+  //ticking for longer timing requirements for ultrasound, and servo turning.
   uint8_t ticksElapsed = 0,
 		  ticksUltrasound = (17.5f / MS_FRAME) + 1,
-		  ticksRefresh = ticksUltrasound;
+		  ticksServo = (20.0f / MS_FRAME) + 1,
+		  ticksRefresh = lcm_uint8(ticksUltrasound, ticksServo);
 
   Command *cmd = NULL;							//current command.
   float steeringAngle = 0;						//current steering angle.
@@ -371,13 +372,18 @@ int main(void)
 			shouldBrake ? 0 : turnSpeed
 		);
 
-		float turnMs = 144.0f * turnSpeed / 25 * nextAngleDiff / SERVO_WIDTH;
-		uint8_t shouldTurn = shouldBrake
-			? distDiff < 0.025 * brakingDist
-			: estSpeed > 0
-			  	  ? distDiff / estSpeed < turnMs
-				  : 0;
-		if (shouldTurn) servo_setAngle(nextAngle);
+//		float turnMs = 144.0f * turnSpeed / 25 * nextAngleDiff / SERVO_WIDTH;
+//		uint8_t shouldTurn = shouldBrake
+//			? distDiff < 0.025 * brakingDist
+//			: estSpeed > 0
+//			  	  ? distDiff / estSpeed < turnMs
+//				  : 0;
+//		if (shouldTurn) servo_setAngle(nextAngle);\
+
+		if (!(ticksElapsed % ticksServo)) {
+			//TODO: turn a small angle every 20ms + 1 tick.
+		}
+
 		if (distDiff <= 0) {
 			//target achieved; move to next command.
 			commands_end(&huart3, cmd);

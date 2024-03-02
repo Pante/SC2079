@@ -3,6 +3,9 @@
 float abs_float(float a) {
 	return a < 0 ? -a : a;
 }
+float min_float(float a, float b) {
+	return a < b ? a : b;
+}
 float square_float(float a) {
 	return a * a;
 }
@@ -12,6 +15,25 @@ float dist_squared(float x1, float x2, float y1, float y2) {
 
 uint8_t min_uint8(uint8_t a, uint8_t b) {
 	return a < b ? a : b;
+}
+uint8_t max_uint8(uint8_t a, uint8_t b) {
+	return a > b ? a : b;
+}
+
+uint8_t lcm_uint8(uint8_t x, uint8_t y) {
+	uint8_t max = (x > y) ? x : y;
+
+    // While loop to check if max variable
+    // is divisible by x and y
+    while (max < 255) {
+        if (max % x == 0 && max % y == 0) {
+            return max;
+        }
+
+        ++max;
+    }
+
+    return max;
 }
 
 uint16_t get_uint16(char *buf, uint16_t size) {
