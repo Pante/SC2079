@@ -31,9 +31,11 @@ class Task1PC:
             self.stream_thread = threading.Thread(target=self.stream_start)
             self.pc_receive_thread.start()  # Receive from PC
             self.stream_thread.start()  # Start stream
-        
-        # End connection
-        self.disconnect()
+        except KeyboardInterrupt:
+            print("Exiting program")
+        finally:
+            self.disconnect()
+            
         
     def stream_start(self):
         self.stream_listener.start_stream_read(
