@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +37,9 @@ public class ControlFragment extends Fragment {
 
     // Timer
     public static Handler timerHandler = new Handler();
+
+    //just added, need to test
+    Button startSend;
 
     public static Runnable timerRunnableExplore = new Runnable() {
         @Override
@@ -101,6 +105,7 @@ public class ControlFragment extends Fragment {
         robotStatusTextView = Home.getRobotStatusTextView();
         fastestTimer = 0;
         exploreTimer = 0;
+        startSend = root.findViewById(R.id.startSend); //just added, need to test
 
         gridMap = Home.getGridMap();
 
@@ -300,8 +305,21 @@ public class ControlFragment extends Fragment {
             }
         });
 
+        //added new Button, startSend, need to test
+        startSend.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                showLog("Clicked startSendBtn");
+                showToast("Sending BEGIN to robot...");
+                Home.printMessage("BEGIN"); //send a string "BEGIN" to the RPI
+                showLog("Exiting startSend");
+            }
+        });
+
         return root;
     }
+
+
 
     private static void showLog(String message) {
         Log.d(TAG, message);
