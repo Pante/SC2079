@@ -375,13 +375,24 @@ public class Home extends Fragment {
                     e.printStackTrace();
                 }
             }
-            // Expects a syntax of e.g. Algo|f010
-            if(message.contains("Algo")) {
+            // OLD VER: Expects a syntax of e.g. Algo|f010. Commented out and implemented new version below
+/*            if(message.contains("Algo")) {
                 // translate the message after Algo|
                 if(trackRobot)
                     pathTranslator.translatePath(message.split("\\|")[1]);
 //                pathTranslator.altTranslation(message.split("\\|")[1]);   // last min addition - untested
+            }*/
+
+            //NEW VER: Expects a syntax of eg. MOVE,<DISTANCE IN CM>,<DIRECTION>.
+            //NEW VER: Expects a syntax of eg. TURN,<DIRECTION>.
+
+            //CASE 1 & 2: MoveInstruction or TurnInstruction sent
+            else if(message.contains("MOVE") || message.contains("TURN")){
+                pathTranslator.translatePath(message); //splitting and translation will be done in PathTranslator
             }
+
+
+
         }
     };
 
