@@ -1,12 +1,15 @@
 import json
 import socket
+import sys
 import threading
 from multiprocessing import Manager, Process
+from pathlib import Path
 
-from Camera_Streaming_UDP.stream_listener import StreamListener
+sys.path.insert(1, "/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi")
+from TestingScripts.Camera_Streaming_UDP.stream_listener import StreamListener
 
 
-class PCMainIntegrated:
+class Task1PC:
     def __init__(self):
         # self.manager = Manager()
         self.process_PC_receive = None
@@ -21,32 +24,19 @@ class PCMainIntegrated:
         self.port = 5000
         self.client_socket = None
 
-        self.stream_listener = StreamListener("v9_task1.pt")
+        self.stream_listener = StreamListener("TestingScripts/v9_task1.pt")
         self.prev_image = None
 
     def start(self):
-        self.pc_receive_thread = threading.Thread(target=self.pc_receive)
-        self.stream_thread = threading.Thread(target=self.stream_start)
-        self.pc_receive_thread.start()  # Receive from PC
-        self.stream_thread.start()  # Start stream
-
-        user_input = 0
-        while user_input < 3:
-            user_input = int(input("1: Send a message, 2: Exit"))
-            if user_input == 1:
-                try:
-                    # action_type = input("Type of action:")
-                    message_content = input("Enter message content: ")
-                    self.client_socket.send(message_content.encode("utf-8"))
-                    print("message received from PC: ", message_content)
-                    # time.sleep(10)
-                except OSError as e:
-                    print("Error in sending data:", e)
-            else:
-                break
-
-        # End connection
-        self.disconnect()
+        try:
+            self.pc_receive_thread = threading.Thread(target=self.pc_receive)
+            self.stream_thread = threading.Thread(target=self.stream_start)
+            self.pc_receive_thread.start()  # Receive from PC
+            self.stream_thread.start()  # Start stream
+        except KeyboardInterrupt:
+            print("Exiting program")
+        finally:
+            self.disconnect()
 
     def stream_start(self):
         self.stream_listener.start_stream_read(
@@ -69,7 +59,7 @@ class PCMainIntegrated:
                     + names[int(result.boxes[0].cls[0].item())]
                 )
                 self.prev_image = names[int(result.boxes[0].cls[0].item())]
-                print("FIRST: ", self.prev_image)
+                # print("FIRST: ", self.prev_image)
             elif names[int(result.boxes[0].cls[0].item())] != self.prev_image:
                 # New image, can send over
                 message_content = (
@@ -78,7 +68,7 @@ class PCMainIntegrated:
                     + names[int(result.boxes[0].cls[0].item())]
                 )
                 self.prev_image = names[int(result.boxes[0].cls[0].item())]
-                print("SECOND: ", self.prev_image)
+                # print("SECOND: ", self.prev_image)
 
         elif self.prev_image != "NONE":
             # No object detected, send "NONE" over
@@ -129,5 +119,5 @@ class PCMainIntegrated:
 
 
 if __name__ == "__main__":
-    pcMain = PCMainIntegrated()
+    pcMain = Task1PC()
     pcMain.start()

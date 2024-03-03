@@ -45,6 +45,7 @@ class Task2RPI:
         self.last_image = None
         self.prev_image = None
         self.STM_Stopped = False
+        self.num_obstacle = 1
 
     def initialize(self):
         try:
@@ -93,11 +94,11 @@ class Task2RPI:
 
                     if confidence_level is not None:
                         if object_id == "marker":
-                            print("MARKER")
-                            action_type = "TARGET"
-                            message_content = object_id
-                            self.prev_image = object_id
-                            self.set_last_image(object_id)
+                            print(
+                                "MARKER"
+                            )  # When it's a marker, don't update the last_image
+                            # self.prev_image = object_id
+                            # self.set_last_image(object_id)
                         elif object_id == "NONE":
                             self.set_last_image("NONE")
                         else:
@@ -106,8 +107,6 @@ class Task2RPI:
                             try:
                                 if self.prev_image == None:
                                     # New image detected, send to Android
-                                    action_type = "TARGET"
-                                    message_content = object_id
                                     self.prev_image = object_id
                                     self.set_last_image(object_id)
                                 elif self.prev_image == object_id:
@@ -116,8 +115,6 @@ class Task2RPI:
                                     pass
                                 else:
                                     # The current image is new, so can send to Android
-                                    action_type = "TARGET"
-                                    message_content = object_id
                                     self.prev_image = object_id
                                     self.set_last_image(object_id)
                             except OSError:
@@ -143,8 +140,9 @@ class Task2RPI:
                 message_rcv = self.android.receive()
 
                 if "BEGIN" in message_rcv:
-                    # TODO: Begin Task 2 - Send W command to STM?
+                    # Begin Task 2
                     print("Message received from Android:", message_rcv)
+                    self.start()
 
             except OSError:
                 self.android_dropped.set()
@@ -154,22 +152,76 @@ class Task2RPI:
 
     def stm_receive(self) -> None:
         msg = ""
+        cmd_send = ""
         while True:
             message_rcv = None
             try:
                 message_rcv = self.stm.wait_receive()
                 print("Message received from STM: ", message_rcv)
+                # TODO: Logic for task 2
+
                 if "fS" in message_rcv:
-                    self.set_stm_stop(
-                        True
-                    )  # Finished stopping, can start delay to recognize image
-                    print("Setting STM Stopped to true")
+                    # Robot has stopped, take in latest_image then decide what to do
+                    self.set_stm_stop(True)
+                    if self.num_obstacle == 1:  # First Obstacle
+                        if self.get_last_image() == "38":  # RIGHT ARROW
+                            # TODO: Perform set of commands to turn right
+                            print("Right arrow detected")
+                            # Perform Right Arc
+                            self.stm.send_cmd("T", 95, 25, 45)
+                            self.stm.send_cmd("T", 95, 0, 10)
+                            self.stm.send_cmd("T", 95, -25, 105)
+                            self.stm.send_cmd("T", 95, 0, 26.8)
+                            self.stm.send_cmd("t", 95, -25, 60)
+                            self.stm.send_cmd("t", 95, -25, 60)  # End of Rigt Arc
+
+                        elif self.get_last_image() == "39":  # LEFT ARROW
+                            # TODO: Perform set of commands to turn left
+                            print("Left arrow detected")
+                            # Perform Left Arc
+
+                            # End of Left Arc
+
+                        self.stm.send_cmd("W", 95, 0, 50)  # Move towards next obstacle
+                        self.stm.send_cmd("W", 95, 0, 30)
+                        self.stm.send_cmd(
+                            "S", 95, 0, 0
+                        )  # Stopped in front of next obstacle
+
+                    elif self.num_obstacle == 2:  # Second Obstacle
+                        if self.get_last_image() == "38":  # RIGHT ARROW
+                            # TODO: Perform set of commands to turn right
+                            print("Right arrow detected")
+                        elif self.get_last_image() == "39":  # LEFT ARROW
+                            # TODO: Perform set of commands to turn left
+                            print("Left arrow detected")
+
+                        # self.stm.send_cmd("W", 95, 0, 50)  # Move towards next obstacle
+                        # self.stm.send_cmd("W", 95, 0, 30)
+                        # self.stm.send_cmd(
+                        #     "S", 95, 0, 0
+                        # )  # Stopped in front of next obstacle
+
+                    elif (
+                        self.num_obstacle == 3
+                    ):  # Finished obstacle 2, go back to carpark
+                        print("Going back to carpark...")
+                        # TODO: Perform set of commands to go back to the carpark
+
+                    self.num_obstacle += 1
 
             except OSError as e:
                 print(f"Error in receiving STM data: {e}")
 
             if message_rcv is None:
                 continue
+
+    def start(self):
+        print("Starting program...")
+        print("Sending initial commands to the STM32...")
+        self.stm.send_cmd("W", 95, 0, 50)
+        self.stm.send_cmd("W", 95, 0, 30)
+        self.stm.send_cmd("S", 95, 0, 0)
 
     def stop(self):
         """Stops all processes on the RPi and disconnects from Android, STM and PC"""
@@ -178,6 +230,20 @@ class Task2RPI:
         self.android.disconnect()
         # TODO: Add Stream disconnect
         print("Program Ended\n")
+
+    def get_last_image(self) -> str:
+        print(f"Returning last_image as {self.last_image}")
+        return self.last_image
+
+    def set_last_image(self, img) -> None:
+        print(f"Setting last_image as {self.last_image}")
+        self.last_image = img
+
+    def set_stm_stop(self, val) -> None:
+        self.STM_Stopped = val
+
+    def get_stm_stop(self) -> bool:
+        return self.STM_Stopped
 
 
 if __name__ == "__main__":

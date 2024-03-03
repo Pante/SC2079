@@ -146,9 +146,6 @@ class Task1RPI:
                             try:
                                 if self.prev_image == None:
                                     # New image detected, send to Android
-                                    action_type = "TARGET"
-                                    message_content = object_id
-                                    # ~ self.android.send(AndroidMessage(action_type, message_content))
                                     self.prev_image = object_id
                                     self.set_last_image(object_id)
                                 elif self.prev_image == object_id:
@@ -157,9 +154,6 @@ class Task1RPI:
                                     continue
                                 else:
                                     # The current image is new, so can send to Android
-                                    action_type = "TARGET"
-                                    message_content = object_id
-                                    # ~ self.android.send(AndroidMessage(action_type, message_content))
                                     self.prev_image = object_id
                                     self.set_last_image(object_id)
                             except OSError:
@@ -186,7 +180,7 @@ class Task1RPI:
 
                 if "BEGIN" in message_rcv:
                     # TODO: Begin Task 1
-                    self.callPathfinding()  # Calculate the path
+                    self.start()  # Calculate the path
 
                 elif "OBSTACLE" in message_rcv:
                     message_split = message_rcv.split(",")
@@ -373,17 +367,14 @@ class Task1RPI:
 
             self.android_dropped.clear()  # Clear previously set event
 
-    def callPathfinding(self):
+    def start(self):
         pathfindingRequest = PathfindingRequest(
             obstacles=self.obstacleArr, robot=self.robot
         )
         pathfinding_api = PathfindingApi(api_client=self.client)
         response = pathfinding_api.pathfinding_post(pathfindingRequest)
         segments = response.segments
-        i = 1
-        j = 1
-        counter = 0
-
+        # i = 1
         for i, segment in enumerate(segments):
             print(f"On segment {i+1} of {len(segments)}:")
             self.set_stm_stop(False)  # Reset to false upon starting the new segment
@@ -431,7 +422,6 @@ class Task1RPI:
 
                     elif isinstance(inst, TurnInstruction):
                         val = 90
-                        # TODO: Send instruction to the STM to turn
                         inst_send = inst.value
                         if inst.value == "FORWARD_LEFT":
                             flag = "T"
