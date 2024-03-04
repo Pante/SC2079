@@ -1,11 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-import numpy as np
-
-from pathfinding.world.primitives import Direction, Point, Vector
-from pathfinding.world.world import World, Obstacle, Robot
+from pathfinding.world.primitives import Direction, Vector
+from pathfinding.world.world import World, Obstacle
 
 
 def generate_objectives(world: World) -> dict[Obstacle, set[Vector]]:
