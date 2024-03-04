@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from http import HTTPStatus
 
+import numpy as np
 from flask import make_response
 from flask_openapi3 import APIBlueprint, Tag
 from pydantic import BaseModel, Field
@@ -42,7 +43,7 @@ class PathfindingRequestRobot(BaseModel):
         # This is a workaround to ensure that the centre point isn't off-centre. It is to workaround incorrect turning
         # calculation.
         if (north_east.x - south_west.x) % 2 != 0 and (north_east.y - south_west.y) % 2 != 0:
-            north_east = Point(north_east.x + 1, north_east.y  + 1)
+            north_east = Point(north_east.x + 1, north_east.y + 1)
 
         return Robot(self.direction, south_west, north_east)
 
@@ -134,3 +135,20 @@ def pathfinding(body: PathfindingRequest):
     response = make_response(pathfinding_response.model_dump(mode='json'), HTTPStatus.OK)
     response.mimetype = "application/json"
     return response
+
+
+def dump(world: World, segments: list[Segment]):
+    """
+    Dumps the path to a txt file for visualization.
+
+    :param world:
+    :param segments:
+    :return:
+    """
+    map = np.array(world.grid, dtype=int)
+    for i, s in enumerate(segments):
+        for v in s.vectors:
+            map[v.x, v.y] = i + 2
+
+    a = np.rot90(map)
+    np.savetxt('dump.txt', a, fmt='%d')
