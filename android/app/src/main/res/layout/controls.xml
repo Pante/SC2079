@@ -57,6 +57,12 @@
                     android:background="@drawable/border_black_state"-->
 
 
+                <Button
+                    android:id="@+id/startSend"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Start" />
+
                 <ImageButton
                     android:id="@+id/exploreResetImageBtn2"
                     style="@style/Widget.AppCompat.ImageButton"
@@ -66,11 +72,6 @@
                     android:layout_marginTop="30dp"
                     android:background="@color/transparent" />
 
-                <Button
-                    android:id="@+id/startSend"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Start" />
                 <!--                app:srcCompat="@drawable/ic_refresh"-->
 
             </LinearLayout>

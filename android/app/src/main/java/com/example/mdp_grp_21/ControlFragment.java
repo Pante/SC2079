@@ -305,12 +305,32 @@ public class ControlFragment extends Fragment {
             }
         });
 
-        //added new Button, startSend, need to test
+        //added new Button, startSend for left WEEK8, need to test
         startSend.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
                 showLog("Clicked startSendBtn");
                 showToast("Sending BEGIN to robot...");
+                exploreButton.toggle();
+                if (exploreButton.getText().equals("WK8 START")) {
+                    showToast("Auto Movement/ImageRecog timer stop!");
+                    robotStatusTextView.setText("Auto Movement Stopped");
+                    timerHandler.removeCallbacks(timerRunnableExplore);
+                }
+                else if (exploreButton.getText().equals("STOP")) {
+                    // Get String value that represents obstacle configuration
+                    String msg = gridMap.getObstacles();
+                    // Send this String over via BT
+                    Home.printCoords(msg);
+                    // Start timer
+                    Home.stopTimerFlag = false;
+                    showToast("Auto Movement/ImageRecog timer start!");
+
+                    robotStatusTextView.setText("Auto Movement Started");
+                    exploreTimer = System.currentTimeMillis();
+                    timerHandler.postDelayed(timerRunnableExplore, 0);
+                }
+                //ok
                 Home.printMessage("BEGIN"); //send a string "BEGIN" to the RPI
                 showLog("Exiting startSend");
             }
