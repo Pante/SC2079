@@ -9,7 +9,7 @@ sys.path.insert(1, "/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi")
 from TestingScripts.Camera_Streaming_UDP.stream_listener import StreamListener
 
 
-class Task1PC:
+class Task2PC:
     def __init__(self):
         # self.manager = Manager()
         self.process_PC_receive = None
@@ -119,5 +119,5 @@ class Task1PC:
 
 
 if __name__ == "__main__":
-    pcMain = Task1PC()
+    pcMain = Task2PC()
     pcMain.start()
