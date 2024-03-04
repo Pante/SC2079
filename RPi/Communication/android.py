@@ -134,7 +134,8 @@ class Android(Link):
         Connect to Andriod by Bluetooth
         """
         print("Bluetooth Connection Started")
-        try:
+        try:            
+            
             # Make RPi discoverable by the Android tablet to complete pairing
             os.system("sudo hciconfig hci0 piscan")
             
@@ -142,11 +143,13 @@ class Android(Link):
             # Initialize server socket
             #port = 1 # port 1 is commonly used, but we already specified port 1 as default when setting up RFCOMM.
             self.server_socket = bt.BluetoothSocket(bt.RFCOMM)
+            # ~ self.server_socket.bind((self.hostId, bt.PORT_ANY))
             self.server_socket.bind((self.hostId, bt.PORT_ANY))
             self.server_socket.listen(1)
 
             # Parameters
             port = self.server_socket.getsockname()[1]
+            # ~ port = 1
 
             # Advertise
             bt.advertise_service(self.server_socket, "MDPGroup14 RPi", service_id=self.uuid, service_classes=[self.uuid, bt.SERIAL_PORT_CLASS], profiles=[bt.SERIAL_PORT_PROFILE])
@@ -180,6 +183,7 @@ class Android(Link):
             self.client_socket = None
             self.server_socket = None
             self.connected = False
+            time.sleep(1) # Time for cleanup
             print("Bluetooth has been disconnected")
         except Exception as e:
             print("Failed to disconnect bluetooth: %s", str(e))

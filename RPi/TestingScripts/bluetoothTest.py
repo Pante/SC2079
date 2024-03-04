@@ -31,38 +31,40 @@ class BluetoothConnectionTest:
 		# ~ android = Android()
 
 		# Connect to android
-		self.android.connect()
-		print("Android processess successfully started")
+		try:
+			self.android.connect()
+			print("Android processess successfully started")
 
-		self.process_android_receive = Process(target=self.android_receive)
+			self.process_android_receive = Process(target=self.android_receive)
 
-		# Start processes
-		self.process_android_receive.start() # Receive from android
-		
-		user_input = 0;
+			# Start processes
+			self.process_android_receive.start() # Receive from android
+			
+			user_input = 0;
 
-		while user_input < 3:
-			user_input = int(input("1: Send a message, 2: Exit"))
-			if user_input == 1:
-				try:
-					obstacle_id = input("Obstacle ID:")
-					target_id = input("Target ID (Image detected):")
-					final_msg_sending = "TARGET," + obstacle_id + "," + target_id
-					self.android.send(final_msg_sending)
-					# ~ self.android.send(AndroidMessage(action_type, message_content))
-					print("message sent")
-					# time.sleep(10)
-				except OSError as e:
-					print("Error in sending data: {e}")
-			else:
-				break
-				# ~ try:
-					# ~ self.android.receive()
-				# ~ except OSError as e:
-					# ~ print("Error in receiving data: {e}")
-
-		# End the connection
-		self.android.disconnect()
+			while user_input < 3:
+				user_input = int(input("1: Send a message, 2: Exit"))
+				if user_input == 1:
+					try:
+						obstacle_id = input("Obstacle ID:")
+						target_id = input("Target ID (Image detected):")
+						final_msg_sending = "TARGET," + obstacle_id + "," + target_id
+						self.android.send(final_msg_sending)
+						# ~ self.android.send(AndroidMessage(action_type, message_content))
+						print("message sent")
+						# time.sleep(10)
+					except OSError as e:
+						print("Error in sending data: {e}")
+				else:
+					break
+					# ~ try:
+						# ~ self.android.receive()
+					# ~ except OSError as e:
+						# ~ print("Error in receiving data: {e}")
+		except:
+			# End the connection
+			print("DISCONNECTION HAPPENED")
+			self.android.disconnect()
 
 	def android_receive(self) -> None:
 		while True:
