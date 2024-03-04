@@ -43,6 +43,7 @@
 /* USER CODE BEGIN PD */
 #define MS_FRAME 2.5f
 #define SERIAL_BUF_SIZE 20
+#define SERIAL_RING_SIZE 1000
 #define DIST_DIFF_DEFAULT 10
 /* USER CODE END PD */
 
@@ -72,9 +73,11 @@ Sensors sensors;
 MagCalParams magCalParams;
 
 //serial buffers.
-uint8_t buf_i = 0;
+volatile uint16_t ring_i = 0, track_i = 0;
+uint16_t buf_i = 0;
+
 uint8_t buf_serial[SERIAL_BUF_SIZE];
-uint8_t byte_serial;
+uint8_t ring_serial[SERIAL_RING_SIZE];
 
 //ultrasound pulse width measurement.
 volatile uint8_t isRisingCaptured = 0;
@@ -106,15 +109,15 @@ static void MX_TIM7_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+//increment index in a ring.
+static void serial_inc_ring(volatile uint16_t *i) {
+	*i = (*i + 1) % SERIAL_RING_SIZE;
+}
+
 //serial in.
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-	HAL_UART_Receive_IT(&huart3, &byte_serial, 1);
-	buf_serial[buf_i++] = byte_serial;
-
-	if (byte_serial == CMD_END) {
-		commands_process(&huart3, buf_serial, buf_i);
-		buf_i = 0;
-	}
+	serial_inc_ring(&ring_i);
+	HAL_UART_Receive_IT(&huart3, &ring_serial[ring_i], 1);
 }
 
 /* --- Start: Timer Management --- */
@@ -247,12 +250,11 @@ int main(void)
   /* ----- End: OS Parameters ----- */
 
   /* ----- Start: Interrupts ----- */
-  HAL_UART_Receive_IT(&huart3, &byte_serial, 1);	//start receiving serial.
-  HAL_ADC_Start(&hadc1);							//start continuous ADC conversion.
-  HAL_TIM_Base_Start_IT(&htim7);					//start paced loop timer.
+  HAL_UART_Receive_IT(&huart3, &ring_serial[ring_i], 1);	//start receiving serial.
+  HAL_ADC_Start(&hadc1);									//start continuous ADC conversion.
+  HAL_TIM_Base_Start_IT(&htim7);							//start paced loop timer.
   /* ----- End: Interrupts ----- */
 
-  uint8_t buf[17];
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -262,9 +264,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
 	/* ----- Start: Sensor reading ----- */
-	//trigger distance measurement (minimum 3ms delay)
+	//trigger distance measurement.
 	if (!(ticksElapsed % ticksUltrasound)) {
 		sensors_us_trig();
 	}
@@ -274,11 +275,6 @@ int main(void)
 	sensors_read_gyroZ();
 	sensors_read_heading(MS_FRAME, sensors.gyroZ);
 	/* ----- End: Sensor reading ----- */
-
-//	if (usCaptureComplete) {
-//		snprintf(buf, 25, "%7.2f,%7.2f,%7.2f\r\n", sensors.usDist, sensors.irDist, dist_get_front(sensors.usDist, sensors.irDist));
-//		HAL_UART_Transmit(&huart3, buf, sizeof(buf), HAL_MAX_DELAY);
-//	}
 
 	/* ----- Start: Get next command (if any) ----- */
 	if (cmd == NULL) {
@@ -378,10 +374,10 @@ int main(void)
 //			: estSpeed > 0
 //			  	  ? distDiff / estSpeed < turnMs
 //				  : 0;
-//		if (shouldTurn) servo_setAngle(nextAngle);\
+//		if (shouldTurn) servo_setAngle(nextAngle);
 
 		if (!(ticksElapsed % ticksServo)) {
-			//TODO: turn a small angle every 20ms + 1 tick.
+			//turn a small angle every 20ms.
 			float timeLeft = distDiff / estSpeed;
 			if (timeLeft < (SERVO_TURN_PERIOD) * (nextAngleDiff / SERVO_TURN_STEP)) {
 				//should increment.
@@ -408,7 +404,21 @@ int main(void)
 	/* ----- End: Drive PID Control ----- */
 
 	/* ----- Start: Paced Loop Control ----- */
-	while (!newTick);									//wait for new tick.
+	while (!newTick) {									//wait for new tick.
+		/* ----- Start: Process Ring Buffer ----- */
+		/* We use the down time for paced looping to process commands. */
+		if (track_i != ring_i) {
+			uint8_t c = ring_serial[track_i];
+			buf_serial[buf_i++] = c;
+			if (c == CMD_END) {
+				commands_process(&huart3, buf_serial, buf_i);
+				buf_i = 0;
+			}
+
+			serial_inc_ring(&track_i);
+		}
+		/* ----- End: Process Ring Buffer ----- */
+	}
 	newTick = 0;										//acknowledge flag.
 
 	ticksElapsed = (ticksElapsed + 1) % ticksRefresh;	//refresh tick count.

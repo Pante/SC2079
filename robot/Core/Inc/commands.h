@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include <stdlib.h>
+#include <string.h>
 #include "commands_FLAGS.h"
 #include "convert.h"
 
