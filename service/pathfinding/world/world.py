@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List
 
 import numpy as np
@@ -22,13 +22,13 @@ class World:
     def __init__(self, size: int, robot: Robot, obstacles: List[Obstacle]):
         self.size = size
         self.grid = np.full((size, size), True)
-        self.robot = robot
         self.obstacles = obstacles
+        self.robot = robot
+
+        assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
+        self.__annotate_grid()
 
         assert self.__inside(robot)
-        assert all(map(lambda obstacle: self.__inside(obstacle), self.obstacles))
-
-        self.__annotate_obstacles()
 
     def __inside(self, entity: Entity) -> bool:
         return (0 <= entity.south_west.x < self.size and
@@ -36,17 +36,22 @@ class World:
                 0 <= entity.north_east.x < self.size and
                 0 <= entity.north_east.y < self.size)
 
-    def __annotate_obstacles(self: World) -> None:
+    def __annotate_grid(self: World) -> None:
+        self.grid[0:self.robot.north_length, :] = False
+        self.grid[:, -self.robot.east_length:] = False
+        self.grid[-self.robot.south_length:, :] = False
+        self.grid[:, 0:self.robot.west_length] = False
+
         for obstacle in self.obstacles:
-            west_x = obstacle.south_west.x - self.robot.east_length
-            east_x = obstacle.north_east.x + self.robot.west_length + 1
-            south_y = obstacle.south_west.y - self.robot.north_length
-            north_y = obstacle.north_east.y + self.robot.south_length + 1
+            west_x = max(obstacle.south_west.x - self.robot.east_length, 0)
+            east_x = min(obstacle.north_east.x + self.robot.west_length + 1, self.size)
+            south_y = max(obstacle.south_west.y - self.robot.north_length, 0)
+            north_y = min(obstacle.north_east.y + self.robot.south_length + 1, self.size)
 
             self.grid[west_x:east_x, south_y:north_y] = False
 
-    def contains(self, position: Point | Vector) -> bool:
-        return self.grid[position.x, position.y]
+    def contains(self, centre: Point | Vector) -> bool:
+        return (0 <= centre.x < self.size and 0 <= centre.y < self.size) and self.grid[centre.x, centre.y]
 
     @property
     def cell_size(self) -> int:
@@ -63,11 +68,23 @@ class Entity(ABC):
         assert 0 <= self.south_west.x <= self.north_east.x
         assert 0 <= self.south_west.y <= self.north_east.y
         assert (self.north_east.y - self.south_west.y) == (self.north_east.x - self.south_west.x)
+        self.centre = Point(
+            self.south_west.x + (self.north_east.x - self.south_west.x) // 2,
+            self.south_west.y + (self.north_east.y - self.south_west.y) // 2,
+            )
+        self.north_length = self.north_east.y - self.centre.y
+        self.east_length = self.north_east.x - self.centre.x
+        self.south_length = self.centre.y - self.south_west.y
+        self.west_length = self.centre.x - self.south_west.x
 
     @property
     def clearance(self):
         # Assumes that height & width are the same
         return self.north_east.y - self.south_west.y + 1
+
+    @property
+    def vector(self) -> Vector:
+        return Vector(self.direction, self.centre.x, self.centre.y)
 
     @property
     def north_west(self) -> Point:
@@ -88,38 +105,6 @@ class Obstacle(Entity):
 
 
 @dataclass
-class Centerable(Entity):
-    centre: Point = field(init=False)
-
-    def __post_init__(self):
-        super().__post_init__()
-        self.centre = Point(
-            self.south_west.x + (self.north_east.x - self.south_west.x) // 2,
-            self.south_west.y + (self.north_east.y - self.south_west.y) // 2,
-        )
-
-    @property
-    def vector(self) -> Vector:
-        return Vector(self.direction, self.centre.x, self.centre.y)
-
-    @property
-    def north_length(self) -> int:
-        return self.north_east.y - self.centre.y
-
-    @property
-    def east_length(self) -> int:
-        return self.north_east.x - self.centre.x
-
-    @property
-    def south_length(self) -> int:
-        return self.centre.y - self.south_west.y
-
-    @property
-    def west_length(self) -> int:
-        return self.centre.x - self.south_west.x
-
-
-@dataclass
-class Robot(Centerable):
+class Robot(Entity):
     def __post_init__(self):
         super().__post_init__()
