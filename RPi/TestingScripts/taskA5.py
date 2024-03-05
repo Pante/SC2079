@@ -261,15 +261,15 @@ class TaskA5:
 		for dir_str in ["SOUTH", "EAST", "NORTH", "WEST"]:		
 			direction_one = Direction(dir_str)
 			image_id_1 = 1
-			south_west =  PathfindingPoint(x=20,y=20)
+			south_west =  PathfindingPoint(x=40,y=40)
 			# Need to add 4 to x and y from the south_west to get the north_east coords
-			north_east = PathfindingPoint(x=21,y=21)
+			north_east = PathfindingPoint(x=45,y=45)
 			pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
 			obstacleArr.append(pathObstacle)
 		
 		robot_direction = Direction("NORTH")
-		robot_south_west =  PathfindingPoint(x=20,y=0)
-		robot_north_east =  PathfindingPoint(x=24,y=4)
+		robot_south_west =  PathfindingPoint(x=0,y=0)
+		robot_north_east =  PathfindingPoint(x=13,y=13)
 		# Replace with current_robot_position when ready
 		pathRobot =  PathfindingRequestRobot(direction = robot_direction, north_east = robot_north_east, south_west = robot_south_west)
 		
