@@ -231,7 +231,7 @@ public class ControlFragment extends Fragment {
                     // Get String value that represents obstacle configuration
                     String msg = gridMap.getObstacles();
                     // Send this String over via BT
-                    Home.printCoords(msg);
+                    //Home.printCoords(msg);
                     // Start timer
                     Home.stopTimerFlag = false;
                     showToast("Auto Movement/ImageRecog timer start!");
@@ -321,7 +321,7 @@ public class ControlFragment extends Fragment {
                     // Get String value that represents obstacle configuration
                     String msg = gridMap.getObstacles();
                     // Send this String over via BT
-                    Home.printCoords(msg);
+                    //Home.printCoords(msg);
                     // Start timer
                     Home.stopTimerFlag = false;
                     showToast("Auto Movement/ImageRecog timer start!");
