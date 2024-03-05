@@ -24,7 +24,6 @@ static void commands_ack(UART_HandleTypeDef *uart, Command *cmd, uint8_t indicat
 	free(buf);
 }
 
-static uint8_t buf[3];
 void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 	Command *next = get_new_cmd();
 

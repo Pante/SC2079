@@ -30,22 +30,17 @@ class Task2RPI:
         self.android_dropped = self.manager.Event()
         self.host = "192.168.14.14"
         self.port = 5000
-        self.HTML = """
-            <html>
-            <head>
-            <title>PyShine Live Streaming</title>
-            </head>
-
-            <body>
-            <center><h1> PyShine Live Streaming using PiCamera </h1></center>
-            <center><img src="stream.mjpg" width='640' height='480' autoplay playsinline></center>
-            </body>
-            </html>
-        """
         self.last_image = None
         self.prev_image = None
         self.STM_Stopped = False
+        
         self.num_obstacle = 1
+        self.on_arrow_callback = None # callback that takes in a single argument, boolean is_right
+
+        self.drive_speed = 95 # tune to balance speed with precision. kachow!
+        # left and right arrow IDs
+        self.LEFT_ARROW_ID = "39"
+        self.RIGHT_ARROW_ID = "38"
 
     def initialize(self):
         try:
@@ -164,49 +159,37 @@ class Task2RPI:
                     # Robot has stopped, take in latest_image then decide what to do
                     self.set_stm_stop(True)
                     if self.num_obstacle == 1:  # First Obstacle
-                        if self.get_last_image() == "38":  # RIGHT ARROW
-                            # TODO: Perform set of commands to turn right
+                        if self.get_last_image() == self.RIGHT_ARROW_ID:  # RIGHT ARROW
                             print("Right arrow detected")
-                            # Perform Right Arc
-                            self.stm.send_cmd("T", 95, 25, 45)
-                            self.stm.send_cmd("T", 95, 0, 10)
-                            self.stm.send_cmd("T", 95, -25, 105)
-                            self.stm.send_cmd("T", 95, 0, 26.8)
-                            self.stm.send_cmd("t", 95, -25, 60)
-                            self.stm.send_cmd("t", 95, -25, 60)  # End of Rigt Arc
+                            self.callback_obstacle1(True)
 
-                        elif self.get_last_image() == "39":  # LEFT ARROW
-                            # TODO: Perform set of commands to turn left
+                        elif self.get_last_image() == self.LEFT_ARROW_ID:  # LEFT ARROW
                             print("Left arrow detected")
-                            # Perform Left Arc
-
-                            # End of Left Arc
-
-                        self.stm.send_cmd("W", 95, 0, 50)  # Move towards next obstacle
-                        self.stm.send_cmd("W", 95, 0, 30)
-                        self.stm.send_cmd(
-                            "S", 95, 0, 0
-                        )  # Stopped in front of next obstacle
+                            self.callback_obstacle1(False)
+                        
+                        else:
+                            # set to trigger on next arrow found.
+                            self.on_arrow_callback = self.callback_obstacle1
 
                     elif self.num_obstacle == 2:  # Second Obstacle
-                        if self.get_last_image() == "38":  # RIGHT ARROW
-                            # TODO: Perform set of commands to turn right
+                        if self.get_last_image() == self.RIGHT_ARROW_ID:  # RIGHT ARROW
                             print("Right arrow detected")
-                        elif self.get_last_image() == "39":  # LEFT ARROW
-                            # TODO: Perform set of commands to turn left
+                            self.callback_obstacle2(True)
+                            
+                        elif self.get_last_image() == self.LEFT_ARROW_ID:  # LEFT ARROW
                             print("Left arrow detected")
-
-                        # self.stm.send_cmd("W", 95, 0, 50)  # Move towards next obstacle
-                        # self.stm.send_cmd("W", 95, 0, 30)
-                        # self.stm.send_cmd(
-                        #     "S", 95, 0, 0
-                        # )  # Stopped in front of next obstacle
+                            self.callback_obstacle2(False)
+                        
+                        else:
+                            # set to trigger on next arrow found.
+                            self.on_arrow_callback = self.callback_obstacle2
 
                     elif (
                         self.num_obstacle == 3
                     ):  # Finished obstacle 2, go back to carpark
                         print("Going back to carpark...")
                         # TODO: Perform set of commands to go back to the carpark
+                        self.perform_carpark()
 
                     self.num_obstacle += 1
 
@@ -216,12 +199,55 @@ class Task2RPI:
             if message_rcv is None:
                 continue
 
+    # drive towards obstacle (and insert 'S' to signal camera tracking).
+    def perform_toward_obstacle(self) -> None:
+        self.stm.send_cmd("W", self.drive_speed, 0, 50)
+        self.stm.send_cmd("S", self.drive_speed, 0, 0)
+        self.stm.send_cmd("W", self.drive_speed, 0, 30)
+
+    # drive arc for first 10x10 obstacle.
+    def perform_arc1(self, is_right) -> None:
+        #get initial turning angle.
+        angle = 25 if is_right else -25
+
+        self.stm.send_cmd("T", self.drive_speed, angle, 45)
+        self.stm.send_cmd("T", self.drive_speed, 0, 10)
+        self.stm.send_cmd("T", self.drive_speed, -angle, 105)
+        self.stm.send_cmd("T", self.drive_speed, 0, 26.8)
+        self.stm.send_cmd("t", self.drive_speed, -angle, 60)
+
+    # drive arc for second 60x10 obstacle.
+    def perform_arc2(self, is_right) -> None:
+        #get initial turning angle.
+        angle = 25 if is_right else -25
+
+        self.stm.send_cmd("T", self.drive_speed, angle, 45)
+        self.stm.send_cmd("T", self.drive_speed, 0, 10)
+        self.stm.send_cmd("T", self.drive_speed, -angle, 105)
+        self.stm.send_cmd("T", self.drive_speed, 0, 26.8)
+        self.stm.send_cmd("t", self.drive_speed, -angle, 60)
+
+    # set this callback it is time to detect an arrow for obstacle 1.
+    def callback_obstacle1(self, is_right) -> None:
+        self.perform_arc1(is_right)
+        self.perform_toward_obstacle()
+
+        self.on_arrow_callback = None # clear callback.
+
+    # set this callback it is time to detect an arrow for obstacle 2.
+    def callback_obstacle2(self, is_right) -> None:
+        self.perform_arc2(is_right)
+
+        self.on_arrow_callback = None # clear callback.
+    
+    # drive back to the carpark.
+    def perform_carpark(self) -> None:
+        pass
+
     def start(self):
         print("Starting program...")
         print("Sending initial commands to the STM32...")
-        self.stm.send_cmd("W", 95, 0, 50)
-        self.stm.send_cmd("W", 95, 0, 30)
-        self.stm.send_cmd("S", 95, 0, 0)
+        self.perform_toward_obstacle()
 
     def stop(self):
         """Stops all processes on the RPi and disconnects from Android, STM and PC"""
@@ -236,7 +262,11 @@ class Task2RPI:
         return self.last_image
 
     def set_last_image(self, img) -> None:
-        print(f"Setting last_image as {self.last_image}")
+        print(f"Setting last_image as {img}")
+
+        if (img == self.RIGHT_ARROW_ID or img == self.LEFT_ARROW_ID) and self.on_arrow_callback is not None:
+            self.on_arrow_callback(img == self.RIGHT_ARROW_ID)
+
         self.last_image = img
 
     def set_stm_stop(self, val) -> None:

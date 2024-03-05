@@ -15,7 +15,7 @@ float angle_get(float msElapsed, float w, float heading) {
 	kParams.s_est += msElapsed * msElapsed * ANGLE_S_W;
 	kalman_update(&kParams, angle_w, heading);
 
-	if (angle_w < -90 && (heading - angle_w) > 180 || heading < -90 && (angle_w - heading) > 180) {
+	if ((angle_w < -90 && (heading - angle_w) > 180) || (heading < -90 && (angle_w - heading) > 180)) {
 		//detect discontinuous wrapping; adjust accordingly.
 		kParams.last_est = add_angle(kParams.last_est, 180);
 	}

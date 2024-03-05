@@ -1,13 +1,10 @@
 # import pyshine as ps
 import socket
 import sys
-import threading
 import time
 from multiprocessing import Manager, Process
 from pathlib import Path
 from threading import Thread
-
-import picamera
 
 sys.path.insert(1, "/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi")
 from Communication.android import Android, AndroidMessage
@@ -66,18 +63,6 @@ class Task1RPI:
         self.android_dropped = self.manager.Event()
         self.host = "192.168.14.14"
         self.port = 5000
-        self.HTML = """
-                        <html>
-                        <head>
-                        <title>PyShine Live Streaming</title>
-                        </head>
-
-                        <body>
-                        <center><h1> PyShine Live Streaming using PiCamera </h1></center>
-                        <center><img src="stream.mjpg" width='640' height='480' autoplay playsinline></center>
-                        </body>
-                        </html>
-                        """
         self.conf = Configuration(host="http://192.168.14.13:5000")
         self.client = ApiClient(configuration=self.conf)
         self.last_image = None
