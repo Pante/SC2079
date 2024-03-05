@@ -4,24 +4,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <LinearLayout
         android:layout_width="400dp"
         android:layout_height="350dp"
         android:orientation="horizontal">
-
         <LinearLayout
             android:layout_width="200dp"
             android:layout_height="350dp"
             android:orientation="vertical">
-
             <LinearLayout
                 android:layout_width="180dp"
-                android:layout_marginStart="10dp"
                 android:layout_height="350dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
                 android:orientation="vertical">
-
                 <TextView
                     android:id="@+id/exploreTextView"
                     android:layout_width="180dp"
@@ -29,12 +25,11 @@
                     android:layout_marginTop="10dp"
                     android:gravity="center"
                     android:text="WEEK 8"
-                    android:textSize="20sp"
-                    android:textColor="@color/black" />
-<!--                app:drawableStartCompat="@mipmap/left"
+                    android:textColor="@color/black"
+                    android:textSize="20sp" />
+                <!--                app:drawableStartCompat="@mipmap/left"
                     app:drawableEndCompat="@mipmap/right"-->
-<!--                android:background="@drawable/statusbar"-->
-
+                <!--                android:background="@drawable/statusbar"-->
                 <TextView
                     android:id="@+id/exploreTimeTextView2"
                     android:layout_width="180dp"
@@ -44,7 +39,6 @@
                     android:text="00:00"
                     android:textColor="@color/black"
                     android:textSize="26sp" />
-
                 <ToggleButton
                     android:id="@+id/exploreToggleBtn2"
                     android:layout_width="180dp"
@@ -53,9 +47,15 @@
                     android:text="Exploration"
                     android:textOff="WK8 START"
                     android:textOn="STOP" />
-<!--                android:drawableEnd="@mipmap/qqqq"
+                <!--                android:drawableEnd="@mipmap/qqqq"
                     android:background="@drawable/border_black_state"-->
 
+
+                <Button
+                    android:id="@+id/startSend"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Start" />
 
                 <ImageButton
                     android:id="@+id/exploreResetImageBtn2"
@@ -64,8 +64,14 @@
                     android:layout_height="50dp"
                     android:layout_marginStart="65dp"
                     android:layout_marginTop="30dp"
-                    android:background="@color/transparent"/>
-<!--                app:srcCompat="@drawable/ic_refresh"-->
+                    android:background="@color/transparent" />
+
+                <Button
+                    android:id="@+id/startSend"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Start" />
+                <!--                app:srcCompat="@drawable/ic_refresh"-->
 
             </LinearLayout>
         </LinearLayout>
@@ -73,14 +79,12 @@
             android:layout_width="200dp"
             android:layout_height="350dp"
             android:orientation="vertical">
-
             <LinearLayout
                 android:layout_width="180dp"
                 android:layout_marginStart="10dp"
                 android:layout_height="350dp"
                 android:layout_marginTop="5dp"
                 android:orientation="vertical">
-
                 <TextView
                     android:id="@+id/fastestTextView"
                     android:layout_width="180dp"
@@ -90,10 +94,9 @@
                     android:text="WEEK 9"
                     android:textSize="20sp"
                     android:textColor="@color/black" />
-<!--                android:background="@drawable/statusbar"-->
-<!--                app:drawableLeftCompat="@mipmap/left"
-                    app:drawableRightCompat="@mipmap/right"-->
-
+                <!--                android:background="@drawable/statusbar"-->
+                <!--                app:drawableLeftCompat="@mipmap/left"
+                                    app:drawableRightCompat="@mipmap/right"-->
                 <TextView
                     android:id="@+id/fastestTimeTextView2"
                     android:layout_width="180dp"
@@ -103,7 +106,6 @@
                     android:textColor="@color/black"
                     android:text="00:00"
                     android:textSize="26sp" />
-
                 <ToggleButton
                     android:id="@+id/fastestToggleBtn2"
                     android:layout_width="180dp"
@@ -112,9 +114,8 @@
                     android:text="FASTEST"
                     android:textOff="WK9 START"
                     android:textOn="STOP" />
-<!--                android:drawableEnd="@mipmap/qqqq"
-                    android:background="@drawable/border_black_state"-->
-
+                <!--                android:drawableEnd="@mipmap/qqqq"
+                                    android:background="@drawable/border_black_state"-->
                 <ImageButton
                     android:id="@+id/fastestResetImageBtn2"
                     style="@style/Widget.AppCompat.ImageButton"
@@ -123,8 +124,7 @@
                     android:layout_marginStart="65dp"
                     android:layout_marginTop="30dp"
                     android:background="@color/transparent"/>
-<!--                app:srcCompat="@drawable/ic_refresh"-->
-
+                <!--                app:srcCompat="@drawable/ic_refresh"-->
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

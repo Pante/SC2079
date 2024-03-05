@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +37,9 @@ public class ControlFragment extends Fragment {
 
     // Timer
     public static Handler timerHandler = new Handler();
+
+    //just added, need to test
+    Button startSend;
 
     public static Runnable timerRunnableExplore = new Runnable() {
         @Override
@@ -101,6 +105,7 @@ public class ControlFragment extends Fragment {
         robotStatusTextView = Home.getRobotStatusTextView();
         fastestTimer = 0;
         exploreTimer = 0;
+        startSend = root.findViewById(R.id.startSend); //just added, need to test
 
         gridMap = Home.getGridMap();
 
@@ -113,12 +118,12 @@ public class ControlFragment extends Fragment {
                     gridMap.moveRobot("forward");
                     Home.refreshLabel();    // update x and y coordinate displayed
                     // display different statuses depending on validity of robot action
-                            if (gridMap.getValidPosition()){
-                                updateStatus("moving forward");}
-                            else {
-                                Home.printMessage("obstacle");
-                                updateStatus("Unable to move forward");
-                            }
+                    if (gridMap.getValidPosition()){
+                        updateStatus("moving forward");}
+                    else {
+                        Home.printMessage("obstacle");
+                        updateStatus("Unable to move forward");
+                    }
 
                     Home.printMessage("f");
                 }
@@ -300,8 +305,41 @@ public class ControlFragment extends Fragment {
             }
         });
 
+        //added new Button, startSend for left WEEK8, need to test
+        startSend.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                showLog("Clicked startSendBtn");
+                showToast("Sending BEGIN to robot...");
+                exploreButton.toggle();
+                if (exploreButton.getText().equals("WK8 START")) {
+                    showToast("Auto Movement/ImageRecog timer stop!");
+                    robotStatusTextView.setText("Auto Movement Stopped");
+                    timerHandler.removeCallbacks(timerRunnableExplore);
+                }
+                else if (exploreButton.getText().equals("STOP")) {
+                    // Get String value that represents obstacle configuration
+                    String msg = gridMap.getObstacles();
+                    // Send this String over via BT
+                    Home.printCoords(msg);
+                    // Start timer
+                    Home.stopTimerFlag = false;
+                    showToast("Auto Movement/ImageRecog timer start!");
+
+                    robotStatusTextView.setText("Auto Movement Started");
+                    exploreTimer = System.currentTimeMillis();
+                    timerHandler.postDelayed(timerRunnableExplore, 0);
+                }
+                //ok
+                Home.printMessage("BEGIN"); //send a string "BEGIN" to the RPI
+                showLog("Exiting startSend");
+            }
+        });
+
         return root;
     }
+
+
 
     private static void showLog(String message) {
         Log.d(TAG, message);

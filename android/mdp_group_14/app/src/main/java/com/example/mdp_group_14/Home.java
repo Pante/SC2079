@@ -1,5 +1,12 @@
 package com.example.mdp_group_14;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewpager.widget.ViewPager;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
@@ -17,19 +24,18 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -81,9 +87,8 @@ public class Home extends Fragment {
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getActivity().getSupportFragmentManager(),
                 FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-
-        sectionsPagerAdapter.addFragment(new MappingFragment(),"MAP CONFIG");
         sectionsPagerAdapter.addFragment(new BluetoothCommunications(),"CHAT");
+        sectionsPagerAdapter.addFragment(new MappingFragment(),"MAP CONFIG");
         sectionsPagerAdapter.addFragment(new ControlFragment(),"CHALLENGE");
 
         ViewPager viewPager = root.findViewById(R.id.view_pager);
@@ -229,7 +234,7 @@ public class Home extends Fragment {
         showLog("Entering printMessage");
         editor = sharedPreferences.edit();
 
- }
+    }
 
 
 //        if (BluetoothConnectionService.BluetoothConnectionStatus) {
@@ -359,24 +364,35 @@ public class Home extends Fragment {
             else if(message.contains("TARGET")) {
                 try {
                     String[] cmd = message.split(",");
-                    BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no:" + cmd[1]+ ", Prediction: " + cmd[2] + "\n");
+                    BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no. :" + cmd[1]+ "Prediction: +" + cmd[2] + "\n");
 
 
-                    gridMap.updateIDFromRpi(String.valueOf(Integer.valueOf(cmd[1])-1), cmd[2]);
-                    obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 2);
+                    gridMap.updateIDFromRpi(cmd[1], cmd[2]);
+                    obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 1);
                 }
                 catch(Exception e)
                 {
                     e.printStackTrace();
                 }
             }
-            // Expects a syntax of e.g. Algo|f010
-            if(message.contains("Algo")) {
+            // OLD VER: Expects a syntax of e.g. Algo|f010. Commented out and implemented new version below
+/*            if(message.contains("Algo")) {
                 // translate the message after Algo|
                 if(trackRobot)
                     pathTranslator.translatePath(message.split("\\|")[1]);
 //                pathTranslator.altTranslation(message.split("\\|")[1]);   // last min addition - untested
+            }*/
+
+            //NEW VER: Expects a syntax of eg. MOVE,<DISTANCE IN CM>,<DIRECTION>.
+            //NEW VER: Expects a syntax of eg. TURN,<DIRECTION>.
+
+            //CASE 1 & 2: MoveInstruction or TurnInstruction sent
+            else if(message.contains("MOVE") || message.contains("TURN")){
+                pathTranslator.translatePath(message); //splitting and translation will be done in PathTranslator
             }
+
+
+
         }
     };
 

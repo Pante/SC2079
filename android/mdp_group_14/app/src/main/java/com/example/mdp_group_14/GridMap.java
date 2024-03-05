@@ -32,9 +32,9 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class GridMap extends View{
@@ -597,10 +597,8 @@ public class GridMap extends View{
 
         Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1)*5 + "," + (19 - row)*5 + "," + (imageBearings.get(19 - row)[col - 1]).toUpperCase());
 
-
         updateStatus(obstacleNumber + "," + (col - 1)+ "," + (19 - row) + ","  + imageBearings.get(19 - row)[col - 1]); // north east
 //        Home.printMessage({"key":"hello","value":"hello"});
-
     }
 
     private ArrayList<int[]> getObstacleCoord() {
@@ -705,7 +703,6 @@ public class GridMap extends View{
 
             updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
             Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (initialColumn)*5 + "," + (initialRow)*5 + "," + "-1");
-
         }
         // drop within gridmap
         else if (dragEvent.getAction() == DragEvent.ACTION_DROP) {
@@ -761,6 +758,7 @@ public class GridMap extends View{
                     cells[initialColumn][20 - initialRow].setType("unexplored");
 
                     updateStatus(obstacleNumber + "," + (endColumn-1) + "," + (endRow-1) + ", Bearing: " + tempBearing);
+
                     Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," +(endColumn-1)*5+ "," + (endRow-1)*5 + "," + tempBearing.toUpperCase());
                 }
             } else {
@@ -807,7 +805,7 @@ public class GridMap extends View{
                         && imageBearings.get(row - 1)[column - 1].equals("")) {
                     return false;
                 }
-                DragShadowBuilder dragShadowBuilder = new MyDragShadowBuilder(this);
+                View.DragShadowBuilder dragShadowBuilder = new MyDragShadowBuilder(this);
                 this.startDrag(null, dragShadowBuilder, null, 0);
             }
 
@@ -885,6 +883,7 @@ public class GridMap extends View{
                             else cells[tCol][20 - tRow].setType("obstacle");
                             int obstacleNumber = GridMap.obstacleCoord.size();
                             updateStatus( obstacleNumber + "," + newID + ","+(tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
+
                             Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (tCol - 1)*5 + "," + (tRow - 1)*5 + "," + newBearing.toUpperCase());
                             callInvalidate();
                         }
@@ -1095,9 +1094,9 @@ public class GridMap extends View{
                             curCoord[1] += 1;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[1] -= 1;
+                                curCoord[1] -= 1; //reset to original position
                             } else {
-                                curCoord[0] += 1;
+                                curCoord[0] += 2; //changed for new turning radius
                                 robotDirection = "right";
                                 validPosition = true;
                             }
@@ -1117,13 +1116,13 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] -= 1;
                             } else {
-                                curCoord[0] -= 1;
+                                curCoord[0] -= 2; //changed for new turning radius
                                 robotDirection = "left";
                                 validPosition = true;
                             }
                         }
                         break;
-                        // testing new direction of movement (facing forward)
+                    // testing new direction of movement (facing forward)
                     case "backleft":
                         if ((1 < curCoord[1] && curCoord[1] < 19)
                                 && (0 < curCoord[0] && curCoord[0] < 20)) {
@@ -1132,7 +1131,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] += 1;
                             } else {
-                                curCoord[0] -= 1;
+                                curCoord[0] -= 2; //changed for new turning radius
                                 robotDirection = "right";
                                 validPosition = true;
                             }
@@ -1146,7 +1145,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] += 1;
                             } else {
-                                curCoord[0] += 1;
+                                curCoord[0] += 2; //changed for new turning radius
                                 robotDirection = "left";
                                 validPosition = true;
                             }
@@ -1173,7 +1172,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[0] -= 1;
                             } else {
-                                curCoord[1] -= 1;
+                                curCoord[1] -= 2; //changed for new turning radius
                                 robotDirection = "down";
                                 validPosition = true;
                             }
@@ -1193,7 +1192,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[0] -= 1;
                             } else {
-                                curCoord[1] += 1;
+                                curCoord[1] += 2; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
                             }
@@ -1208,7 +1207,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] -= 1;
                             } else {
-                                curCoord[0] -= 1;
+                                curCoord[0] -= 2; //changed for new turning radius
                                 robotDirection = "down";
                                 validPosition = true;
                             }
@@ -1222,7 +1221,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] += 1;
                             } else {
-                                curCoord[0] -= 1;
+                                curCoord[0] -= 2; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
                             }
@@ -1248,7 +1247,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] += 1;
                             } else {
-                                curCoord[0] -= 1;
+                                curCoord[0] -= 2; //changed for new turning radius
                                 robotDirection = "left";
                                 validPosition = true;
                             }
@@ -1268,7 +1267,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] += 1;
                             } else {
-                                curCoord[0] += 1;
+                                curCoord[0] += 2; //changed for new turning radius
                                 robotDirection = "right";
                                 validPosition = true;
                             }
@@ -1283,7 +1282,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] -= 1;
                             } else {
-                                curCoord[0] += 1;
+                                curCoord[0] += 2; //changed for new turning radius
                                 robotDirection = "left";
                                 validPosition = true;
                             }
@@ -1297,7 +1296,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] -= 1;
                             } else {
-                                curCoord[0] -= 1;
+                                curCoord[0] -= 2; //changed for new turning radius
                                 robotDirection = "right";
                                 validPosition = true;
                             }
@@ -1323,7 +1322,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[0] += 1;
                             } else {
-                                curCoord[1] += 1;
+                                curCoord[1] += 2; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
                             }
@@ -1343,7 +1342,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[0] += 1;
                             } else {
-                                curCoord[1] -= 1;
+                                curCoord[1] -= 2; //changed for new turning radius
                                 robotDirection = "down";
                                 validPosition = true;
                             }
@@ -1358,7 +1357,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] += 1;
                             } else {
-                                curCoord[0] += 1;
+                                curCoord[0] += 2; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
                             }
@@ -1372,7 +1371,7 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] -= 1;
                             } else {
-                                curCoord[0] += 1;
+                                curCoord[0] += 2; //changed for new turning radius
                                 robotDirection = "down";
                                 validPosition = true;
                             }
@@ -1440,7 +1439,7 @@ public class GridMap extends View{
         return false;   // false means no obstacles
     }
 
-    private static class MyDragShadowBuilder extends DragShadowBuilder {
+    private static class MyDragShadowBuilder extends View.DragShadowBuilder {
         private Point mScaleFactor;
 
         // Defines the constructor for myDragShadowBuilder
