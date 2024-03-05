@@ -3,6 +3,7 @@ import time
 from multiprocessing import Manager, Process
 from pathlib import Path
 from threading import Thread
+import keyboard as kb
 
 # ~ from picamera import PiCamera
 import picamera
@@ -76,7 +77,7 @@ class TaskA5:
 						</html>
 						"""
 		# Rin on 192.168.14.13, Port 5000
-		self.conf = Configuration(host="http://192.168.14.13:5000")
+		self.conf = Configuration(host="http://192.168.14.17:5001")
 		self.client = ApiClient(configuration=self.conf)
 		self.last_image = None
 		self.prev_image = None
@@ -261,15 +262,15 @@ class TaskA5:
 		for dir_str in ["SOUTH", "EAST", "NORTH", "WEST"]:		
 			direction_one = Direction(dir_str)
 			image_id_1 = 1
-			south_west =  PathfindingPoint(x=40,y=40)
+			south_west =  PathfindingPoint(x=45,y=40)
 			# Need to add 4 to x and y from the south_west to get the north_east coords
-			north_east = PathfindingPoint(x=45,y=45)
+			north_east = PathfindingPoint(x=49,y=44)
 			pathObstacle =  PathfindingRequestObstacle(direction=direction_one, image_id = image_id_1, north_east = north_east, south_west = south_west)
 			obstacleArr.append(pathObstacle)
 		
 		robot_direction = Direction("NORTH")
 		robot_south_west =  PathfindingPoint(x=0,y=0)
-		robot_north_east =  PathfindingPoint(x=13,y=13)
+		robot_north_east =  PathfindingPoint(x=10,y=10)
 		# Replace with current_robot_position when ready
 		pathRobot =  PathfindingRequestRobot(direction = robot_direction, north_east = robot_north_east, south_west = robot_south_west)
 		
@@ -283,6 +284,7 @@ class TaskA5:
 		i = 1
 		counter = 0
 		
+		segments = segments[:1]
 		for i, segment in enumerate(segments):
 			print(f"On segment {i+1} of {len(segments)}:")
 			self.set_stm_stop(False) # Reset to false upon starting the new segment
