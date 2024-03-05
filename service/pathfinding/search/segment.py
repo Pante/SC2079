@@ -6,7 +6,7 @@ from pathfinding.search.instructions import Turn, Move, TurnInstruction
 from pathfinding.search.move import move
 from pathfinding.search.turn import turn
 from pathfinding.world.primitives import Vector
-from pathfinding.world.world import World, Cell
+from pathfinding.world.world import World
 
 
 def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int, List[tuple[Vector, Turn | Move | None]]]:
@@ -41,7 +41,6 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
     source[initial] = None
     instructions[initial] = None
     costs[initial] = 0
-    cell = Cell(world.robot.direction, world.robot.south_west, world.robot.north_east)
     current = initial
 
     while not frontier.empty():
@@ -50,13 +49,12 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
         if current in objectives:
             break
 
-        for next, instruction in __neighbours(world, cell, current):
+        for next, instruction in __neighbours(world, current):
             new_cost = costs[current]
             match instruction:
                 case Move():
                     new_cost += + 1
                 case Turn():
-                    # TODO: Should diagonals' cost be 2 instead of 1?
                     new_cost += len(instruction.vectors)
 
             if next not in costs or new_cost < costs[next]:
@@ -91,15 +89,15 @@ class __PriorityQueue:
         return heapq.heappop(self.elements)[1]
 
 
-def __neighbours(world: World, cell: Cell, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
+def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
     for instruction in TurnInstruction:
         path = turn(world, current, instruction)
-        if all(map(lambda p: world.contains(cell.set_vector(p)), path)):
+        if all(map(lambda p: world.contains(p), path)):
             yield path[-1], Turn(instruction, path)
 
     for instruction in Move:
         next = move(current, instruction)
-        if world.contains(cell.set_vector(next)):
+        if world.contains(next):
             yield next, instruction
 
 
