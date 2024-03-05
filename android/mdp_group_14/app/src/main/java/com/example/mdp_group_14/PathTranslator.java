@@ -211,17 +211,17 @@ public class PathTranslator {
 
         //Case 1: is a MOVE command. Expects a syntax of eg. MOVE,<DISTANCE IN CM>,<DIRECTION>.
         if(stmCommand.contains("MOVE")){
-<<<<<<< Updated upstream
+
             try { //set commandValue to <DISTANCE IN CM>
                 commandValue = Integer.parseInt(stmCommand.split(",")[1]);
 
             } catch(Exception e) {}
-=======
+
 //            try { //set commandValue to <DISTANCE IN CM>
 //                 commandValue = Integer.parseInt(stmCommand.split(",")[2]);
 //
 //            } catch(Exception e) {}
->>>>>>> Stashed changes
+
             //set commandType for <DIRECTION>
             String direction = stmCommand.split(",")[1];
             showLog("directions"+direction);

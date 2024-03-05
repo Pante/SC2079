@@ -180,7 +180,7 @@ public class GridMap extends View{
                 );
             } else {    // cells[col + 1][19 - row] is an explored obstacle (image has been identified)
                 showLog("drawObstacles: drawing image ID");
-                whitePaint.setTextSize(25);
+                whitePaint.setTextSize(17);
                 canvas.drawText(
                         ITEM_LIST.get(row)[col],
                         cells[col + 1][19 - row].startX + ((cells[1][1].endX - cells[1][1].startX) / 2),
@@ -479,7 +479,13 @@ public class GridMap extends View{
 
         dir= (direction.equals("up"))?"NORTH":(direction.equals("down"))?"SOUTH":(direction.equals("left"))?"WEST":"EAST";
 
-        Home.printMessage("ROBOT" + "," + (col - 2)*5 + "," + (row - 1)*5 + "," + dir.toUpperCase());
+        if ((col - 2)>=0 && (row - 1)>=0)
+        {
+            Home.printMessage("ROBOT" + "," + (col - 2)*5 + "," + (row - 1)*5 + "," + dir.toUpperCase());
+        }
+        else{
+            showLog("out of grid");
+        }
         // "robot", <x value> , <y value> , <bearing>
 
         updateStatus(col-2 + "," + (row - 1)+ ", Bearing: " + dir); // south west
@@ -586,23 +592,34 @@ public class GridMap extends View{
 
     public void setObstacleCoord(int col, int row) {
         showLog("Entering setObstacleCoord");
+
+
         int[] obstacleCoord = new int[]{col - 1, row - 1};
+
         GridMap.obstacleCoord.add(obstacleCoord);
+
         row = this.convertRow(row);
         cells[col][row].setType("obstacle");
         showLog("Exiting setObstacleCoord");
 
         int obstacleNumber = GridMap.obstacleCoord.size();
 
-
-        Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1)*5 + "," + (19 - row)*5 + "," + (imageBearings.get(19 - row)[col - 1]).toUpperCase());
-
+        if (((col - 1))>=0 && ((row - 1))>=0)
+        {
+            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1)*5 + "," + (19 - row)*5 + "," + (imageBearings.get(19 - row)[col - 1]).toUpperCase());
+        }
+        else{
+            showLog("out of grid");
+        }
         updateStatus(obstacleNumber + "," + (col - 1)+ "," + (19 - row) + ","  + imageBearings.get(19 - row)[col - 1]); // north east
 //        Home.printMessage({"key":"hello","value":"hello"});
     }
 
     private ArrayList<int[]> getObstacleCoord() {
         return obstacleCoord;
+    }
+    private ArrayList<int[]> getObstacleCoord2() {
+        return obstacleCoord2;
     }
 
     private static void showLog(String message) {
@@ -685,6 +702,7 @@ public class GridMap extends View{
         endColumn = endRow = -999;
         int obstacleNumber = GridMap.obstacleCoord.size();
 
+        int obstacleid=-1;
         showLog("dragEvent.getAction() == " + dragEvent.getAction());
         showLog("dragEvent.getResult() is " + dragEvent.getResult());
         showLog("initialColumn = " + initialColumn + ", initialRow = " + initialRow);
@@ -693,16 +711,29 @@ public class GridMap extends View{
         if ((dragEvent.getAction() == DragEvent.ACTION_DRAG_ENDED)
                 && (endColumn == -999 || endRow == -999) && !dragEvent.getResult()) {
             // check if 2 arrays are same, then remove
+            int obstacleid3=-1;
             for (int i = 0; i < obstacleCoord.size(); i++) {
                 if (Arrays.equals(obstacleCoord.get(i), new int[]{initialColumn - 1, initialRow - 1}))
+                {
                     obstacleCoord.remove(i);
+                    obstacleid3=i;
+                }
+
+
             }
             cells[initialColumn][20-initialRow].setType("unexplored");
             ITEM_LIST.get(initialRow-1)[initialColumn-1] = "";
             imageBearings.get(initialRow-1)[initialColumn-1] = "";
 
             updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
-            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (initialColumn)*5 + "," + (initialRow)*5 + "," + "-1");
+             if (((initialColumn - 1))>=0 && ((initialRow - 1))>=0)
+            {
+                Home.printMessage("OBSTACLE" + "," + (obstacleid3+1) + "," + (initialColumn)*5 + "," + (initialRow)*5 + "," + "-1");
+            }
+            else{
+                showLog("out of grid");
+            }
+
         }
         // drop within gridmap
         else if (dragEvent.getAction() == DragEvent.ACTION_DROP) {
@@ -714,13 +745,20 @@ public class GridMap extends View{
                     && imageBearings.get(initialRow-1)[initialColumn-1].equals("")) {
                 showLog("Cell is empty");
             }
+
             // if dropped within mapview but outside drawn grids, remove obstacle from lists
             // drag to left side of grid
             else if (endColumn <= 0 || endRow <= 0) {
+                int obstacleid2= -1;
                 for (int i = 0; i < obstacleCoord.size(); i++) {
                     if (Arrays.equals(obstacleCoord.get(i),
                             new int[]{initialColumn - 1, initialRow - 1}))
+                    {
                         obstacleCoord.remove(i);
+                        obstacleid2=i;
+                    }
+
+
                 }
                 cells[initialColumn][20-initialRow].setType("unexplored");
                 ITEM_LIST.get(initialRow-1)[initialColumn-1] = "";
@@ -728,7 +766,14 @@ public class GridMap extends View{
 
 
                 updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
-                Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (initialColumn)*5 + "," + (initialRow)*5 + "," + "-1");
+
+                if (((initialColumn - 1))>=0 && ((initialRow - 1))>=0)
+                {
+                    Home.printMessage("OBSTACLE" + "," + (obstacleid2+1) + "," + (initialColumn)*5 + "," + (initialRow)*5 + "," + "-1");
+                }
+                else{
+                    showLog("out of grid");
+                }
 
             }
             // if dropped within gridmap, shift it to new position unless already got existing
@@ -750,16 +795,25 @@ public class GridMap extends View{
                     imageBearings.get(endRow - 1)[endColumn - 1] = tempBearing;
                     // update existing obstacleCoord entry that matches the original (x,y) coords with new (x',y') coords
                     for (int i = 0; i < obstacleCoord.size(); i++) {
-                        if (Arrays.equals(obstacleCoord.get(i), new int[]{initialColumn - 1, initialRow - 1}))
+                        if (Arrays.equals(obstacleCoord.get(i), new int[]{initialColumn - 1, initialRow - 1})) {
                             obstacleCoord.set(i, new int[]{endColumn - 1, endRow - 1});
+                            obstacleid = i;
+                        }
                     }
                     // set the old obstacle's position to "unexplored" and new position to either "obstacle" or "image"
                     cells[endColumn][20 - endRow].setType(cells[initialColumn][20 - initialRow].type);
                     cells[initialColumn][20 - initialRow].setType("unexplored");
 
-                    updateStatus(obstacleNumber + "," + (endColumn-1) + "," + (endRow-1) + ", Bearing: " + tempBearing);
+                    updateStatus(obstacleid+1+ "," + (endColumn-1) + "," + (endRow-1) + ", Bearing: " + tempBearing);
 
-                    Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," +(endColumn-1)*5+ "," + (endRow-1)*5 + "," + tempBearing.toUpperCase());
+                    if (((endColumn - 1))>=0 && ((endRow - 1))>=0)
+                    {
+                        Home.printMessage("OBSTACLE" + "," + (obstacleid+1) + "," +(endColumn-1)*5+ "," + (endRow-1)*5 + "," + tempBearing.toUpperCase());
+                    }
+                    else{
+                        showLog("out of grid");
+                    }
+
                 }
             } else {
                 showLog("Drag event failed.");
@@ -781,6 +835,7 @@ public class GridMap extends View{
             // column and row values are BASED ON THE DISPLAYED MAP (but also +1 as it is not 0-indexed)
             int column = (int) (event.getX() / cellSize);
             int row = this.convertRow((int) (event.getY() / cellSize));
+
             initialColumn = column;
             initialRow = row;
 
@@ -832,6 +887,7 @@ public class GridMap extends View{
                     final Spinner mIDSpinner = mView.findViewById(R.id.imageIDSpinner2);
                     final Spinner mBearingSpinner = mView.findViewById(R.id.bearingSpinner2);
 
+
                     ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                             this.getContext(), R.array.imageID_array,
                             android.R.layout.simple_spinner_item);
@@ -865,8 +921,20 @@ public class GridMap extends View{
                         public void onClick(DialogInterface dialogInterface, int i) {
                             String newID = mIDSpinner.getSelectedItem().toString();
                             String newBearing = mBearingSpinner.getSelectedItem().toString();
+
                             ITEM_LIST.get(tRow - 1)[tCol - 1] = newID;
                             imageBearings.get(tRow - 1)[tCol - 1] = newBearing;
+
+
+                            int obstacleid=-1;
+                            // update existing obstacleCoord entry that matches the original (x,y) coords with new (x',y') coords
+                            for (int m = 0; m < obstacleCoord.size(); m++) {
+                                if (Arrays.equals(obstacleCoord.get(m), new int[]{tCol - 1, tRow - 1})) {
+                                    obstacleid = m;
+                                }
+                            }
+
+
                             showLog("tRow - 1 = " + (tRow - 1));
                             showLog("tCol - 1 = " + (tCol - 1));
                             showLog("newID = " + newID);
@@ -882,10 +950,16 @@ public class GridMap extends View{
                             if(!newID.equals("Nil")) cells[tCol][20 - tRow].setType("image"); // if new id is set then show on obstacle on app
                             else cells[tCol][20 - tRow].setType("obstacle");
                             int obstacleNumber = GridMap.obstacleCoord.size();
-                            updateStatus( obstacleNumber + "," + newID + ","+(tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
+                            updateStatus( (obstacleid+1) + "," + newID + ","+(tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
 
-                            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (tCol - 1)*5 + "," + (tRow - 1)*5 + "," + newBearing.toUpperCase());
-                            callInvalidate();
+                            if (((tCol - 1))>=0 && ((tRow - 1))>=0)
+                            {
+                                Home.printMessage("OBSTACLE" + "," + (obstacleid+1) + "," + (tCol - 1)*5 + "," + (tRow - 1)*5 + "," + newBearing.toUpperCase());
+                            }
+                            else{
+                                showLog("out of grid");
+                            }
+                           callInvalidate();
                         }
                     });
 
@@ -1578,8 +1652,11 @@ public class GridMap extends View{
         for (int i = 0; i < obstacleCoord.size(); i++) {
             message += ((obstacleCoord.get(i)[0]) + "," // add x coordinate of obstacle
                     + (obstacleCoord.get(i)[1]) + ","   // add y coordinate of obstacle
-                    + imageBearings.get(obstacleCoord.get(i)[1])[obstacleCoord.get(i)[0]].charAt(0));   // add the 1st letter of the direction
-            if(i < obstacleCoord.size() - 1) message += "|";    // add a "|" to the end of each obstacle's info (except for the last)
+                    + imageBearings.get(obstacleCoord.get(i)[1])[obstacleCoord.get(i)[0]]);   // add the 1st letter of the direction
+
+            showLog("here"+imageBearings.get(obstacleCoord.get(i)[1])[obstacleCoord.get(i)[0]]);
+
+            if(i < obstacleCoord.size() - 1) message += "\n";    // add a "|" to the end of each obstacle's info (except for the last)
         }
         return message;
     }
