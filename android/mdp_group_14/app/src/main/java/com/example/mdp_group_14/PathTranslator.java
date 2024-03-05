@@ -213,6 +213,7 @@ public class PathTranslator {
         if(stmCommand.contains("MOVE")){
             try { //set commandValue to <DISTANCE IN CM>
                 commandValue = Integer.parseInt(stmCommand.split(",")[1]);
+
             } catch(Exception e) {}
             //set commandType for <DIRECTION>
             String direction = stmCommand.split(",")[2];

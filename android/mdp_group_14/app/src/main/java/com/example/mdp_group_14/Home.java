@@ -388,6 +388,7 @@ public class Home extends Fragment {
 
             //CASE 1 & 2: MoveInstruction or TurnInstruction sent
             else if(message.contains("MOVE") || message.contains("TURN")){
+                updateStatus("translation");
                 pathTranslator.translatePath(message); //splitting and translation will be done in PathTranslator
             }
 
