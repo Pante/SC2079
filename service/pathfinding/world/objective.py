@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathfinding.world.primitives import Direction, Vector
-from pathfinding.world.world import World, Obstacle
+from pathfinding.world.world import Obstacle, World
 
 
 def generate_objectives(world: World) -> dict[Obstacle, set[Vector]]:
@@ -9,7 +9,7 @@ def generate_objectives(world: World) -> dict[Obstacle, set[Vector]]:
     for obstacle in world.obstacles:
         generated = __generate_objectives(world, obstacle)
         if not generated:
-            print(f'WARNING: Could not generate objectives for {obstacle}. Skipping.')
+            print(f"WARNING: Could not generate objectives for {obstacle}. Skipping.")
             continue
 
         objectives[obstacle] = generated
@@ -29,17 +29,17 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     """
     The minimum distance (in grid cells) between the obstacle and objective, inclusive. (Total cm / cm per cell).
     """
-    minimum_gap = 5 // world.cell_size
+    minimum_gap = 16 // world.cell_size
     """
     The maximum distance (in grid cells) between the obstacle and objective, exclusive. (Total cm / cm per cell).
     """
-    maximum_gap = 25 // world.cell_size
+    maximum_gap = 26 // world.cell_size
 
     """
     The offset to the sides (in grid cells) between the obstacle and objective, inclusive. 
     (Total cm / cm per cell). This should be increased as the difference in sizes between obstacles & the robot increases.
     """
-    offset = 4 // world.cell_size
+    offset = 0 // world.cell_size
 
     objectives = set()
 
@@ -56,9 +56,9 @@ def __suggest_objective(obstacle: Obstacle, gap: int, alignment: int) -> Vector:
     """
     Creates an objective from this obstacle.
 
-    This function assumes that obstacles are always smaller than the robot. It does not check whether the objective 
+    This function assumes that obstacles are always smaller than the robot. It does not check whether the objective
     collides with other obstacles.
-    
+
     :param obstacle: The obstacle.
     :param gap: The distance (in grid cells) between the obstacle and objective.
     :param alignment: An offset (in grid cells) to adjust the suggested objective's placement by.
