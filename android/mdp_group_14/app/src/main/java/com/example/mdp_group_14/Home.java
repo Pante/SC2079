@@ -81,8 +81,9 @@ public class Home extends Fragment {
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getActivity().getSupportFragmentManager(),
                 FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-        sectionsPagerAdapter.addFragment(new BluetoothCommunications(),"CHAT");
+
         sectionsPagerAdapter.addFragment(new MappingFragment(),"MAP CONFIG");
+        sectionsPagerAdapter.addFragment(new BluetoothCommunications(),"CHAT");
         sectionsPagerAdapter.addFragment(new ControlFragment(),"CHALLENGE");
 
         ViewPager viewPager = root.findViewById(R.id.view_pager);

@@ -479,7 +479,7 @@ public class GridMap extends View{
 
         dir= (direction.equals("up"))?"NORTH":(direction.equals("down"))?"SOUTH":(direction.equals("left"))?"WEST":"EAST";
 
-        Home.printMessage("ROBOT" + "," + (col - 2)*2 + "," + (row - 1)*2 + "," + dir);
+        Home.printMessage("ROBOT" + "," + (col - 2)*5 + "," + (row - 1)*5 + "," + dir.toUpperCase());
         // "robot", <x value> , <y value> , <bearing>
 
         updateStatus(col-2 + "," + (row - 1)+ ", Bearing: " + dir); // south west
@@ -595,7 +595,7 @@ public class GridMap extends View{
         int obstacleNumber = GridMap.obstacleCoord.size();
 
 
-        Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1)*2 + "," + (19 - row)*2 + "," + imageBearings.get(19 - row)[col - 1]);
+        Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1)*5 + "," + (19 - row)*5 + "," + (imageBearings.get(19 - row)[col - 1]).toUpperCase());
 
 
         updateStatus(obstacleNumber + "," + (col - 1)+ "," + (19 - row) + ","  + imageBearings.get(19 - row)[col - 1]); // north east
@@ -704,7 +704,7 @@ public class GridMap extends View{
             imageBearings.get(initialRow-1)[initialColumn-1] = "";
 
             updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
-            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (initialColumn)*2 + "," + (initialRow)*2 + "," + "-1");
+            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (initialColumn)*5 + "," + (initialRow)*5 + "," + "-1");
 
         }
         // drop within gridmap
@@ -731,7 +731,7 @@ public class GridMap extends View{
 
 
                 updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
-                Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (initialColumn)*2 + "," + (initialRow)*2 + "," + "-1");
+                Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (initialColumn)*5 + "," + (initialRow)*5 + "," + "-1");
 
             }
             // if dropped within gridmap, shift it to new position unless already got existing
@@ -761,7 +761,7 @@ public class GridMap extends View{
                     cells[initialColumn][20 - initialRow].setType("unexplored");
 
                     updateStatus(obstacleNumber + "," + (endColumn-1) + "," + (endRow-1) + ", Bearing: " + tempBearing);
-                    Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," +(endColumn-1)*2+ "," + (endRow-1)*2 + "," + tempBearing);
+                    Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," +(endColumn-1)*5+ "," + (endRow-1)*5 + "," + tempBearing.toUpperCase());
                 }
             } else {
                 showLog("Drag event failed.");
@@ -885,7 +885,7 @@ public class GridMap extends View{
                             else cells[tCol][20 - tRow].setType("obstacle");
                             int obstacleNumber = GridMap.obstacleCoord.size();
                             updateStatus( obstacleNumber + "," + newID + ","+(tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
-                            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (tCol - 1)*2 + "," + (tRow - 1)*2 + "," + newBearing);
+                            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (tCol - 1)*5 + "," + (tRow - 1)*5 + "," + newBearing.toUpperCase());
                             callInvalidate();
                         }
                     });
