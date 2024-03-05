@@ -2,7 +2,7 @@ import heapq
 import math
 from typing import List, Generator
 
-from pathfinding.search.instructions import Turn, Move, TurnInstruction
+from pathfinding.search.instructions import Turn, Move, TurnInstruction, MoveInstruction
 from pathfinding.search.move import move
 from pathfinding.search.turn import turn
 from pathfinding.world.primitives import Vector
@@ -34,7 +34,7 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
     """
     frontier = __PriorityQueue()
     source: dict[Vector, Vector | None] = {}
-    instructions: dict[Vector, Turn | Move | None] = {}
+    instructions: dict[Vector, Turn | MoveInstruction | None] = {}
     costs: dict[Vector, int] = {}
 
     frontier.add(0, initial)
@@ -52,8 +52,8 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
         for next, instruction in __neighbours(world, current):
             new_cost = costs[current]
             match instruction:
-                case Move():
-                    new_cost += + 1
+                case MoveInstruction():
+                    new_cost += instruction.amount
                 case Turn():
                     new_cost += len(instruction.vectors)
 
@@ -89,16 +89,17 @@ class __PriorityQueue:
         return heapq.heappop(self.elements)[1]
 
 
-def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
+def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | MoveInstruction], None, None]:
     for instruction in TurnInstruction:
         path = turn(world, current, instruction)
         if all(map(lambda p: world.contains(p), path)):
             yield path[-1], Turn(instruction, path)
 
     for instruction in Move:
-        next = move(current, instruction)
-        if world.contains(next):
-            yield next, instruction
+        for cells in [10, 5, 1]:
+            path = move(current, instruction, cells)
+            if all(map(lambda p: world.contains(p), path)):
+                yield path[-1], MoveInstruction(instruction, cells)
 
 
 def __heuristic(current: Vector, objectives: set[Vector]) -> int:

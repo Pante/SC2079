@@ -43,10 +43,10 @@ class World:
         self.grid[:, 0:self.robot.west_length] = False
 
         for obstacle in self.obstacles:
-            west_x = max(obstacle.south_west.x - self.robot.clearance, 0)
-            east_x = min(obstacle.north_east.x + self.robot.clearance + 1, self.size)
-            south_y = max(obstacle.south_west.y - self.robot.clearance, 0)
-            north_y = min(obstacle.north_east.y + self.robot.clearance + 1, self.size)
+            west_x = max(obstacle.south_west.x - self.robot.clearance // 2, 0)
+            east_x = min(obstacle.north_east.x + (self.robot.clearance // 2) + 1, self.size)
+            south_y = max(obstacle.south_west.y - self.robot.clearance // 2, 0)
+            north_y = min(obstacle.north_east.y + (self.robot.clearance // 2) + 1, self.size)
 
             self.grid[west_x:east_x, south_y:north_y] = False
 

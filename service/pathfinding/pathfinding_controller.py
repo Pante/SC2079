@@ -100,7 +100,7 @@ class PathfindingResponseSegment(BaseModel):
 
     @classmethod
     def from_segment(cls, verbose: bool, segment: Segment):
-        cost = segment.cost if verbose else None
+        cost = segment.cost if verbose else 0
         instructions = [
             (
                 PathfindingResponseMoveInstruction.from_move_instruction(i)
@@ -112,7 +112,7 @@ class PathfindingResponseSegment(BaseModel):
         vectors = (
             [PathfindingVector.from_vector(vector) for vector in segment.vectors]
             if verbose
-            else None
+            else []
         )
         return cls(
             image_id=segment.image_id,
@@ -177,7 +177,7 @@ def pathfinding(body: PathfindingRequest):
         ]
     )
 
-    dump(world, segments)
+    # dump(world, segments)
     print(datetime.now())
 
     response = make_response(
