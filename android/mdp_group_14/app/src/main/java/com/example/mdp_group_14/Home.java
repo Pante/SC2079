@@ -87,8 +87,9 @@ public class Home extends Fragment {
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getActivity().getSupportFragmentManager(),
                 FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-        sectionsPagerAdapter.addFragment(new BluetoothCommunications(),"CHAT");
+
         sectionsPagerAdapter.addFragment(new MappingFragment(),"MAP CONFIG");
+        sectionsPagerAdapter.addFragment(new BluetoothCommunications(),"CHAT");
         sectionsPagerAdapter.addFragment(new ControlFragment(),"CHALLENGE");
 
         ViewPager viewPager = root.findViewById(R.id.view_pager);
@@ -166,6 +167,8 @@ public class Home extends Fragment {
                     }
                 }
         );
+        PathTranslator pathTranslator = new PathTranslator(gridMap);
+//        pathTranslator.translatePath("MOVE,FORWARD,30");
         return root;
     }
 
@@ -321,6 +324,7 @@ public class Home extends Fragment {
             PathTranslator pathTranslator = new PathTranslator(gridMap);    // For real-time updating on displayed gridmap
             String message = intent.getStringExtra("receivedMessage");
             showLog("receivedMessage: message --- " + message);
+
             String[] cmdd = message.split(",");
             showLog("cmd1 --- " + cmdd[1]);
             showLog("cmd2 --- " + cmdd[2]);
@@ -367,8 +371,8 @@ public class Home extends Fragment {
                     BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no. :" + cmd[1]+ "Prediction: +" + cmd[2] + "\n");
 
 
-                    gridMap.updateIDFromRpi(cmd[1], cmd[2]);
-                    obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 1);
+                    gridMap.updateIDFromRpi(String.valueOf(Integer.valueOf(cmd[1])-1), cmd[2]);
+                    obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 2);
                 }
                 catch(Exception e)
                 {

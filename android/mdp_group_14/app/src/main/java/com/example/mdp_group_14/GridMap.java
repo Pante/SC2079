@@ -105,7 +105,7 @@ public class GridMap extends View{
         initMap();
         blackPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         whitePaint.setColor(Color.WHITE);
-        whitePaint.setTextSize(25);
+        whitePaint.setTextSize(17);
         whitePaint.setTextAlign(Paint.Align.CENTER);
         maroonPaint.setColor(getResources().getColor(R.color.brightRed));
         maroonPaint.setStrokeWidth(8);
