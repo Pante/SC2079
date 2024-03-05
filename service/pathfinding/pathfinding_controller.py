@@ -196,9 +196,19 @@ def dump(world: World, segments: list[Segment]):
     :return:
     """
     map = np.array(world.grid, dtype=int)
+    for obstacle in world.obstacles:
+        west_x = max(obstacle.south_west.x, 0)
+        east_x = min(obstacle.north_east.x + 1, world.size)
+        south_y = max(obstacle.south_west.y, 0)
+        north_y = min(obstacle.north_east.y + 1, world.size)
+
+        map[west_x:east_x, south_y:north_y] = 9
+
     for i, s in enumerate(segments):
         for v in s.vectors:
             map[v.x, v.y] = i + 2
 
     a = np.rot90(map)
     np.savetxt("dump.txt", a, fmt="%d")
+
+# 10 cells
