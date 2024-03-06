@@ -43,10 +43,10 @@ class World:
         self.grid[:, 0:self.robot.west_length] = False
 
         for obstacle in self.obstacles:
-            west_x = max(obstacle.south_west.x - self.robot.east_length, 0)
-            east_x = min(obstacle.north_east.x + self.robot.west_length + 1, self.size)
-            south_y = max(obstacle.south_west.y - self.robot.north_length, 0)
-            north_y = min(obstacle.north_east.y + self.robot.south_length + 1, self.size)
+            west_x = max(obstacle.south_west.x - self.robot.clearance // 2, 0)
+            east_x = min(obstacle.north_east.x + (self.robot.clearance // 2) + 1, self.size)
+            south_y = max(obstacle.south_west.y - self.robot.clearance // 2, 0)
+            north_y = min(obstacle.north_east.y + (self.robot.clearance // 2) + 1, self.size)
 
             self.grid[west_x:east_x, south_y:north_y] = False
 
@@ -68,14 +68,11 @@ class Entity(ABC):
         assert 0 <= self.south_west.x <= self.north_east.x
         assert 0 <= self.south_west.y <= self.north_east.y
         assert (self.north_east.y - self.south_west.y) == (self.north_east.x - self.south_west.x)
-        self.centre = Point(
-            self.south_west.x + (self.north_east.x - self.south_west.x) // 2,
-            self.south_west.y + (self.north_east.y - self.south_west.y) // 2,
-            )
-        self.north_length = self.north_east.y - self.centre.y
-        self.east_length = self.north_east.x - self.centre.x
-        self.south_length = self.centre.y - self.south_west.y
-        self.west_length = self.centre.x - self.south_west.x
+        self.centre = Point(self.north_east.x // 2, self.north_east.y // 2)
+        self.north_length = self.north_east.y // 2
+        self.east_length = self.north_east.x // 2
+        self.south_length = self.north_east.y // 2
+        self.west_length = self.north_east.x // 2
 
     @property
     def clearance(self):

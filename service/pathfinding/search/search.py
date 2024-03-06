@@ -70,7 +70,7 @@ class Segment:
     vectors: list[Vector]
 
     @classmethod
-    def compress(cls, world: World, image_id: int | None, information: tuple[int, list[tuple[Vector, Turn | Move]]]) -> Segment:
+    def compress(cls, world: World, image_id: int | None, information: tuple[int, list[tuple[Vector, Turn | MoveInstruction]]]) -> Segment:
         cost, parts = information
         instructions: List[TurnInstruction | MoveInstruction | MiscInstruction] = []
         vectors: list[Vector] = []
@@ -81,13 +81,13 @@ class Segment:
                     instructions.append(movement.turn)
                     vectors.extend(movement.vectors)
 
-                case Move() if instructions and isinstance(instructions[-1], MoveInstruction) and instructions[-1].move == movement:
+                case MoveInstruction() if instructions and isinstance(instructions[-1], MoveInstruction) and instructions[-1].move == movement.move:
                     vectors.append(vector)
-                    instructions[-1].amount += world.cell_size
+                    instructions[-1].amount += movement.amount * world.cell_size
 
-                case Move():
+                case MoveInstruction():
                     vectors.append(vector)
-                    instructions.append(MoveInstruction(movement, world.cell_size))
+                    instructions.append(MoveInstruction(movement.move, movement.amount * world.cell_size))
 
         instructions.append(MiscInstruction.CAPTURE_IMAGE)
 
