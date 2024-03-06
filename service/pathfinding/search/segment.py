@@ -6,10 +6,10 @@ from pathfinding.search.instructions import Turn, Move, TurnInstruction, Straigh
 from pathfinding.search.straight import straight
 from pathfinding.search.turn import turn
 from pathfinding.world.primitives import Vector
-from pathfinding.world.world import World
+from pathfinding.world.world import World, Obstacle
 
 
-def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int, List[tuple[Vector, Turn | Move | None]]]:
+def segment(world: World, initial: Vector, objectives: dict[Obstacle, tuple[Vector, set[Vector]]]) -> None | tuple[Obstacle, int, list[tuple[Vector, Turn | Move | None]]]:
     """
     Finds the shortest path of a segment of the overall path.
 
@@ -41,13 +41,13 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
     source[initial] = None
     moves[initial] = None
     costs[initial] = 0
-    current = initial
 
     while not frontier.empty():
         current = frontier.pop()
 
-        if current in objectives:
-            break
+        for obstacle, (_, vectors) in objectives.items():
+            if current in vectors:
+                return __trace(source, moves, costs, obstacle, current)
 
         for next, move in __neighbours(world, current):
             new_cost = costs[current] + len(move.vectors)
@@ -57,6 +57,16 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
                 moves[next] = move
                 costs[next] = new_cost
 
+    return None
+
+
+def __trace(
+    source: dict[Vector, Vector | None],
+    moves: dict[Vector, Turn | Move | None],
+    costs: dict[Vector, int],
+    obstacle: Obstacle,
+    current: Vector
+) -> tuple[Obstacle, int, list[tuple[Vector, Turn | Move | None]]]:
     path = []
     objective = current
 
@@ -65,8 +75,7 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
         current = source.get(current)
 
     path.reverse()
-
-    return costs.get(objective, -1), path
+    return obstacle, costs.get(objective, -1), path
 
 
 class __PriorityQueue:
@@ -97,8 +106,8 @@ def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn 
                 yield path[-1], Move(move, path)
 
 
-def __heuristic(current: Vector, objectives: set[Vector]) -> int:
+def __heuristic(current: Vector, objectives: dict[Obstacle, tuple[Vector, set[Vector]]]) -> int:
     """
     The Euclidean distance between two vectors. This is preferred over Manhattan distance which is not admissible.
     """
-    return min(int(math.sqrt((objective.x - current.x) ** 2 + (objective.y - current.y) ** 2)) for objective in objectives)
+    return min(int(math.sqrt((vector.x - current.x) ** 2 + (vector.y - current.y) ** 2)) for vector, _ in objectives.values())

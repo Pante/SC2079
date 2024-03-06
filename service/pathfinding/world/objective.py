@@ -4,15 +4,15 @@ from pathfinding.world.primitives import Direction, Vector
 from pathfinding.world.world import Obstacle, World
 
 
-def generate_objectives(world: World) -> dict[Obstacle, set[Vector]]:
-    objectives: dict[Obstacle, set[Vector]] = {}
+def generate_objectives(world: World) -> dict[Obstacle, tuple[Vector, set[Vector]]]:
+    objectives = dict()
     for obstacle in world.obstacles:
         generated = __generate_objectives(world, obstacle)
         if not generated:
             print(f"WARNING: Could not generate objectives for {obstacle}. Skipping.")
             continue
 
-        objectives[obstacle] = generated
+        objectives[obstacle] = next(iter(generated)), generated
 
     return objectives
 
@@ -42,6 +42,7 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     offset = 0 // world.cell_size
 
     objectives = set()
+    # TODO: max, 0 optimization
     for alignment in range(-offset, obstacle.clearance + offset):
         for gap in range(minimum_gap, maximum_gap):
             objective = __suggest_objective(obstacle, gap + 1, alignment)
