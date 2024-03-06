@@ -19,7 +19,7 @@ def search(world: World, objectives: dict[Obstacle, tuple[Vector, set[Vector]]])
 
         obstacle, _, path = seg
         segments.append(Segment.compress(world, seg))
-        current = path[-1][0]
+        current, _ = path[-1]
         objectives.pop(obstacle)
 
     return segments

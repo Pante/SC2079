@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass
-from typing import List
 
 import numpy as np
 
@@ -19,7 +18,7 @@ class World:
     A world. Clearance computation is optimized for rectangular/square obstacles.
     """
 
-    def __init__(self, size: int, robot: Robot, obstacles: List[Obstacle]):
+    def __init__(self, size: int, robot: Robot, obstacles: list[Obstacle]):
         self.size = size
         self.grid = np.full((size, size), True)
         self.obstacles = obstacles

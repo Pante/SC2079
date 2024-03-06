@@ -42,7 +42,6 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     offset = 0 // world.cell_size
 
     objectives = set()
-    # TODO: max, 0 optimization
     for alignment in range(-offset, obstacle.clearance + offset):
         for gap in range(minimum_gap, maximum_gap):
             objective = __suggest_objective(obstacle, gap + 1, alignment)
@@ -70,27 +69,27 @@ def __suggest_objective(obstacle: Obstacle, gap: int, alignment: int) -> Vector:
         case Direction.NORTH:
             return Vector(
                 Direction.SOUTH,
-                max(obstacle.north_east.x - clearance + alignment, 0),
-                max(obstacle.north_east.y + gap, 0),
+                obstacle.north_east.x - clearance + alignment,
+                obstacle.north_east.y + gap
             )
 
         case Direction.EAST:
             return Vector(
                 Direction.WEST,
-                max(obstacle.north_east.x + gap, 0),
-                max(obstacle.north_east.y - clearance + alignment, 0),
+                obstacle.north_east.x + gap,
+                obstacle.north_east.y - clearance + alignment
             )
 
         case Direction.SOUTH:
             return Vector(
                 Direction.NORTH,
-                max(obstacle.south_west.x + clearance - alignment, 0),
-                max(obstacle.south_west.y - gap, 0),
+                obstacle.south_west.x + clearance - alignment,
+                obstacle.south_west.y - gap
             )
 
         case Direction.WEST:
             return Vector(
                 Direction.EAST,
-                max(obstacle.south_west.x - gap, 0),
-                max(obstacle.south_west.y + clearance - alignment, 0),
+                obstacle.south_west.x - gap,
+                obstacle.south_west.y + clearance - alignment,
             )

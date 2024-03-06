@@ -19,7 +19,7 @@ class MoveInstruction(BaseModel):
     )
 
 
-@dataclass(frozen=True)
+@dataclass
 class Move:
     move: Straight
     vectors: list[Vector]
@@ -37,7 +37,7 @@ class TurnInstruction(str, Enum):
     BACKWARD_RIGHT = 'BACKWARD_RIGHT'
 
 
-@dataclass(frozen=True)
+@dataclass
 class Turn:
     turn: TurnInstruction
     vectors: list[Vector]

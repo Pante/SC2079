@@ -1,6 +1,6 @@
 import heapq
 import math
-from typing import List, Generator
+from typing import Generator
 
 from pathfinding.search.instructions import Turn, Move, TurnInstruction, Straight
 from pathfinding.search.straight import straight
@@ -80,7 +80,7 @@ def __trace(
 
 class __PriorityQueue:
     def __init__(self):
-        self.elements: List[tuple[int, Vector]] = []
+        self.elements: list[tuple[int, Vector]] = []
 
     def empty(self):
         return not self.elements
