@@ -2,8 +2,8 @@ import heapq
 import math
 from typing import List, Generator
 
-from pathfinding.search.instructions import Turn, Move, TurnInstruction, MoveInstruction
-from pathfinding.search.move import move
+from pathfinding.search.instructions import Turn, Move, TurnInstruction, MoveInstruction, Straight
+from pathfinding.search.straight import straight
 from pathfinding.search.turn import turn
 from pathfinding.world.primitives import Vector
 from pathfinding.world.world import World
@@ -34,12 +34,12 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
     """
     frontier = __PriorityQueue()
     source: dict[Vector, Vector | None] = {}
-    instructions: dict[Vector, Turn | MoveInstruction | None] = {}
+    moves: dict[Vector, Turn | Move | None] = {}
     costs: dict[Vector, int] = {}
 
     frontier.add(0, initial)
     source[initial] = None
-    instructions[initial] = None
+    moves[initial] = None
     costs[initial] = 0
     current = initial
 
@@ -49,25 +49,19 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
         if current in objectives:
             break
 
-        for next, instruction in __neighbours(world, current):
-            new_cost = costs[current]
-            match instruction:
-                case MoveInstruction():
-                    new_cost += instruction.amount
-                case Turn():
-                    new_cost += len(instruction.vectors)
-
+        for next, move in __neighbours(world, current):
+            new_cost = costs[current] + len(move.vectors)
             if next not in costs or new_cost < costs[next]:
                 frontier.add(new_cost + __heuristic(next, objectives), next)
                 source[next] = current
-                instructions[next] = instruction
+                moves[next] = move
                 costs[next] = new_cost
 
     path = []
     objective = current
 
     while current is not None:
-        path.append((current, instructions.get(current)))
+        path.append((current, moves.get(current)))
         current = source.get(current)
 
     path.reverse()
@@ -89,17 +83,17 @@ class __PriorityQueue:
         return heapq.heappop(self.elements)[1]
 
 
-def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | MoveInstruction], None, None]:
-    for instruction in TurnInstruction:
-        path = turn(world, current, instruction)
+def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
+    for move in TurnInstruction:
+        path = turn(world, current, move)
         if all(map(lambda p: world.contains(p), path)):
-            yield path[-1], Turn(instruction, path)
+            yield path[-1], Turn(move, path)
 
-    for instruction in Move:
+    for move in Straight:
         for cells in [10, 5, 1]:
-            path = move(current, instruction, cells)
+            path = straight(current, move, cells)
             if all(map(lambda p: world.contains(p), path)):
-                yield path[-1], MoveInstruction(instruction, cells)
+                yield path[-1], Move(move, cells)
 
 
 def __heuristic(current: Vector, objectives: set[Vector]) -> int:

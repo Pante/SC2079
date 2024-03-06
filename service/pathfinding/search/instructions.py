@@ -8,19 +8,24 @@ from pathfinding.world.primitives import Vector
 
 class MiscInstruction(str, Enum):
     CAPTURE_IMAGE = 'CAPTURE_IMAGE'
-    RESET_GYROSCOPE = 'RESET_GYROSCOPE'
 
 
 @dataclass
 class MoveInstruction:
-    move: Move
+    move: Straight
     amount: int
 
     def __post_init__(self):
         assert 0 <= self.amount
 
 
-class Move(str, Enum):
+@dataclass(frozen=True)
+class Move:
+    move: Straight
+    vectors: list[Vector]
+
+
+class Straight(str, Enum):
     FORWARD = 'FORWARD'
     BACKWARD = 'BACKWARD'
 

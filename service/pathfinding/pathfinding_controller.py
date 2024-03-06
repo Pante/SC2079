@@ -32,10 +32,6 @@ class PathfindingRequest(BaseModel):
         description="Whether to attach the path and cost alongside the movement "
         "instructions in the response.",
     )
-
-    size: int | None = Field(
-        default=40, description="The width & height in number of cells."
-    )
     robot: PathfindingRequestRobot = Field(
         description="The initial position of the robot."
     )
@@ -210,5 +206,3 @@ def dump(world: World, segments: list[Segment]):
 
     a = np.rot90(map)
     np.savetxt("dump.txt", a, fmt="%d")
-
-# 10 cells

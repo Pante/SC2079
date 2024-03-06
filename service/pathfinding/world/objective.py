@@ -27,11 +27,11 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     """
 
     """
-    The minimum distance (in grid cells) between the obstacle and objective, inclusive. (Total cm / cm per cell).
+    The minimum distance (in grid cells) between the obstacle and centre of objective, inclusive. (Total cm / cm per cell).
     """
     minimum_gap = 22 // world.cell_size
     """
-    The maximum distance (in grid cells) between the obstacle and objective, exclusive. (Total cm / cm per cell).
+    The maximum distance (in grid cells) between the obstacle and centre of objective, exclusive. (Total cm / cm per cell).
     """
     maximum_gap = 32 // world.cell_size
 
@@ -42,7 +42,6 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     offset = 0 // world.cell_size
 
     objectives = set()
-
     for alignment in range(-offset, obstacle.clearance + offset):
         for gap in range(minimum_gap, maximum_gap):
             objective = __suggest_objective(obstacle, gap + 1, alignment)

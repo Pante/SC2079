@@ -1,29 +1,29 @@
 from pathfinding.world.primitives import Vector, Direction
-from pathfinding.search.instructions import Move
+from pathfinding.search.instructions import Straight
 
 
-def move(vector: Vector, instruction: Move, cells: int) -> list[Vector]:
+def straight(vector: Vector, movement: Straight, cells: int) -> list[Vector]:
     vectors = list()
-    for i in range(0, cells + 1):
-        match (vector.direction, instruction):
-            case (Direction.NORTH, Move.FORWARD):
+    for i in range(1, cells + 1):
+        match (vector.direction, movement):
+            case (Direction.NORTH, Straight.FORWARD):
                 vectors.append(Vector(vector.direction, vector.x, vector.y + i))
-            case (Direction.NORTH, Move.BACKWARD):
+            case (Direction.NORTH, Straight.BACKWARD):
                 vectors.append(Vector(vector.direction, vector.x, vector.y - i))
 
-            case (Direction.SOUTH, Move.FORWARD):
+            case (Direction.SOUTH, Straight.FORWARD):
                 vectors.append(Vector(vector.direction, vector.x, vector.y - i))
-            case (Direction.SOUTH, Move.BACKWARD):
+            case (Direction.SOUTH, Straight.BACKWARD):
                 vectors.append(Vector(vector.direction, vector.x, vector.y + i))
 
-            case (Direction.EAST, Move.FORWARD):
+            case (Direction.EAST, Straight.FORWARD):
                 vectors.append(Vector(vector.direction, vector.x + i, vector.y))
-            case (Direction.EAST, Move.BACKWARD):
+            case (Direction.EAST, Straight.BACKWARD):
                 vectors.append(Vector(vector.direction, vector.x - i, vector.y))
 
-            case (Direction.WEST, Move.FORWARD):
+            case (Direction.WEST, Straight.FORWARD):
                 vectors.append(Vector(vector.direction, vector.x - i, vector.y))
-            case (Direction.WEST, Move.BACKWARD):
+            case (Direction.WEST, Straight.BACKWARD):
                 vectors.append(Vector(vector.direction, vector.x + i, vector.y))
 
     return vectors
