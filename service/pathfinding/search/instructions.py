@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+from pydantic import BaseModel, Field
+
 from pathfinding.world.primitives import Vector
 
 
@@ -10,13 +12,11 @@ class MiscInstruction(str, Enum):
     CAPTURE_IMAGE = 'CAPTURE_IMAGE'
 
 
-@dataclass
-class MoveInstruction:
+class MoveInstruction(BaseModel):
     move: Straight
-    amount: int
-
-    def __post_init__(self):
-        assert 0 <= self.amount
+    amount: int = Field(
+        ge=1, description="The amount to move the robot in centimetres."
+    )
 
 
 @dataclass(frozen=True)

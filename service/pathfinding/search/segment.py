@@ -2,7 +2,7 @@ import heapq
 import math
 from typing import List, Generator
 
-from pathfinding.search.instructions import Turn, Move, TurnInstruction, MoveInstruction, Straight
+from pathfinding.search.instructions import Turn, Move, TurnInstruction, Straight
 from pathfinding.search.straight import straight
 from pathfinding.search.turn import turn
 from pathfinding.world.primitives import Vector
@@ -90,10 +90,11 @@ def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn 
             yield path[-1], Turn(move, path)
 
     for move in Straight:
-        for cells in [10, 5, 1]:
-            path = straight(current, move, cells)
+        modifier = 1 if move == Straight.FORWARD else -1
+        for length in [5, 1]:
+            path = straight(current, modifier, length)
             if all(map(lambda p: world.contains(p), path)):
-                yield path[-1], Move(move, cells)
+                yield path[-1], Move(move, path)
 
 
 def __heuristic(current: Vector, objectives: set[Vector]) -> int:

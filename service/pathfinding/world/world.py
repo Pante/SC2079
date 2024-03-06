@@ -39,10 +39,10 @@ class World:
     def __annotate_grid(self: World) -> None:
         error = 2 // self.cell_size
 
-        self.grid[0:(self.robot.north_length + error), :] = False
-        self.grid[:, -(self.robot.east_length + error):] = False
-        self.grid[-(self.robot.south_length + error):, :] = False
-        self.grid[:, 0:(self.robot.west_length + error)] = False
+        self.grid[0:self.robot.north_length, :] = False
+        self.grid[:, -self.robot.east_length:] = False
+        self.grid[-self.robot.south_length:, :] = False
+        self.grid[:, 0:self.robot.west_length] = False
 
         for obstacle in self.obstacles:
             west_x = max(obstacle.south_west.x - self.robot.west_length - error, 0)
@@ -84,14 +84,6 @@ class Entity(ABC):
     @property
     def vector(self) -> Vector:
         return Vector(self.direction, self.centre.x, self.centre.y)
-
-    @property
-    def north_west(self) -> Point:
-        return Point(self.south_west.x, self.north_east.y)
-
-    @property
-    def south_east(self) -> Point:
-        return Point(self.north_east.x, self.south_west.y)
 
 
 @dataclass(unsafe_hash=True)

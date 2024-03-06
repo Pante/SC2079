@@ -6,17 +6,16 @@ from http import HTTPStatus
 import numpy as np
 from flask import make_response
 from flask_openapi3 import APIBlueprint, Tag
+from pydantic import BaseModel, Field
+
 from pathfinding.search.instructions import (
     MiscInstruction,
-    Move,
-    MoveInstruction,
-    TurnInstruction,
+    TurnInstruction, MoveInstruction,
 )
 from pathfinding.search.search import Segment, search
 from pathfinding.world.objective import generate_objectives
 from pathfinding.world.primitives import Direction, Point, Vector
 from pathfinding.world.world import Obstacle, Robot, World
-from pydantic import BaseModel, Field
 
 api = APIBlueprint(
     "/pathfinding",
@@ -88,7 +87,7 @@ class PathfindingResponseSegment(BaseModel):
     image_id: int
     cost: int | None = Field(description="The cost, included only if verbose is true.")
     instructions: list[
-        MiscInstruction | TurnInstruction | PathfindingResponseMoveInstruction
+        MiscInstruction | TurnInstruction | MoveInstruction
     ]
     path: list[PathfindingVector] | None = Field(
         description="The path (unordered), included only if verbose is true."
@@ -97,14 +96,7 @@ class PathfindingResponseSegment(BaseModel):
     @classmethod
     def from_segment(cls, verbose: bool, segment: Segment):
         cost = segment.cost if verbose else 0
-        instructions = [
-            (
-                PathfindingResponseMoveInstruction.from_move_instruction(i)
-                if isinstance(i, MoveInstruction)
-                else i
-            )
-            for i in segment.instructions
-        ]
+        instructions = segment.instructions
         vectors = (
             [PathfindingVector.from_vector(vector) for vector in segment.vectors]
             if verbose
@@ -116,17 +108,6 @@ class PathfindingResponseSegment(BaseModel):
             instructions=instructions,
             path=vectors,
         )
-
-
-class PathfindingResponseMoveInstruction(BaseModel):
-    move: Move
-    amount: int = Field(
-        ge=1, description="The amount to move the robot in centimetres."
-    )
-
-    @classmethod
-    def from_move_instruction(cls, move_instruction: MoveInstruction):
-        return cls(move=move_instruction.move, amount=move_instruction.amount)
 
 
 class PathfindingVector(BaseModel):
@@ -173,7 +154,7 @@ def pathfinding(body: PathfindingRequest):
         ]
     )
 
-    # dump(world, segments)
+    dump(world, segments)
     print(datetime.now())
 
     response = make_response(

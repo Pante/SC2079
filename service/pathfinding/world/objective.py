@@ -81,17 +81,15 @@ def __suggest_objective(obstacle: Obstacle, gap: int, alignment: int) -> Vector:
             )
 
         case Direction.SOUTH:
-            south_east = obstacle.south_east
             return Vector(
                 Direction.NORTH,
-                max(south_east.x - clearance + alignment, 0),
-                max(south_east.y - gap, 0),
+                max(obstacle.south_west.x + clearance - alignment, 0),
+                max(obstacle.south_west.y - gap, 0),
             )
 
         case Direction.WEST:
-            north_west = obstacle.north_west
             return Vector(
                 Direction.EAST,
-                max(north_west.x - gap, 0),
-                max(north_west.y - clearance + alignment, 0),
+                max(obstacle.south_west.x - gap, 0),
+                max(obstacle.south_west.y + clearance - alignment, 0),
             )

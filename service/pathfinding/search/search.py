@@ -76,18 +76,16 @@ class Segment:
         vectors: list[Vector] = []
 
         for vector, move in parts:
+            vectors.extend(move.vectors)
             match move:
                 case Turn():
                     instructions.append(move.turn)
-                    vectors.extend(move.vectors)
 
                 case Move() if instructions and isinstance(instructions[-1], MoveInstruction) and instructions[-1].move == move.move:
                     instructions[-1].amount += len(move.vectors) * world.cell_size
-                    vectors.extend(move.vectors)
 
                 case Move():
-                    instructions.append(MoveInstruction(move.move, len(move.vectors) * world.cell_size))
-                    vectors.extend(move.vectors)
+                    instructions.append(MoveInstruction(move=move.move, amount=len(move.vectors) * world.cell_size))
 
         instructions.append(MiscInstruction.CAPTURE_IMAGE)
 
