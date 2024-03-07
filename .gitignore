@@ -32,3 +32,5 @@ gradle-app.setting
 # ignore robot builds
 robot/Debug
 robot/Release
+/.replay/
+dump.txt

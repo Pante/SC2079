@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import os
 from datetime import datetime
 from http import HTTPStatus
 
 import numpy as np
-from flask import make_response
+from flask import make_response, request
 from flask_openapi3 import APIBlueprint, Tag
 from pydantic import BaseModel, Field
 
@@ -138,6 +139,8 @@ class PathfindingPoint(BaseModel):
 @api.post("/", responses={200: PathfindingResponse})
 def pathfinding(body: PathfindingRequest):
     print(datetime.now())
+    capture()
+
     robot = body.robot.to_robot()
     obstacles = [obstacle.to_obstacle() for obstacle in body.obstacles]
     world = World(100, robot, obstacles)
@@ -162,6 +165,14 @@ def pathfinding(body: PathfindingRequest):
     )
     response.mimetype = "application/json"
     return response
+
+
+def capture():
+    if not os.path.exists('.replay'):
+        os.makedirs('.replay')
+
+    with open(f'.replay/{datetime.now().strftime('%Y-%m-%d--%H-%M-%S')}.json', 'w') as file:
+        file.write(request.get_data(as_text=True))
 
 
 def dump(world: World, segments: list[Segment]):
