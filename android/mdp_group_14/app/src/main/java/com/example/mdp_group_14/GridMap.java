@@ -618,9 +618,12 @@ public class GridMap extends View{
     private ArrayList<int[]> getObstacleCoord() {
         return obstacleCoord;
     }
-    private ArrayList<int[]> getObstacleCoord2() {
+
+   /* private ArrayList<int[]> getObstacleCoord2() {
         return obstacleCoord2;
     }
+
+    */
 
     private static void showLog(String message) {
         Log.d(TAG, message);
