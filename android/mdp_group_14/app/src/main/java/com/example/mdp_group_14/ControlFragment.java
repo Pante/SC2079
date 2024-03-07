@@ -38,8 +38,7 @@ public class ControlFragment extends Fragment {
     // Timer
     public static Handler timerHandler = new Handler();
 
-    //just added, need to test
-    Button startSend;
+    //Button startSend;
 
     public static Runnable timerRunnableExplore = new Runnable() {
         @Override
@@ -105,7 +104,7 @@ public class ControlFragment extends Fragment {
         robotStatusTextView = Home.getRobotStatusTextView();
         fastestTimer = 0;
         exploreTimer = 0;
-        startSend = root.findViewById(R.id.startSend); //just added, need to test
+        //startSend = root.findViewById(R.id.startSend); //just added, need to test
 
         gridMap = Home.getGridMap();
 
@@ -215,16 +214,16 @@ public class ControlFragment extends Fragment {
             }
         });
 
-        // Start Week 8 challenge
+        // Start Task 1 challenge
         exploreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showLog("Clicked exploreToggleBtn");
+                showLog("Clicked Task 1 Btn (exploreToggleBtn)");
                 ToggleButton exploreToggleBtn = (ToggleButton) v;
 
-                if (exploreToggleBtn.getText().equals("WK8 START")) {
-                    showToast("Auto Movement/ImageRecog timer stop!");
-                    robotStatusTextView.setText("Auto Movement Stopped");
+                if (exploreToggleBtn.getText().equals("TASK 1 START")) {
+                    showToast("Task 1 timer stop!");
+                    robotStatusTextView.setText("Task 1 Stopped");
                     timerHandler.removeCallbacks(timerRunnableExplore);
                 }
                 else if (exploreToggleBtn.getText().equals("STOP")) {
@@ -232,11 +231,13 @@ public class ControlFragment extends Fragment {
                     String msg = gridMap.getObstacles();
                     // Send this String over via BT
                     //Home.printCoords(msg);
+                    //Send BEGIN to the robot
+                    Home.printMessage("BEGIN"); //send a string "BEGIN" to the RPI
                     // Start timer
                     Home.stopTimerFlag = false;
-                    showToast("Auto Movement/ImageRecog timer start!");
+                    showToast("Task 1 timer start!");
 
-                    robotStatusTextView.setText("Auto Movement Started");
+                    robotStatusTextView.setText("Task 1 Started");
                     exploreTimer = System.currentTimeMillis();
                     timerHandler.postDelayed(timerRunnableExplore, 0);
                 }
@@ -247,26 +248,23 @@ public class ControlFragment extends Fragment {
             }
         });
 
+
+        //Start Task 2 Challenge Timer
         fastestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showLog("Clicked fastestToggleBtn");
+                showLog("Clicked Task 2 Btn (fastestToggleBtn)");
                 ToggleButton fastestToggleBtn = (ToggleButton) v;
-                if (fastestToggleBtn.getText().equals("WK9 START")) {
-                    showToast("Fastest car timer stop!");
-                    robotStatusTextView.setText("Fastest Car Stopped");
+                if (fastestToggleBtn.getText().equals("TASK 2 START")) {
+                    showToast("Task 2 timer stop!");
+                    robotStatusTextView.setText("Task 2 Stopped");
                     timerHandler.removeCallbacks(timerRunnableFastest);
                 }
                 else if (fastestToggleBtn.getText().equals("STOP")) {
-                    showToast("Fastest car timer start!");
-                    try {
-                        refreshMessageReceivedNS("WEEK 9 START\n");
-                        Home.printMessage(MappingFragment.path);
-                    } catch (Exception e) {
-                        showLog(e.getMessage());
-                    }
+                    showToast("Task 2 timer start!");
+                    Home.printMessage("BEGIN"); //send a string "BEGIN" to the RPI
                     Home.stopWk9TimerFlag = false;
-                    robotStatusTextView.setText("Fastest Car Started");
+                    robotStatusTextView.setText("Task 2 Started");
                     fastestTimer = System.currentTimeMillis();
                     timerHandler.postDelayed(timerRunnableFastest, 0);
                 }
@@ -305,7 +303,7 @@ public class ControlFragment extends Fragment {
             }
         });
 
-        //added new Button, startSend for left WEEK8, need to test
+        /*
         startSend.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
@@ -335,6 +333,7 @@ public class ControlFragment extends Fragment {
                 showLog("Exiting startSend");
             }
         });
+         */
 
         return root;
     }
