@@ -26,16 +26,10 @@ class Task1PC:
         self.prev_image = None
     
     def start(self):
-        try:
-            self.pc_receive_thread = threading.Thread(target=self.pc_receive)
-            self.stream_thread = threading.Thread(target=self.stream_start)
-            self.pc_receive_thread.start()  # Receive from PC
-            self.stream_thread.start()  # Start stream
-        except KeyboardInterrupt:
-            print("Exiting program")
-        finally:
-            self.disconnect()
-            
+        self.pc_receive_thread = threading.Thread(target=self.pc_receive)
+        self.stream_thread = threading.Thread(target=self.stream_start)
+        self.pc_receive_thread.start()  # Receive from PC
+        self.stream_thread.start()  # Start stream    
         
     def stream_start(self):
         self.stream_listener.start_stream_read(
