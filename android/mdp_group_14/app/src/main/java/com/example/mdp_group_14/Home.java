@@ -267,8 +267,14 @@ public class Home extends Fragment {
 
     public static void refreshDirection(String direction) {
         gridMap.setRobotDirection(direction);
-        directionAxisTextView.setText(sharedPreferences.getString("direction",""));
-        printMessage("Direction is set to " + direction);
+        int x = gridMap.getCurCoord()[0];
+        int y = gridMap.getCurCoord()[1];
+        String newDir = gridMap.getRobotDirection();
+        newDir = newDir.toUpperCase();
+        directionAxisTextView.setText(sharedPreferences.getString("direction","")); //changes the UI direction display as well
+        //printMessage("Direction is set to " + direction); //OLD VER
+        printMessage("ROBOT,"+ x + "," + y + "," + newDir);
+        //showLog("ROBOT,"+ x +"," + y + "," + newDir); //for troubleshooting
 
     }
 
