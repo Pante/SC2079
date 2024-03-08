@@ -273,7 +273,7 @@ int main(void)
 	sensors_read_irDist();
 	sensors_read_accel();
 	sensors_read_gyroZ();
-	sensors_read_heading(MS_FRAME, sensors.gyroZ);
+//	sensors_read_heading(MS_FRAME, sensors.gyroZ);
 	/* ----- End: Sensor reading ----- */
 
 	/* ----- Start: Get next command (if any) ----- */
@@ -298,7 +298,7 @@ int main(void)
 					rBack = get_turning_r_back_cm(steeringAngle);
 					rRobot = get_turning_r_robot_cm(steeringAngle);
 					if (cmd->distType == TARGET) {
-						distTarget = abs_float(get_arc_length(cmd->val, rRobot));
+						distTarget = abs_float(get_arc_length(cmd->val, rBack));
 					}
 				} else {
 					rBack = 0;
@@ -308,8 +308,6 @@ int main(void)
 			} else {
 				commands_end(&huart3, cmd);
 				cmd = NULL;
-
-
 			}
 		}
 	}
@@ -326,7 +324,7 @@ int main(void)
 		estDistOld = estDist;
 
 		//calculate difference in angular velocity.
-		if (rRobot != 0) wTarget = get_w_ms(estSpeed, rRobot);
+		if (rRobot != 0) wTarget = get_w_ms(estSpeed, rBack - GYRO_CENTER_OFFSET_CM);
 		float wGyro = cmd->dir * sensors.gyroZ;
 		wDiff = (wGyro - wTarget); //gyro is flipped when going backwards.
 
@@ -334,16 +332,15 @@ int main(void)
 		switch (cmd->distType) {
 			case TARGET:
 				distDiff = distTarget - estDist;
-				if (rRobot != 0) {
+				if (rBack != 0) {
 					if (estAngle >= cmd->val) distDiff = 0;
-					else distDiff = abs_float(get_arc_length(cmd->val - estAngle, rRobot));
+					else distDiff = abs_float(get_arc_length(cmd->val - estAngle, rBack));
 				}
 				break;
 			case STOP_AWAY:
 				if (usCaptureComplete) {
-					float frontDist = dist_get_front(sensors.usDist, sensors.irDist);
-					distDiff = frontDist - cmd->val;
-					distDiff *= cmd->dir;
+					float frontDistDiff = (dist_get_front(sensors.usDist, sensors.irDist) - cmd->val) * cmd->dir;
+					distDiff = frontDistDiff;
 				}
 				break;
 			default:
@@ -352,14 +349,17 @@ int main(void)
 		}
 
 		Command *next = commands_peek();
+
 		float nextAngle = next != NULL ? next->steeringAngle : 0;
-		float nextAngleDiff = abs_float(next->steeringAngle - cmd->steeringAngle);
+		float nextAngleDiff = abs_float(nextAngle - cmd->steeringAngle);
 		uint8_t shouldBrake = cmd->distType == STOP_AWAY
 				? 1
 				: next != NULL
-				? next->dir != cmd->dir || nextAngleDiff > SERVO_WIDTH
+				? next->dir != cmd->dir
+					|| next->dir < 0 //avoid smooth turning while reversing.
+					|| nextAngleDiff > SERVO_WIDTH
 				: 1;
-		uint8_t turnSpeed = min_uint8(25, next->speed);
+		uint8_t turnSpeed = next != NULL ? min_uint8(20, next->speed) : 20;
 
 		//motor correction.
 		motor_pwmCorrection(
@@ -376,15 +376,42 @@ int main(void)
 //				  : 0;
 //		if (shouldTurn) servo_setAngle(nextAngle);
 
-		if (!(ticksElapsed % ticksServo)) {
-			//turn a small angle every 20ms.
-			float timeLeft = distDiff / estSpeed;
-			if (timeLeft < (SERVO_TURN_PERIOD) * (nextAngleDiff / SERVO_TURN_STEP)) {
+
+		float timeLeft = estSpeed > 0 ? distDiff / estSpeed : 1e10;
+		if (shouldBrake) {
+			if (distDiff < 0.03 * brakingDist * nextAngleDiff / SERVO_WIDTH) {
+				steeringAngle = nextAngle;
+				servo_setAngle(nextAngle);
+			}
+		}
+		else if (!(ticksElapsed % ticksServo)) {
+			//turn a small angle every SERVO_TURN_PERIOD ms.
+			float diff = abs_float(steeringAngle - next->steeringAngle);
+			if (timeLeft < (SERVO_TURN_PERIOD) * (diff / SERVO_TURN_STEP)) {
 				//should increment.
-				float step = min_float(SERVO_TURN_STEP, nextAngleDiff);
+				float step = min_float(SERVO_TURN_STEP, diff);
 				if (nextAngle < steeringAngle) step = -step;
 				steeringAngle += step;
 				servo_setAngle(steeringAngle);
+			}
+		}
+
+		if (next != NULL) {
+			if (commands_type_match(cmd, next)) {
+				//absorb next command into current command.
+				next = commands_pop();
+
+				switch (next->distType) {
+					case TARGET:
+						cmd->val += next->val;
+						break;
+					case STOP_AWAY:
+						cmd->val = next->val;
+						break;
+				}
+
+				commands_end(&huart3, next);
+				next = commands_peek();
 			}
 		}
 

@@ -90,6 +90,8 @@ class StreamListener:
 
 # result handler.
 def handle_result(res):
+    if res is None:
+        return
     print("CONFIDENCE LEVEL: ", res.boxes[0].conf.item())
     print("CLASS: ", res.names[int(res.boxes[0].cls[0].item())])
 
@@ -100,9 +102,9 @@ def handle_disconnect():
 
 
 # # sample use of this class.
-# def stream_listener_test():
-#     # load the StreamListener class with the weights file.
-#     listener = StreamListener('v9_task1.pt')
+def stream_listener_test():
+    # load the StreamListener class with the weights file.
+    listener = StreamListener('../v9_task1.pt')
 
 #     # pass in the handlers and start stream reading.
 #     listener.start_stream_read(handle_result, handle_disconnect, show_video=False)

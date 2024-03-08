@@ -28,7 +28,6 @@ typedef struct {
 #define US_TRIG_SET() HAL_GPIO_WritePin(US_TRIG_GPIO_Port,US_TRIG_Pin,GPIO_PIN_SET)
 #define US_TRIG_CLR() HAL_GPIO_WritePin(US_TRIG_GPIO_Port,US_TRIG_Pin,GPIO_PIN_RESET)
 
-
 void sensors_init(I2C_HandleTypeDef *hi2c1_ptr, ADC_HandleTypeDef *adc_ptr, TIM_HandleTypeDef *ic_ptr, Sensors *sensors_ptr);
 void sensors_read_irDist();
 void sensors_us_trig();

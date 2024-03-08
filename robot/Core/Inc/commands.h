@@ -37,4 +37,5 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size);
 Command *commands_pop();
 Command *commands_peek();
 void commands_end(UART_HandleTypeDef *uart, Command *cmd);
+uint8_t commands_type_match(Command *a, Command *b);
 #endif /* INC_COMMANDS_H_ */
