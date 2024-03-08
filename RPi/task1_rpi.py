@@ -330,7 +330,6 @@ class Task1RPI:
             return
 
         segments = response.segments
-        # i = 1
         for i, segment in enumerate(segments):
             print(f"On segment {i+1} of {len(segments)}:")
             self.set_stm_stop(False)  # Reset to false upon starting the new segment

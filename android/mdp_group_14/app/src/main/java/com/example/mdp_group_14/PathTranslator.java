@@ -8,7 +8,7 @@ import android.widget.Toast;
 public class PathTranslator {
     private static final String TAG = "PathTranslator";
     private static GridMap gridMap;
-    private static final int CELL_LENGTH = 20; //length of each cell in cm
+    private static final int CELL_LENGTH = 5; //length of each cell in cm
     private static final int MILLI_DELAY = 200;    // delay between movement commands
 
     // Turning radius differs for each turn :/
@@ -211,11 +211,25 @@ public class PathTranslator {
 
         //Case 1: is a MOVE command. Expects a syntax of eg. MOVE,<DISTANCE IN CM>,<DIRECTION>.
         if(stmCommand.contains("MOVE")){
+
             try { //set commandValue to <DISTANCE IN CM>
                 commandValue = Integer.parseInt(stmCommand.split(",")[1]);
+
             } catch(Exception e) {}
+
+//            try { //set commandValue to <DISTANCE IN CM>
+//                 commandValue = Integer.parseInt(stmCommand.split(",")[2]);
+//
+//            } catch(Exception e) {}
+
             //set commandType for <DIRECTION>
-            String direction = stmCommand.split(",")[2];
+            String direction = stmCommand.split(",")[1];
+            showLog("directions"+direction);
+
+            commandValue = Integer.valueOf(stmCommand.split(",")[2].replace("\n",""));
+
+//showLog(String.valueOf(Integer.parseInt(stmCommand.split(",")[2])));
+
             if(direction.equals("FORWARD")){
                 commandType = 'f';
             }
@@ -234,10 +248,10 @@ public class PathTranslator {
                 commandType = 'a';
             }
             if (direction.equals("BACKWARD_RIGHT")){
-                commandType = 'q';
+                commandType = 'e';
             }
             if (direction.equals("BACKWARD_LEFT")){
-                commandType = 'e';
+                commandType = 'q';
             }
         }
 
@@ -248,6 +262,17 @@ public class PathTranslator {
                 moves = commandValue / CELL_LENGTH;
                 for(int i = 0; i < moves; i++) {
                     gridMap.moveRobot("forward");
+                    Home.refreshLabel();    // update x and y coordinate displayed
+                    // display different statuses depending on validity of robot action
+                    if (gridMap.getValidPosition()){
+                        showLog("moving forward");}
+                    else {
+                        Home.printMessage("obstacle");
+                        showLog("Unable to move forward");
+                    }
+
+                    Home.printMessage("f");
+
                     try {
                         Thread.sleep(MILLI_DELAY);
                     } catch(InterruptedException e) {
@@ -261,6 +286,7 @@ public class PathTranslator {
                 moves = commandValue / CELL_LENGTH;
                 for(int i = 0; i < moves; i++) {
                     gridMap.moveRobot("back");
+                    Home.refreshLabel();
                     try {
                         Thread.sleep(MILLI_DELAY);
                     } catch(InterruptedException e) {
@@ -272,6 +298,7 @@ public class PathTranslator {
             case 'd':   // 90 deg right
                 Home.refreshMessageReceivedNS("==========================\nForward_Right turn");
                 gridMap.moveRobot("right");
+                Home.refreshLabel();
                 /*
                 moves = RIGHT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 // forward movement

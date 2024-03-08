@@ -8,19 +8,19 @@ static uint16_t pwmValAccel = 0, pwmValTarget = 0,
 	lPwmVal = 0, rPwmVal = 0;
 
 static PidDef pidMatch;
-const static float Kp_match = 1.5e4;
-const static float Ki_match = 8.5e2;
+const static float Kp_match = 1.8e4;
+const static float Ki_match = 9.0e2;
 const static float Kd_match = 1.0e4;
 
 static PidDef pidDistTarget;
-const static float Kp_distTarget = 0.21;
-const static float Ki_distTarget = 0.0009;
+const static float Kp_distTarget = 0.22;
+const static float Ki_distTarget = 0.0012;
 const static float Kd_distTarget = 0.1;
 
 static PidDef pidDistAway;
-const static float Kp_distAway = 0.975;
+const static float Kp_distAway = 0.98;
 const static float Ki_distAway = 0.00001;
-const static float Kd_distAway = 0.13;
+const static float Kd_distAway = 0.11;
 
 void motor_init(TIM_HandleTypeDef *pwm, TIM_HandleTypeDef *l_enc, TIM_HandleTypeDef *r_enc) {
 	//assign timer pointers.

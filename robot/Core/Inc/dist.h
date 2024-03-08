@@ -9,6 +9,7 @@
 //accurate range of IR sensor.
 #define DIST_IR_MIN 10.0f
 #define DIST_IR_MAX 70.0f
+#define DIST_IR_OFFSET 2.5f //distance from front of vehicle
 
 typedef struct {
 	float dist;

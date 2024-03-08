@@ -1,13 +1,18 @@
-import picamera, socket, cv2, base64
-from picamera.array import PiRGBArray
-from threading import Thread
+import base64
+import socket
 import time
+from threading import Thread
 
-class StreamServer():
+import cv2
+import picamera
+from picamera.array import PiRGBArray
+
+
+class StreamServer:
     # define constants.
     def define_constants(self):
         self.BUFF_SIZE = 65536
-        self.HOST_ADDR = ('192.168.14.14', 5005)
+        self.HOST_ADDR = ("192.168.14.14", 5005)
         self.REQ_STREAM = b"stream_request"
 
     def __init__(self):
@@ -27,7 +32,6 @@ class StreamServer():
         # start receiving thread (and exit flag).
         self.exit = False
         Thread(target=self.receive_proc).start()
-
 
     # thread processto listen to incoming requests, and set client address accordingly.
     def receive_proc(self):
@@ -70,6 +74,7 @@ class StreamServer():
     # close the server.
     def close(self):
         self.exit = True
+
 
 # # sample use of this class.
 # def stream_server_test():

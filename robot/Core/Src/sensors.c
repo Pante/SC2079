@@ -72,6 +72,8 @@ void sensors_read_irDist() {
 	float dist = (div < 6.3028 / DIST_IR_MAX)
 		? DIST_IR_MAX
 		: 6.3028 / div;
+
+	dist -= DIST_IR_OFFSET;
 	if (dist < DIST_IR_MIN) dist = DIST_IR_MIN;
 
 	sensors_ptr->irDist = lpf(a_irDist, sensors_ptr->irDist, dist);

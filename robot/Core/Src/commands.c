@@ -106,3 +106,10 @@ void commands_end(UART_HandleTypeDef *uart, Command *cmd) {
 	free(cmd->str);
 	free(cmd);
 }
+
+uint8_t commands_type_match(Command *a, Command *b) {
+	return (a->dir == b->dir)
+			&& (a->speed == b->speed)
+			&& (a->steeringAngle == b->steeringAngle)
+			&& (a->distType == b->distType);
+}
