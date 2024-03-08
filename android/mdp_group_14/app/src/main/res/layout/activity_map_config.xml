@@ -59,7 +59,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         android:scaleType="centerCrop"
 
-                        app:srcCompat="@mipmap/walnut"
+                        app:srcCompat="@mipmap/snorlax"
                         android:background="@drawable/border_black" />
 
                 </LinearLayout>
