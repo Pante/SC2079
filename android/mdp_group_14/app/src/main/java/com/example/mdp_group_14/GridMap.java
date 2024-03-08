@@ -488,7 +488,7 @@ public class GridMap extends View{
         }
         // "robot", <x value> , <y value> , <bearing>
 
-        updateStatus(col-2 + "," + (row - 1)+ ", Bearing: " + dir); // south west
+        //updateStatus(col-2 + "," + (row - 1)+ ", Bearing: " + dir); // south west
         //updateStatus(col + "," + (row + 1)+ ", Bearing: " + dir); // north east
         showLog("Exiting setStartCoord");
     }
@@ -607,11 +607,16 @@ public class GridMap extends View{
         if (((col - 1))>=0 && ((row - 1))>=0)
         {
             Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1)*5 + "," + (19 - row)*5 + "," + (imageBearings.get(19 - row)[col - 1]).toUpperCase());
+            BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString((col - 1)*5)+"\n");
+            BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString((19 - row)*5)+"\n");
+            BluetoothCommunications.getMessageReceivedTextView().append((imageBearings.get(19 - row)[col - 1]).toUpperCase()+"\n");
         }
         else{
             showLog("out of grid");
         }
-        updateStatus(obstacleNumber + "," + (col - 1)+ "," + (19 - row) + ","  + imageBearings.get(19 - row)[col - 1]); // north east
+        //updateStatus(obstacleNumber + "," + (col - 1)+ "," + (19 - row) + ","  + imageBearings.get(19 - row)[col - 1]); // north east
+
+
 //        Home.printMessage({"key":"hello","value":"hello"});
     }
 
@@ -728,7 +733,7 @@ public class GridMap extends View{
             ITEM_LIST.get(initialRow-1)[initialColumn-1] = "";
             imageBearings.get(initialRow-1)[initialColumn-1] = "";
 
-            updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
+            //updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
              if (((initialColumn - 1))>=0 && ((initialRow - 1))>=0)
             {
                 Home.printMessage("OBSTACLE" + "," + (obstacleid3+1) + "," + (initialColumn)*5 + "," + (initialRow)*5 + "," + "-1");
@@ -768,7 +773,7 @@ public class GridMap extends View{
                 imageBearings.get(initialRow-1)[initialColumn-1] = "";
 
 
-                updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
+                //updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
 
                 if (((initialColumn - 1))>=0 && ((initialRow - 1))>=0)
                 {
@@ -807,7 +812,7 @@ public class GridMap extends View{
                     cells[endColumn][20 - endRow].setType(cells[initialColumn][20 - initialRow].type);
                     cells[initialColumn][20 - initialRow].setType("unexplored");
 
-                    updateStatus(obstacleid+1+ "," + (endColumn-1) + "," + (endRow-1) + ", Bearing: " + tempBearing);
+                    //updateStatus(obstacleid+1+ "," + (endColumn-1) + "," + (endRow-1) + ", Bearing: " + tempBearing);
 
                     if (((endColumn - 1))>=0 && ((endRow - 1))>=0)
                     {
@@ -953,7 +958,7 @@ public class GridMap extends View{
                             if(!newID.equals("Nil")) cells[tCol][20 - tRow].setType("image"); // if new id is set then show on obstacle on app
                             else cells[tCol][20 - tRow].setType("obstacle");
                             int obstacleNumber = GridMap.obstacleCoord.size();
-                            updateStatus( (obstacleid+1) + "," + newID + ","+(tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
+                            //updateStatus( (obstacleid+1) + "," + newID + ","+(tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
 
                             if (((tCol - 1))>=0 && ((tRow - 1))>=0)
                             {
@@ -1657,13 +1662,16 @@ public class GridMap extends View{
         for (int i = 0; i < obstacleCoord.size(); i++) {
             message += ((obstacleCoord.get(i)[0]) + "," // add x coordinate of obstacle
                     + (obstacleCoord.get(i)[1]) + ","   // add y coordinate of obstacle
-                    + imageBearings.get(obstacleCoord.get(i)[1])[obstacleCoord.get(i)[0]]);   // add the 1st letter of the direction
+                    + imageBearings.get(obstacleCoord.get(i)[1])[obstacleCoord.get(i)[0]].charAt(0));  // add the 1st letter of the direction
 
-            showLog("here"+imageBearings.get(obstacleCoord.get(i)[1])[obstacleCoord.get(i)[0]]);
+//            showLog("here"+imageBearings.get(obstacleCoord.get(i)[1])[obstacleCoord.get(i)[0]]);
 
             if(i < obstacleCoord.size() - 1) message += "\n";    // add a "|" to the end of each obstacle's info (except for the last)
         }
+        BluetoothCommunications.getMessageReceivedTextView().append(message);
+
         return message;
+
     }
 
     // Returns a string that contains 2 'substrings' of the obstacle information, 1 untranslated & 1 translated, separated by '_'

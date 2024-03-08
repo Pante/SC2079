@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
+import java.util.Arrays;
 
 public class MappingFragment extends Fragment {
     private static final String TAG = "MapFragment";
@@ -204,10 +207,39 @@ public class MappingFragment extends Fragment {
                 mapPref = getContext().getSharedPreferences("Shared Preferences", Context.MODE_PRIVATE);
                 String obsPos = mapPref.getString("maps","");
                 if(!obsPos.equals("")){
-                    String[] obstaclePosition = obsPos.split("\\|");
+
+                    String[] obstaclePosition = obsPos.split("\n");
                     for (String s : obstaclePosition) {
+
                         String[] coords = s.split(",");
-                        gridMap.setObstacleCoord(Integer.parseInt(coords[0]) + 1, Integer.parseInt(coords[1]) + 1);
+//                        BluetoothCommunications.getMessageReceivedTextView().append(Arrays.toString(coords));
+
+//                        String direction2 = "";
+//                        switch (coords[2]) {
+//                            case "N":
+//                                direction2 = "NORTH";
+//                                break;
+//                            case "E":
+//                                direction2 = "EAST";
+//                                break;
+//                            case "W":
+//                                direction2 = "WEST";
+//                                break;
+//                            case "S":
+//                                direction2 = "SOUTH";
+//                                break;
+//                            default:
+//                                direction2 = "null";
+//                        }
+//
+////                        BluetoothCommunications.getMessageReceivedTextView().append(coords[0]);
+////                        BluetoothCommunications.getMessageReceivedTextView().append(coords[1]);
+////                        BluetoothCommunications.getMessageReceivedTextView().append(direction2);
+//
+//                        gridMap.imageBearings.get(Integer.parseInt(coords[1]))[Integer.parseInt(coords[0])] = direction2;
+
+
+
 //                        gridMap.setObstacleCoord(Integer.parseInt(coords[0]) + 1, Integer.parseInt(coords[1]) + 1, "","");
                         String direction = "";
                         switch (coords[2]) {
@@ -227,6 +259,7 @@ public class MappingFragment extends Fragment {
                                 direction = "";
                         }
                         gridMap.imageBearings.get(Integer.parseInt(coords[1]))[Integer.parseInt(coords[0])] = direction;
+                        gridMap.setObstacleCoord(Integer.parseInt(coords[0]) + 1, Integer.parseInt(coords[1]) + 1);
                     }
                     gridMap.invalidate();
                     showLog("Exiting Load Button");
@@ -271,6 +304,7 @@ public class MappingFragment extends Fragment {
             }
         });
 
+        //preload defaults button
         updateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -287,6 +321,7 @@ public class MappingFragment extends Fragment {
                 gridMap.setObstacleCoord(15+1, 4+1);
                 gridMap.setObstacleCoord(12+1, 9+1);
                 gridMap.invalidate();
+                updateStatus("i say dont click right why u still click????");
                 showLog("Exiting updateButton");
             }
         });
@@ -299,5 +334,10 @@ public class MappingFragment extends Fragment {
 
     private void showToast(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+    private void updateStatus(String message) {
+        Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP,0, 0);
+        toast.show();
     }
 }
