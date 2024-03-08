@@ -31,18 +31,19 @@ void servo_setVal(uint32_t val) {
 void servo_setAngle(float angle) {
 	//clamp angle to within width.
 	uint32_t val = 0;
-	if (angle < -SERVO_WIDTH) val = lookup[0][1];
-	else if (angle > SERVO_WIDTH) val = lookup[SERVO_LOOKUP_SIZE - 1][1];
+	if (angle <= -SERVO_WIDTH) val = lookup[0][1];
+	else if (angle >= SERVO_WIDTH) val = lookup[SERVO_LOOKUP_SIZE - 1][1];
 	else {
 		uint8_t i;
 		float min_val, max_val;
 		float min_angle, max_angle;
 		for (i = 0; i < SERVO_LOOKUP_SIZE - 1; i++) {
-			if (angle >= lookup[i][0]) {
-				min_angle = lookup[i][0];
-				max_angle = lookup[i+1][0];
-				min_val = lookup[i][1];
-				max_val = lookup[i+1][1];
+			min_angle = lookup[i][0];
+			max_angle = lookup[i+1][0];
+			min_val = lookup[i][1];
+			max_val = lookup[i+1][1];
+
+			if (angle >= min_angle && angle <= max_angle) {
 				val = min_val + (max_val - min_val) * (angle - min_angle) / (max_angle - min_angle);
 				break;
 			}

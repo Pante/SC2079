@@ -10,7 +10,7 @@
 #define WHEEL_R_CM 3.25f
 #define CHASSIS_CM 14.5f
 #define WHEELBASE_CM 16.2f
-#define GYRO_CENTER_OFFSET_CM 3.2f //offset of gyro from center of robot.
+#define GYRO_CENTER_OFFSET_CM 0.85f //offset of gyro from center of robot.
 
 float abs_float(float a);
 float min_float(float a, float b);

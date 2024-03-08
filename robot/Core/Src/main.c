@@ -324,7 +324,7 @@ int main(void)
 		estDistOld = estDist;
 
 		//calculate difference in angular velocity.
-		if (rRobot != 0) wTarget = get_w_ms(estSpeed, rBack - GYRO_CENTER_OFFSET_CM);
+		if (rBack != 0) wTarget = get_w_ms(estSpeed, rBack - GYRO_CENTER_OFFSET_CM);
 		float wGyro = cmd->dir * sensors.gyroZ;
 		wDiff = (wGyro - wTarget); //gyro is flipped when going backwards.
 
