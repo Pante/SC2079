@@ -77,5 +77,5 @@ class STM():
 
         cmd = f"{flag}{speed}|{angle}|{val}\n" if flag != 'S' else 'S\n'
         self.send(cmd)
-        print(f"Sent {cmd} to STM.")
+        print(f"Sent {cmd.rstrip()} to STM.")
 		

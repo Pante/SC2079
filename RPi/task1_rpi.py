@@ -49,7 +49,7 @@ from TestingScripts.Camera_Streaming_UDP.stream_server import StreamServer
 
 class Task1RPI:
     def __init__(self):
-        self.obstacleArr = []  # Obstacle Array
+        self.obstacle_dict = {}  # Obstacle Dict
         self.robot = None  # Robot
         self.prev_image = None
         self.stm = STM()
@@ -63,11 +63,13 @@ class Task1RPI:
         self.android_dropped = self.manager.Event()
         self.host = "192.168.14.14"
         self.port = 5000
-        self.conf = Configuration(host="http://192.168.14.13:5000")
+        self.conf = Configuration(host="http://192.168.14.17:5001")
         self.client = ApiClient(configuration=self.conf)
         self.last_image = None
         self.prev_image = None
         self.STM_Stopped = False
+
+        self.drive_speed = 95
 
     def initialize(self):
         try:
@@ -156,66 +158,72 @@ class Task1RPI:
     def stream_start(self):
         StreamServer().start()
 
+    def get_api_object(self, Object, dir, sw, size, id=None):
+        x, y = sw
+        w, h = size
+
+        direction = Direction(dir)
+        south_west = PathfindingPoint(x=x, y=y)
+        north_east = PathfindingPoint(x=x + w - 1, y=y + h - 1)
+
+        if id is not None:
+            return Object(
+                direction=direction,
+                south_west=south_west,
+                north_east=north_east,
+                image_id=id,
+            )
+
+        return Object(direction=direction, south_west=south_west, north_east=north_east)
+
     def android_receive(self) -> None:
         print("Went into android receive function")
         while True:
             message_rcv = None
             try:
                 message_rcv = self.android.receive()
-
+                print("MESSAGE RECEIVED: " + message_rcv)
                 if "BEGIN" in message_rcv:
+                    print("BEGINNNN!")
                     # TODO: Begin Task 1
                     self.start()  # Calculate the path
 
                 elif "OBSTACLE" in message_rcv:
-                    message_split = message_rcv.split(",")
-                    obstacle_id = message_split[1]  # OBSTACLE ID
-                    x_axis = message_split[2]  # X AXIS OF OBSTACLE
-                    y_axis = message_split[3]  # Y AXIS OF OBSTACLE
-                    direction = Direction(message_split[4])  # DIRECTION OF OBSTACLE
+                    print("OBSTACLE!!!!")
+                    id, x, y, dir = message_rcv.split(",")[1:]
+                    id = int(id)
 
-                    obstacle_south_west = PathfindingPoint(x=x_axis, y=y_axis)
-                    obstacle_north_east = PathfindingPoint(
-                        x=x_axis + 4, y=y_axis + 4
-                    )  # TODO: Need to change +x value to new grid size
-                    # Need to add 4 to x and y from the south_west to get the north_east coords
-                    newObstacle = PathfindingRequestObstacle(
-                        direction=direction,
-                        image_id=obstacle_id,
-                        south_west=obstacle_south_west,
-                        north_east=obstacle_north_east,
-                    )
-
-                    if len(self.obstacleArr) == 0:
-                        # Obstacle array is empty, add the new obstacle inside
-                        self.obstacleArr.append(newObstacle)
+                    if dir == "-1":
+                        if id in self.obstacle_dict:
+                            del self.obstacle_dict[id]
+                            print("Deleted obstacle", id)
+                    elif dir not in ["NORTH", "SOUTH", "EAST", "WEST"]:
+                        print("Invalid direction provided:", dir + ", ignoring...")
+                        continue
                     else:
-                        # self.obstacleArr is not empty, check if the new Obstacle already exists. If yes, update. If no, insert.
-                        for i, obstacle in enumerate(self.obstacleArr):
-                            if obstacle_id == self.obstacleArr[i].image_id:
-                                # Obstacle exists, update values
-                                self.obstacleArr[i] = newObstacle
-                                break
-                        else:
-                            # Obstacle ID does not exist in ObstacleArr, append new Obstacle inside.
-                            self.obstacleArr.append(newObstacle)
+                        newObstacle = self.get_api_object(
+                            PathfindingRequestObstacle,
+                            dir,
+                            (int(x), int(y)),
+                            (5, 5),
+                            id=id,
+                        )
+                        self.obstacle_dict[id] = newObstacle
 
                         print("Obstacle set successfully: ", newObstacle)
-                        print("Number of obstacles: ", len(self.obstacleArr))
+                    print("Number of obstacles: ", len(self.obstacle_dict))
 
                 elif "ROBOT" in message_rcv:
-                    message_split = message_rcv.split(",")
-                    x_axis = message_split[1]  # X AXIS OF ROBOT
-                    y_axis = message_split[2]  # Y AXIS OF ROBOT
-                    robot_direction = Direction(message_split[3])  # DIRECTION OF ROBOT
-                    robot_south_west = PathfindingPoint(x=x_axis, y=y_axis)
-                    robot_north_east = PathfindingPoint(
-                        x=x_axis + 4, y=y_axis + 4
-                    )  # TODO: Need to change +x value to new grid size
-                    self.robot = PathfindingRequestRobot(
-                        direction=robot_direction,
-                        north_east=robot_north_east,
-                        south_west=robot_south_west,
+                    print("NEW ROBOT LOCATION!!!")
+                    x, y, dir = message_rcv.split(",")[1:]
+                    x, y = int(x), int(y)
+
+                    if x < 0 or y < 0:
+                        print("Illegal robot coordinate, ignoring...")
+                        continue
+
+                    self.robot = self.get_api_object(
+                        PathfindingRequestRobot, dir, (int(x), int(y)), (12, 12)
                     )
                     print("Robot set successfully: ", self.robot)
                 else:
@@ -249,34 +257,36 @@ class Task1RPI:
                     )  # Ignore the 'f' at the start
                     cmd_speed = message_split[0]
                     turning_degree = message_split[1]
-                    distance = message_split[2]
+                    distance = message_split[2].strip()
 
                     cmd = cmd_speed[0]  # Command (t/T)
                     speed = cmd_speed[1:]
 
-                    if turning_degree == -25:
+                    send_count = 1
+
+                    if turning_degree == "-25":
                         # Turn left
                         if cmd == "t":
                             # Backward left
-                            msg = "TURN,BACKWARD_LEFT"
+                            msg = "TURN,BACKWARD_LEFT,0"
                         elif cmd == "T":
                             # Forward left
-                            msg = "TURN,FORWARD_LEFT"
-                    elif turning_degree == 25:
+                            msg = "TURN,FORWARD_LEFT,0"
+                    elif turning_degree == "25":
                         # Turn right
                         if cmd == "t":
                             # Backward right
-                            msg = "TURN,BACKWARD_RIGHT"
+                            msg = "TURN,BACKWARD_RIGHT,0"
                         elif cmd == "T":
                             # Forward right
-                            msg = "TURN,FORWARD_RIGHT"
-                    elif turning_degree == 0:
+                            msg = "TURN,FORWARD_RIGHT,0"
+                    elif turning_degree == "0":
                         if cmd == "t":
                             # Backward
-                            msg = "MOVE," + distance + ",BACKWARD"
+                            msg = "MOVE,BACKWARD," + distance
                         elif cmd == "T":
                             # Forward
-                            msg = "MOVE," + distance + ",FORWARD"
+                            msg = "MOVE,FORWARD," + distance
                     else:
                         # Unknown turning degree
                         print("Unknown turning degree")
@@ -307,65 +317,26 @@ class Task1RPI:
         # TODO: Add Stream disconnect/end
         print("Program Ended\n")
 
-    # def reconnect_android(self):
-    #     """
-    #     Handles the reconnection to Android in the event of a lost connection.
-    #     If connection establised will wait until disconnected before taking action
-    #     """
-
-    #     print("Reconnection handler is watching\n")
-    #     while True:
-    #         self.android_dropped.wait()  # Wait for bluetooth connection to drop with Android.
-    #         print("Android link is down, initiating reconnect\n")
-
-    #         # Kill child processes
-    #         print("Killing Child Processes\n")
-    #         self.process_android_receive.kill()
-
-    #         # Wait for the child processes to finish
-    #         self.process_android_receive.join()
-    #         assert self.process_android_receive.is_alive() is False
-    #         print("Child Processes Killed Successfully\n")
-
-    #         # Clean up old sockets
-    #         self.android.disconnect()
-
-    #         # Reconnect
-    #         self.android.connect()
-
-    #         # Reinitialise Android processes
-    #         self.process_android_receive = Process(target=self.android_receive)
-
-    #         # Start previously killed processes
-    #         self.process_android_receive.start()
-
-    #         print("Android processes successfully restarted")
-
-    #         message: AndroidMessage = AndroidMessage(
-    #             "general", "Link successfully reconnected!"
-    #         )
-    #         try:
-    #             self.android.send(message)
-    #         except OSError:
-    #             self.android_dropped.set()
-    #             print("Event set: Android dropped")
-
-    #         self.android_dropped.clear()  # Clear previously set event
-
     def start(self):
         pathfindingRequest = PathfindingRequest(
-            obstacles=self.obstacleArr, robot=self.robot
+            obstacles=self.obstacle_dict.values(), robot=self.robot, verbose=False
         )
         pathfinding_api = PathfindingApi(api_client=self.client)
-        response = pathfinding_api.pathfinding_post(pathfindingRequest)
+        response = None
+        try:
+            response = pathfinding_api.pathfinding_post(pathfindingRequest)
+        except:
+            print("Server failed, try again.")
+            return
+
         segments = response.segments
         # i = 1
         for i, segment in enumerate(segments):
             print(f"On segment {i+1} of {len(segments)}:")
             self.set_stm_stop(False)  # Reset to false upon starting the new segment
 
-            print("PATH ", i, ": ", segment.path.actual_instance)
-            print("Segment ", i, ": ", segment.instructions)
+            # print("PATH ", i, ": ", segment.path.actual_instance)
+            # print("Segment ", i, ": ", segment.instructions)
             print("SEGMENT NUMBER ", i)
             i = i + 1
 
@@ -422,35 +393,45 @@ class Task1RPI:
                             flag = "t"
                             angle = "25"
 
-                        self.stm.send_cmd(flag, 60, angle, val)
-                        time.sleep(0.2)
+                self.stm.send_cmd(flag, self.drive_speed, angle, val)
 
-                while not self.get_stm_stop():
-                    # Wait until the STM has execute all the commands and stopped (True), then wait x seconds to recognise image
-                    pass
+            while not self.get_stm_stop():
+                # Wait until the STM has execute all the commands and stopped (True), then wait x seconds to recognise image
+                pass
 
-                print("STM stopped, recognising image...")
-                # STM has stopped, recognise image - x seconds to recognise
-                time.sleep(2)
-                print("Image recognition delay done.")
-                last_image = self.get_last_image()
-                print("Last image:", last_image)
-                if last_image == "marker":
-                    msg_str = f"TARGET,{last_image},{last_image}"
-                    self.android.send(msg_str)
-                    print("Going next, it's MARKER")
-                    continue  # Perform next segment
-                elif last_image == "NONE":
-                    print("Last image is NONE")
-                    continue
-                else:
-                    # Image found, send to android.
-                    msg_str = f"TARGET,{segment.image_id},{last_image}"
-                    self.android.send(msg_str)
-                    # Image found, break out of this and don't send anymore instructions to the STM
-                    break
-            time.sleep(0.1) # time for buffer between buffers
+            print("STM stopped, recognising image...")
+            # STM has stopped, recognise image - x seconds to recognise
+            time.sleep(2)
+            print("Image recognition delay done.")
+            last_image = self.get_last_image()
+            print("Last image:", last_image)
+            if last_image == "marker":
+                msg_str = f"TARGET,{last_image},{last_image}"
+                self.android.send(msg_str)
+                print("Going next, it's MARKER")
+                continue  # Perform next segment
+            elif last_image == "NONE":
+                print("Last image is NONE")
+                continue
+            else:
+                # Image found, send to android.
+                msg_str = f"TARGET,{segment.image_id},{last_image}"
+                self.android.send(msg_str)
+                stitching_str = "STITCH_IMG," + last_image
+                self.pc.send(
+                    stitching_str
+                )  # Send the detected image_id over to the PC to append to it's array there
             
+        # if i == len(segments) - 1:  # End of all the segments, do stitching
+        try:
+            print("request stitch")
+            self.pc.send("PERFORM STITCHING")
+        except OSError as e:
+            print("Error in sending stitching command to PC: " + e)
+        
+        
+        time.sleep(0.1)  # time for buffer between buffers
+
     def get_last_image(self) -> str:
         print(f"Returning last_image as {self.last_image}")
         return self.last_image

@@ -39,7 +39,7 @@ class Task2RPI:
             None  # callback that takes in a single argument, boolean is_right
         )
 
-        self.drive_speed = 95  # tune to balance speed with precision. kachow!
+        self.drive_speed = 87  # tune to balance speed with precision. kachow!
         # left and right arrow IDs
         self.LEFT_ARROW_ID = "39"
         self.RIGHT_ARROW_ID = "38"
@@ -47,6 +47,7 @@ class Task2RPI:
     def initialize(self):
         try:
             # let stream server start before calling other sockets.
+            print("starting stream")
             self.process_pc_stream = Thread(target=self.stream_start)
             self.process_pc_stream.start()  # Start the Stream
             time.sleep(0.1)
@@ -202,32 +203,53 @@ class Task2RPI:
                 continue
 
     # drive towards obstacle (and insert 'S' to signal camera tracking).
-    def perform_toward_obstacle(self) -> None:
+    def perform_toward_obstacle(self, capture_dist=30) -> None:
         self.stm.send_cmd("W", self.drive_speed, 0, 50)
         self.stm.send_cmd("S", self.drive_speed, 0, 0)
-        self.stm.send_cmd("W", self.drive_speed, 0, 30)
+        self.stm.send_cmd("W", self.drive_speed, 0, capture_dist)
 
     # drive arc for first 10x10 obstacle.
     def perform_arc1(self, is_right) -> None:
         # get initial turning angle.
         angle = 25 if is_right else -25
 
-        self.stm.send_cmd("T", self.drive_speed, angle, 45)
-        self.stm.send_cmd("T", self.drive_speed, 0, 10)
-        self.stm.send_cmd("T", self.drive_speed, -angle, 105)
-        self.stm.send_cmd("T", self.drive_speed, 0, 26.8)
-        self.stm.send_cmd("t", self.drive_speed, -angle, 60)
+        self.stm.send_cmd("T", self.drive_speed, angle, 30)
+        self.stm.send_cmd("T", self.drive_speed, 0, 18)
+        self.stm.send_cmd("T", self.drive_speed, -angle, 40)
 
     # drive arc for second 60x10 obstacle.
-    def perform_arc2(self, is_right) -> None:
-        # get initial turning angle.
-        angle = 25 if is_right else -25
+    def perform_arc2(self, is_right1, is_right2) -> None:
+        angle_big = 25 if is_right2 else -25
+        angle_bm = 20 if is_right2 else -20
+        angle_mid = 17 if is_right2 else -17
+        angle_small = 11 if is_right2 else -11
 
-        self.stm.send_cmd("T", self.drive_speed, angle, 45)
-        self.stm.send_cmd("T", self.drive_speed, 0, 10)
-        self.stm.send_cmd("T", self.drive_speed, -angle, 105)
-        self.stm.send_cmd("T", self.drive_speed, 0, 26.8)
-        self.stm.send_cmd("t", self.drive_speed, -angle, 60)
+        if is_right1 == is_right2:
+            # self.stm.send_cmd("T", self.drive_speed, -angle_big, 19)
+            # self.stm.send_cmd("t", self.drive_speed, 0, 10)
+            # self.stm.send_cmd("t", self.drive_speed, -angle_big, 45)
+            self.stm.send_cmd("t", self.drive_speed, angle_small, 40)
+            self.stm.send_cmd("T", self.drive_speed, angle_big, 95)
+            self.stm.send_cmd("T", self.drive_speed, -angle_mid, 225)
+            # self.stm.send_cmd("T", self.drive_speed, -angle_bm, 90)
+            # self.stm.send_cmd("T", self.drive_speed, 0, 22.5)
+            # self.stm.send_cmd("T", self.drive_speed, -angle_big, 135)
+            # self.stm.send_cmd("T", self.drive_speed, 0, 50)
+            # self.stm.send_cmd("T", self.drive_speed, -angle_big, 90)
+            # self.stm.send_cmd("T", self.drive_speed, angle_big, )
+            # self.stm.send_cmd("T", self.drive_speed, -angle_big, 155)
+            # self.stm.send_cmd("T", self.drive_speed, 0, 45)
+            # self.stm.send_cmd("T", self.drive_speed, -angle_big, 90)
+
+
+        else:
+            self.stm.send_cmd("t", self.drive_speed, -angle_big, 25)
+            self.stm.send_cmd("T", self.drive_speed, angle_big, 55)
+            self.stm.send_cmd("T", self.drive_speed, 0, 50)
+            self.stm.send_cmd("T", self.drive_speed, -angle_big, 160)
+            self.stm.send_cmd("T", self.drive_speed, 0, 25)
+            self.stm.send_cmd("T", self.drive_speed, -angle_big, 90)
+
 
     # set this callback it is time to detect an arrow for obstacle 1.
     def callback_obstacle1(self, is_right) -> None:
@@ -244,7 +266,7 @@ class Task2RPI:
 
     # drive back to the carpark.
     def perform_carpark(self) -> None:
-        pass
+        self.stm.send_cmd("W", self.drive_speed, 0, 20)
 
     def start(self):
         print("Starting program...")
@@ -280,6 +302,25 @@ class Task2RPI:
         return self.STM_Stopped
 
 
+# def main():
+#     task2 = Task2RPI()  # init
+#     task2.initialize()
+
+
+def test():
+    print("in testing")
+    task2 = Task2RPI()
+    task2.stm.connect()
+    task2.drive_speed = 87
+    is_right1 = True
+    is_right2 = True
+
+    task2.perform_toward_obstacle()
+    task2.perform_arc1(is_right1)
+    task2.perform_toward_obstacle(35 if is_right1 else 20)
+    task2.perform_arc2(is_right1, is_right2)
+    # task2.perform_carpark()
+
 if __name__ == "__main__":
-    task2 = Task2RPI()  # init
-    task2.initialize()
+    test()
+    # pass
