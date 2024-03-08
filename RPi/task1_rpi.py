@@ -307,50 +307,50 @@ class Task1RPI:
         # TODO: Add Stream disconnect/end
         print("Program Ended\n")
 
-    def reconnect_android(self):
-        """
-        Handles the reconnection to Android in the event of a lost connection.
-        If connection establised will wait until disconnected before taking action
-        """
+    # def reconnect_android(self):
+    #     """
+    #     Handles the reconnection to Android in the event of a lost connection.
+    #     If connection establised will wait until disconnected before taking action
+    #     """
 
-        print("Reconnection handler is watching\n")
-        while True:
-            self.android_dropped.wait()  # Wait for bluetooth connection to drop with Android.
-            print("Android link is down, initiating reconnect\n")
+    #     print("Reconnection handler is watching\n")
+    #     while True:
+    #         self.android_dropped.wait()  # Wait for bluetooth connection to drop with Android.
+    #         print("Android link is down, initiating reconnect\n")
 
-            # Kill child processes
-            print("Killing Child Processes\n")
-            self.process_android_receive.kill()
+    #         # Kill child processes
+    #         print("Killing Child Processes\n")
+    #         self.process_android_receive.kill()
 
-            # Wait for the child processes to finish
-            self.process_android_receive.join()
-            assert self.process_android_receive.is_alive() is False
-            print("Child Processes Killed Successfully\n")
+    #         # Wait for the child processes to finish
+    #         self.process_android_receive.join()
+    #         assert self.process_android_receive.is_alive() is False
+    #         print("Child Processes Killed Successfully\n")
 
-            # Clean up old sockets
-            self.android.disconnect()
+    #         # Clean up old sockets
+    #         self.android.disconnect()
 
-            # Reconnect
-            self.android.connect()
+    #         # Reconnect
+    #         self.android.connect()
 
-            # Reinitialise Android processes
-            self.process_android_receive = Process(target=self.android_receive)
+    #         # Reinitialise Android processes
+    #         self.process_android_receive = Process(target=self.android_receive)
 
-            # Start previously killed processes
-            self.process_android_receive.start()
+    #         # Start previously killed processes
+    #         self.process_android_receive.start()
 
-            print("Android processes successfully restarted")
+    #         print("Android processes successfully restarted")
 
-            message: AndroidMessage = AndroidMessage(
-                "general", "Link successfully reconnected!"
-            )
-            try:
-                self.android.send(message)
-            except OSError:
-                self.android_dropped.set()
-                print("Event set: Android dropped")
+    #         message: AndroidMessage = AndroidMessage(
+    #             "general", "Link successfully reconnected!"
+    #         )
+    #         try:
+    #             self.android.send(message)
+    #         except OSError:
+    #             self.android_dropped.set()
+    #             print("Event set: Android dropped")
 
-            self.android_dropped.clear()  # Clear previously set event
+    #         self.android_dropped.clear()  # Clear previously set event
 
     def start(self):
         pathfindingRequest = PathfindingRequest(
@@ -449,7 +449,8 @@ class Task1RPI:
                     self.android.send(msg_str)
                     # Image found, break out of this and don't send anymore instructions to the STM
                     break
-
+            time.sleep(0.1) # time for buffer between buffers
+            
     def get_last_image(self) -> str:
         print(f"Returning last_image as {self.last_image}")
         return self.last_image

@@ -18,13 +18,14 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
                 android:orientation="vertical">
+
                 <TextView
                     android:id="@+id/exploreTextView"
                     android:layout_width="180dp"
                     android:layout_height="40dp"
                     android:layout_marginTop="10dp"
                     android:gravity="center"
-                    android:text="WEEK 8"
+                    android:text="TASK 1"
                     android:textColor="@color/black"
                     android:textSize="20sp" />
                 <!--                app:drawableStartCompat="@mipmap/left"
@@ -39,23 +40,18 @@
                     android:text="00:00"
                     android:textColor="@color/black"
                     android:textSize="26sp" />
+
                 <ToggleButton
                     android:id="@+id/exploreToggleBtn2"
                     android:layout_width="180dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:text="Exploration"
-                    android:textOff="WK8 START"
+                    android:textOff="TASK 1 START"
                     android:textOn="STOP" />
                 <!--                android:drawableEnd="@mipmap/qqqq"
                     android:background="@drawable/border_black_state"-->
 
-
-                <Button
-                    android:id="@+id/startSend"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Start" />
 
                 <ImageButton
                     android:id="@+id/exploreResetImageBtn2"
@@ -66,11 +62,7 @@
                     android:layout_marginTop="30dp"
                     android:background="@color/transparent" />
 
-                <Button
-                    android:id="@+id/startSend"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Start" />
+
                 <!--                app:srcCompat="@drawable/ic_refresh"-->
 
             </LinearLayout>
@@ -85,15 +77,16 @@
                 android:layout_height="350dp"
                 android:layout_marginTop="5dp"
                 android:orientation="vertical">
+
                 <TextView
                     android:id="@+id/fastestTextView"
                     android:layout_width="180dp"
                     android:layout_height="40dp"
                     android:layout_marginTop="10dp"
                     android:gravity="center"
-                    android:text="WEEK 9"
-                    android:textSize="20sp"
-                    android:textColor="@color/black" />
+                    android:text="TASK 2"
+                    android:textColor="@color/black"
+                    android:textSize="20sp" />
                 <!--                android:background="@drawable/statusbar"-->
                 <!--                app:drawableLeftCompat="@mipmap/left"
                                     app:drawableRightCompat="@mipmap/right"-->
@@ -106,13 +99,14 @@
                     android:textColor="@color/black"
                     android:text="00:00"
                     android:textSize="26sp" />
+
                 <ToggleButton
                     android:id="@+id/fastestToggleBtn2"
                     android:layout_width="180dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:text="FASTEST"
-                    android:textOff="WK9 START"
+                    android:textOff="TASK 2 START"
                     android:textOn="STOP" />
                 <!--                android:drawableEnd="@mipmap/qqqq"
                                     android:background="@drawable/border_black_state"-->

@@ -33,11 +33,13 @@ class Task2RPI:
         self.last_image = None
         self.prev_image = None
         self.STM_Stopped = False
-        
-        self.num_obstacle = 1
-        self.on_arrow_callback = None # callback that takes in a single argument, boolean is_right
 
-        self.drive_speed = 95 # tune to balance speed with precision. kachow!
+        self.num_obstacle = 1
+        self.on_arrow_callback = (
+            None  # callback that takes in a single argument, boolean is_right
+        )
+
+        self.drive_speed = 95  # tune to balance speed with precision. kachow!
         # left and right arrow IDs
         self.LEFT_ARROW_ID = "39"
         self.RIGHT_ARROW_ID = "38"
@@ -166,7 +168,7 @@ class Task2RPI:
                         elif self.get_last_image() == self.LEFT_ARROW_ID:  # LEFT ARROW
                             print("Left arrow detected")
                             self.callback_obstacle1(False)
-                        
+
                         else:
                             # set to trigger on next arrow found.
                             self.on_arrow_callback = self.callback_obstacle1
@@ -175,11 +177,11 @@ class Task2RPI:
                         if self.get_last_image() == self.RIGHT_ARROW_ID:  # RIGHT ARROW
                             print("Right arrow detected")
                             self.callback_obstacle2(True)
-                            
+
                         elif self.get_last_image() == self.LEFT_ARROW_ID:  # LEFT ARROW
                             print("Left arrow detected")
                             self.callback_obstacle2(False)
-                        
+
                         else:
                             # set to trigger on next arrow found.
                             self.on_arrow_callback = self.callback_obstacle2
@@ -207,7 +209,7 @@ class Task2RPI:
 
     # drive arc for first 10x10 obstacle.
     def perform_arc1(self, is_right) -> None:
-        #get initial turning angle.
+        # get initial turning angle.
         angle = 25 if is_right else -25
 
         self.stm.send_cmd("T", self.drive_speed, angle, 45)
@@ -218,7 +220,7 @@ class Task2RPI:
 
     # drive arc for second 60x10 obstacle.
     def perform_arc2(self, is_right) -> None:
-        #get initial turning angle.
+        # get initial turning angle.
         angle = 25 if is_right else -25
 
         self.stm.send_cmd("T", self.drive_speed, angle, 45)
@@ -232,14 +234,14 @@ class Task2RPI:
         self.perform_arc1(is_right)
         self.perform_toward_obstacle()
 
-        self.on_arrow_callback = None # clear callback.
+        self.on_arrow_callback = None  # clear callback.
 
     # set this callback it is time to detect an arrow for obstacle 2.
     def callback_obstacle2(self, is_right) -> None:
         self.perform_arc2(is_right)
 
-        self.on_arrow_callback = None # clear callback.
-    
+        self.on_arrow_callback = None  # clear callback.
+
     # drive back to the carpark.
     def perform_carpark(self) -> None:
         pass
@@ -264,7 +266,9 @@ class Task2RPI:
     def set_last_image(self, img) -> None:
         print(f"Setting last_image as {img}")
 
-        if (img == self.RIGHT_ARROW_ID or img == self.LEFT_ARROW_ID) and self.on_arrow_callback is not None:
+        if (
+            img == self.RIGHT_ARROW_ID or img == self.LEFT_ARROW_ID
+        ) and self.on_arrow_callback is not None:
             self.on_arrow_callback(img == self.RIGHT_ARROW_ID)
 
         self.last_image = img
