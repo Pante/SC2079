@@ -359,7 +359,6 @@ class Task1RPI:
         pathfinding_api = PathfindingApi(api_client=self.client)
         response = pathfinding_api.pathfinding_post(pathfindingRequest)
         segments = response.segments
-        # i = 1
         for i, segment in enumerate(segments):
             print(f"On segment {i+1} of {len(segments)}:")
             self.set_stm_stop(False)  # Reset to false upon starting the new segment
@@ -447,10 +446,22 @@ class Task1RPI:
                     # Image found, send to android.
                     msg_str = f"TARGET,{segment.image_id},{last_image}"
                     self.android.send(msg_str)
+                    stitching_str = "STITCH_IMG," + last_image
+                    self.pc.send(
+                        stitching_str
+                    )  # Send the detected image_id over to the PC to append to it's array there
+
                     # Image found, break out of this and don't send anymore instructions to the STM
                     break
-            time.sleep(0.1) # time for buffer between buffers
-            
+
+            if i == len(segments) - 1:  # End of all the segments, do stitching
+                try:
+                    self.pc.send("PERFORM STITCHING")
+                except OSError as e:
+                    print("Error in sending stitching command to PC: " + e)
+
+            time.sleep(0.1)  # time for buffer between buffers
+
     def get_last_image(self) -> str:
         print(f"Returning last_image as {self.last_image}")
         return self.last_image
