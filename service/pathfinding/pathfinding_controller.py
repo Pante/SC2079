@@ -1,22 +1,22 @@
 from __future__ import annotations
 
+import os
 from datetime import datetime
 from http import HTTPStatus
 
 import numpy as np
-from flask import make_response
+from flask import make_response, request
 from flask_openapi3 import APIBlueprint, Tag
+from pydantic import BaseModel, Field
+
 from pathfinding.search.instructions import (
     MiscInstruction,
-    Move,
-    MoveInstruction,
-    TurnInstruction,
+    TurnInstruction, MoveInstruction,
 )
 from pathfinding.search.search import Segment, search
 from pathfinding.world.objective import generate_objectives
 from pathfinding.world.primitives import Direction, Point, Vector
 from pathfinding.world.world import Obstacle, Robot, World
-from pydantic import BaseModel, Field
 
 api = APIBlueprint(
     "/pathfinding",
@@ -31,10 +31,6 @@ class PathfindingRequest(BaseModel):
         default=True,
         description="Whether to attach the path and cost alongside the movement "
         "instructions in the response.",
-    )
-
-    size: int | None = Field(
-        default=40, description="The width & height in number of cells."
     )
     robot: PathfindingRequestRobot = Field(
         description="The initial position of the robot."
@@ -92,7 +88,7 @@ class PathfindingResponseSegment(BaseModel):
     image_id: int
     cost: int | None = Field(description="The cost, included only if verbose is true.")
     instructions: list[
-        MiscInstruction | TurnInstruction | PathfindingResponseMoveInstruction
+        MiscInstruction | TurnInstruction | MoveInstruction
     ]
     path: list[PathfindingVector] | None = Field(
         description="The path (unordered), included only if verbose is true."
@@ -101,14 +97,7 @@ class PathfindingResponseSegment(BaseModel):
     @classmethod
     def from_segment(cls, verbose: bool, segment: Segment):
         cost = segment.cost if verbose else 0
-        instructions = [
-            (
-                PathfindingResponseMoveInstruction.from_move_instruction(i)
-                if isinstance(i, MoveInstruction)
-                else i
-            )
-            for i in segment.instructions
-        ]
+        instructions = segment.instructions
         vectors = (
             [PathfindingVector.from_vector(vector) for vector in segment.vectors]
             if verbose
@@ -120,17 +109,6 @@ class PathfindingResponseSegment(BaseModel):
             instructions=instructions,
             path=vectors,
         )
-
-
-class PathfindingResponseMoveInstruction(BaseModel):
-    move: Move
-    amount: int = Field(
-        ge=1, description="The amount to move the robot in centimetres."
-    )
-
-    @classmethod
-    def from_move_instruction(cls, move_instruction: MoveInstruction):
-        return cls(move=move_instruction.move, amount=move_instruction.amount)
 
 
 class PathfindingVector(BaseModel):
@@ -161,6 +139,8 @@ class PathfindingPoint(BaseModel):
 @api.post("/", responses={200: PathfindingResponse})
 def pathfinding(body: PathfindingRequest):
     print(datetime.now())
+    capture()
+
     robot = body.robot.to_robot()
     obstacles = [obstacle.to_obstacle() for obstacle in body.obstacles]
     world = World(100, robot, obstacles)
@@ -177,7 +157,7 @@ def pathfinding(body: PathfindingRequest):
         ]
     )
 
-    # dump(world, segments)
+    dump(world, segments)
     print(datetime.now())
 
     response = make_response(
@@ -185,6 +165,14 @@ def pathfinding(body: PathfindingRequest):
     )
     response.mimetype = "application/json"
     return response
+
+
+def capture():
+    if not os.path.exists('.replay'):
+        os.makedirs('.replay')
+
+    with open(f'.replay/{datetime.now().strftime('%Y-%m-%d--%H-%M-%S')}.json', 'w') as file:
+        file.write(request.get_data(as_text=True))
 
 
 def dump(world: World, segments: list[Segment]):
@@ -210,5 +198,3 @@ def dump(world: World, segments: list[Segment]):
 
     a = np.rot90(map)
     np.savetxt("dump.txt", a, fmt="%d")
-
-# 10 cells

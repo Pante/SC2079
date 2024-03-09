@@ -1,63 +1,26 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from itertools import pairwise
-from typing import List
-
-import numpy as np
-from python_tsp.distances import euclidean_distance_matrix
-from python_tsp.exact import solve_tsp_dynamic_programming
 
 from pathfinding.search.instructions import Turn, TurnInstruction, Move, MoveInstruction, MiscInstruction
 from pathfinding.search.segment import segment
 from pathfinding.world.primitives import Vector
-from pathfinding.world.world import Robot, World, Obstacle
+from pathfinding.world.world import World, Obstacle
 
 
-def search(world: World, objectives: dict[Obstacle, set[Vector]]) -> List[Segment]:
-    entities = [world.robot] + world.obstacles
-    permutation, _ = __hamiltonian_path(entities, objectives)
-    return __segments(world, [entities[i] for i in permutation], objectives)
-
-
-# TODO: We should replace this function path with better search heuristics to prevent edge cases.
-def __hamiltonian_path(entities: List[Robot | Obstacle], objectives: dict[Obstacle, set[Vector]]) -> tuple[
-    List[int], float]:
-    """
-    Returns the hamiltonian path of the initial robot and the objectives.
-    This is used as a heuristic to determine the optimal visitation order of the objectives.
-
-    :param entities: The robot and objectives to visit.
-    :return:
-        The indexes of the robot (0) and objectives (1:N) in the order of visitation.
-        The total distance the optimal permutation produces.
-
-    11, 29, 9, 13
-    """
-
-    positions: list[list[int]] = []
-    for entity in entities:
-        match entity:
-            case r if isinstance(r, Robot):
-                positions.append([entity.south_west.x, entity.south_west.y])
-
-            case o if isinstance(o, Obstacle):
-                # Getting an element from a set is non-deterministic
-                objective = next(iter(objectives[o]))
-                positions.append([objective.x, objective.y])
-
-    positions = [[entity.south_west.x, entity.south_west.y] for entity in entities]
-    distance_matrix = euclidean_distance_matrix(np.array(positions))
-    distance_matrix[:, 0] = 0
-    permutation, distance = solve_tsp_dynamic_programming(distance_matrix)
-    return permutation, distance
-
-
-def __segments(world: World, entities: List[Robot | Obstacle], objectives: dict[Obstacle, set[Vector]]) -> List[Segment]:
+def search(world: World, objectives: dict[Obstacle, tuple[Vector, set[Vector]]]) -> list[Segment]:
     segments = []
-    for a, b in pairwise(entities):
-        tuple = segment(world, segments[-1].vectors[-1] if segments else a.vector, objectives[b])
-        segments.append(Segment.compress(world, b.image_id if isinstance(b, Obstacle) else None, tuple))
+    current = world.robot.vector
+    for _ in world.obstacles:
+        seg = segment(world, current, objectives)
+        if seg is None:
+            print(f'Unable to find path to {objectives.keys()}. Skipping.')
+            return segments
+
+        obstacle, _, path = seg
+        segments.append(Segment.compress(world, seg))
+        current, _ = path[-1]
+        objectives.pop(obstacle)
 
     return segments
 
@@ -66,29 +29,29 @@ def __segments(world: World, entities: List[Robot | Obstacle], objectives: dict[
 class Segment:
     image_id: int
     cost: int
-    instructions: List[TurnInstruction | MoveInstruction | MiscInstruction]
+    instructions: list[TurnInstruction | MoveInstruction | MiscInstruction]
     vectors: list[Vector]
 
     @classmethod
-    def compress(cls, world: World, image_id: int | None, information: tuple[int, list[tuple[Vector, Turn | MoveInstruction]]]) -> Segment:
-        cost, parts = information
-        instructions: List[TurnInstruction | MoveInstruction | MiscInstruction] = []
+    def compress(cls, world: World, information: tuple[Obstacle, int, list[tuple[Vector, Turn | Move | None]]]) -> Segment:
+        obstacle, cost, parts = information
+        instructions: list[TurnInstruction | MoveInstruction | MiscInstruction] = []
         vectors: list[Vector] = []
 
-        for vector, movement in parts:
-            match movement:
+        for vector, move in parts:
+            match move:
                 case Turn():
-                    instructions.append(movement.turn)
-                    vectors.extend(movement.vectors)
+                    instructions.append(move.turn)
+                    vectors.extend(move.vectors)
 
-                case MoveInstruction() if instructions and isinstance(instructions[-1], MoveInstruction) and instructions[-1].move == movement.move:
-                    vectors.append(vector)
-                    instructions[-1].amount += movement.amount * world.cell_size
+                case Move() if instructions and isinstance(instructions[-1], MoveInstruction) and instructions[-1].move == move.move:
+                    instructions[-1].amount += len(move.vectors) * world.cell_size
+                    vectors.extend(move.vectors)
 
-                case MoveInstruction():
-                    vectors.append(vector)
-                    instructions.append(MoveInstruction(movement.move, movement.amount * world.cell_size))
+                case Move():
+                    instructions.append(MoveInstruction(move=move.move, amount=len(move.vectors) * world.cell_size))
+                    vectors.extend(move.vectors)
 
         instructions.append(MiscInstruction.CAPTURE_IMAGE)
 
-        return cls(image_id, cost, instructions, vectors)
+        return cls(obstacle.image_id, cost, instructions, vectors)

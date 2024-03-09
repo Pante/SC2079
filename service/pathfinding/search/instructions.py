@@ -3,24 +3,29 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+from pydantic import BaseModel, Field
+
 from pathfinding.world.primitives import Vector
 
 
 class MiscInstruction(str, Enum):
     CAPTURE_IMAGE = 'CAPTURE_IMAGE'
-    RESET_GYROSCOPE = 'RESET_GYROSCOPE'
+
+
+class MoveInstruction(BaseModel):
+    move: Straight
+    amount: int = Field(
+        ge=1, description="The amount to move the robot in centimetres."
+    )
 
 
 @dataclass
-class MoveInstruction:
-    move: Move
-    amount: int
-
-    def __post_init__(self):
-        assert 0 <= self.amount
+class Move:
+    move: Straight
+    vectors: list[Vector]
 
 
-class Move(str, Enum):
+class Straight(str, Enum):
     FORWARD = 'FORWARD'
     BACKWARD = 'BACKWARD'
 
@@ -32,7 +37,7 @@ class TurnInstruction(str, Enum):
     BACKWARD_RIGHT = 'BACKWARD_RIGHT'
 
 
-@dataclass(frozen=True)
+@dataclass
 class Turn:
     turn: TurnInstruction
     vectors: list[Vector]
