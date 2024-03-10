@@ -1173,8 +1173,7 @@ public class GridMap extends View{
                     case "right":
                         if ((0 < curCoord[1] && curCoord[1] < 15)
                                 //curCoord[0] must be at least 1
-                                && (1 < curCoord[0] && curCoord[0] < 14)) {
-
+                                && (0 < curCoord[0] && curCoord[0] < 14)) {
                             curCoord[1] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
@@ -1194,7 +1193,7 @@ public class GridMap extends View{
                         break;
                     case "left":
                         if ((0 < curCoord[1] && curCoord[1] < 15)
-                                && (8 < curCoord[0] && curCoord[0] < 16)) {
+                                && (6 < curCoord[0] && curCoord[0] < 20)) {
                             curCoord[1] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
@@ -1208,28 +1207,28 @@ public class GridMap extends View{
                         break;
                     // testing new direction of movement (facing forward)
                     case "backleft":
-                        if ((7 < curCoord[1] && curCoord[1] < 20)
-                                && (6 < curCoord[0] && curCoord[0] < 21)) {
-                            curCoord[1] -= 7;
+                        if ((5 < curCoord[1] && curCoord[1] < 20)
+                                && (8 < curCoord[0] && curCoord[0] < 20)) {
+                            curCoord[1] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[1] += 7;
+                                curCoord[1] += 5;
                             } else {
-                                curCoord[0] -= 5; //changed for new turning radius
+                                curCoord[0] -= 7; //changed for new turning radius
                                 robotDirection = "right";
                                 validPosition = true;
                             }
                         }
                         break;
                     case "backright":
-                        if ((6 < curCoord[1] && curCoord[1] < 20)
-                                && (1 < curCoord[0] && curCoord[0] < 16)) {
-                            curCoord[1] -= 7;
+                        if ((5 < curCoord[1] && curCoord[1] < 20)
+                                && (0 < curCoord[0] && curCoord[0] < 14)) {
+                            curCoord[1] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[1] += 7;
+                                curCoord[1] += 5;
                             } else {
-                                curCoord[0] += 5; //changed for new turning radius
+                                curCoord[0] += 7; //changed for new turning radius
                                 robotDirection = "left";
                                 validPosition = true;
                             }
