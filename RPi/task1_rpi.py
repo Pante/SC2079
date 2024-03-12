@@ -8,6 +8,7 @@ from threading import Thread
 
 sys.path.insert(1, "/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi")
 from Communication.android import Android, AndroidMessage
+from Communication.android_dummy import AndroidDummy
 from Communication.pc import PC
 from Communication.stm import STM
 from openapi_client.api.image_recognition_api import ImageRecognitionApi
@@ -53,7 +54,8 @@ class Task1RPI:
         self.robot = None  # Robot
         self.prev_image = None
         self.stm = STM()
-        self.android = Android()
+        # self.android = Android()
+        self.android = AndroidDummy()
         self.pc = PC()
         self.manager = Manager()
         self.process_stm_receive = None
@@ -63,13 +65,14 @@ class Task1RPI:
         self.android_dropped = self.manager.Event()
         self.host = "192.168.14.14"
         self.port = 5000
-        self.conf = Configuration(host="http://192.168.14.17:5001")
+        self.host_time_offset = 0
+        self.conf = Configuration(host="http://192.168.14.13:5000")
         self.client = ApiClient(configuration=self.conf)
         self.last_image = None
         self.prev_image = None
         self.STM_Stopped = False
 
-        self.drive_speed = 95
+        self.drive_speed = 25
 
     def initialize(self):
         try:
@@ -92,6 +95,42 @@ class Task1RPI:
             self.process_android_receive.start()  # Receive from android
             self.process_stm_receive.start()  # Receive from PC
 
+            # Manual init
+            self.robot = self.get_api_object(
+                PathfindingRequestRobot, "NORTH", (0, 0), (12, 12)
+            )
+            self.obstacle_dict = {
+                1: self.get_api_object(
+                    PathfindingRequestObstacle,
+                    "SOUTH",
+                    (30, 30),
+                    (5, 5),
+                    id=1,
+                ),
+                2: self.get_api_object(
+                    PathfindingRequestObstacle,
+                    "NORTH",
+                    (30, 30),
+                    (5, 5),
+                    id=2,
+                ),
+                3: self.get_api_object(
+                    PathfindingRequestObstacle,
+                    "WEST",
+                    (30, 30),
+                    (5, 5),
+                    id=3,
+                ),
+                4: self.get_api_object(
+                    PathfindingRequestObstacle,
+                    "EAST",
+                    (30, 30),
+                    (5, 5),
+                    id=4,
+                ),
+            }
+            self.start()
+
         except OSError as e:
             print("Initialization failed: ", e)
 
@@ -99,55 +138,58 @@ class Task1RPI:
         while True:
             try:
                 message_rcv = self.pc.receive()
-                print(message_rcv)
-
-                if "NONE" in message_rcv:
+                print(f"Received from PC: {message_rcv}")
+                if "TIME" in message_rcv:
+                    self.host_time_offset = time.time_ns() - int(message_rcv.split(",")[1])
+                    print(f"Synchronized time to offset {self.host_time_offset}.")
+                elif "NONE" in message_rcv:
                     self.set_last_image("NONE")
                 else:
-                    split_results = message_rcv.split(",")
+                    msg_split = message_rcv.split(",")
+                    if len(msg_split) != 3:
+                        continue
+
+                    obstacle_id, conf_str, object_id = msg_split
                     confidence_level = None
 
                     try:
-                        confidence_level = float(split_results[0])
+                        confidence_level = float(conf_str)
                     except ValueError:
                         confidence_level = None
-
-                    object_id = "NONE"
-                    if len(split_results) > 1:
-                        object_id = split_results[1]
 
                     print("OBJECT ID:", object_id)
 
                     if confidence_level is not None:
-                        if object_id == "marker":
-                            print("MARKER")
-                            action_type = "TARGET"
-                            message_content = object_id
-                            self.prev_image = object_id
-                            self.set_last_image(object_id)
-                        elif object_id == "NONE":
-                            self.set_last_image("NONE")
-                        else:
-                            # Not a marker, can just send back to relevant parties (android)
-                            print("OBJECT ID IS: ", object_id)
-                            try:
-                                if self.prev_image == None:
-                                    # New image detected, send to Android
-                                    self.prev_image = object_id
-                                    self.set_last_image(object_id)
-                                elif self.prev_image == object_id:
-                                    # Do nothing, no need to send since the prev image is the same as current image
-                                    self.set_last_image(object_id)
-                                    continue
-                                else:
-                                    # The current image is new, so can send to Android
-                                    self.prev_image = object_id
-                                    self.set_last_image(object_id)
-                            except OSError:
-                                self.android_dropped.set()
-                                print("Event set: Bluetooth connection dropped")
-                    else:
-                        self.set_last_image("NONE")
+                        self.android.send(f"TARGET,{obstacle_id},{object_id}")
+                    #     if object_id == "marker":
+                    #         print("MARKER")
+                    #         action_type = "TARGET"
+                    #         message_content = object_id
+                    #         self.prev_image = object_id
+                    #         self.set_last_image(object_id)
+                    #     elif object_id == "NONE":
+                    #         self.set_last_image("NONE")
+                    #     else:
+                    #         # Not a marker, can just send back to relevant parties (android)
+                    #         print("OBJECT ID IS: ", object_id)
+                    #         try:
+                    #             if self.prev_image == None:
+                    #                 # New image detected, send to Android
+                    #                 self.prev_image = object_id
+                    #                 self.set_last_image(object_id)
+                    #             elif self.prev_image == object_id:
+                    #                 # Do nothing, no need to send since the prev image is the same as current image
+                    #                 self.set_last_image(object_id)
+                    #                 continue
+                    #             else:
+                    #                 # The current image is new, so can send to Android
+                    #                 self.prev_image = object_id
+                    #                 self.set_last_image(object_id)
+                    #         except OSError:
+                    #             self.android_dropped.set()
+                    #             print("Event set: Bluetooth connection dropped")
+                    # else:
+                    #     self.set_last_image("NONE")
                 # Depending on the message type and value, pass to other processes
                 # e.g. self.stm.send()
 
@@ -398,33 +440,37 @@ class Task1RPI:
                 # Wait until the STM has execute all the commands and stopped (True), then wait x seconds to recognise image
                 pass
 
-            print("STM stopped, recognising image...")
-            # STM has stopped, recognise image - x seconds to recognise
-            time.sleep(2)
-            print("Image recognition delay done.")
-            last_image = self.get_last_image()
-            print("Last image:", last_image)
-            if last_image == "marker":
-                msg_str = f"TARGET,{last_image},{last_image}"
-                self.android.send(msg_str)
-                print("Going next, it's MARKER")
-                continue  # Perform next segment
-            elif last_image == "NONE":
-                print("Last image is NONE")
-                continue
-            else:
-                # Image found, send to android.
-                msg_str = f"TARGET,{segment.image_id},{last_image}"
-                self.android.send(msg_str)
-                stitching_str = "STITCH_IMG," + last_image
-                self.pc.send(
-                    stitching_str
-                )  # Send the detected image_id over to the PC to append to it's array there
+            time.sleep(0.75)
+            print("STM stopped, sending time of capture...")
+            self.pc.send(f"DETECT,{segment.image_id},{time.time_ns() - self.host_time_offset}") 
+
+            # print("STM stopped, recognising image...")
+            # # STM has stopped, recognise image - x seconds to recognise
+            # time.sleep(2)
+            # print("Image recognition delay done.")
+            # last_image = self.get_last_image()
+            # print("Last image:", last_image)
+            # if last_image == "marker":
+            #     msg_str = f"TARGET,{last_image},{last_image}"
+            #     self.android.send(msg_str)
+            #     print("Going next, it's MARKER")
+            #     continue  # Perform next segment
+            # elif last_image == "NONE":
+            #     print("Last image is NONE")
+            #     continue
+            # else:
+            #     # Image found, send to android.
+            #     msg_str = f"TARGET,{segment.image_id},{last_image}"
+            #     self.android.send(msg_str)
+            #     stitching_str = "STITCH_IMG," + last_image
+            #     self.pc.send(
+            #         stitching_str
+            #     )  # Send the detected image_id over to the PC to append to it's array there
             
         # if i == len(segments) - 1:  # End of all the segments, do stitching
         try:
             print("request stitch")
-            self.pc.send("PERFORM STITCHING")
+            self.pc.send(f"PERFORM STITCHING,{len(segments)}")
         except OSError as e:
             print("Error in sending stitching command to PC: " + e)
         

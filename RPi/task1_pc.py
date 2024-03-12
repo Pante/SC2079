@@ -6,6 +6,7 @@ import threading
 from multiprocessing import Manager, Process
 from pathlib import Path
 
+from time import time_ns
 import cv2
 import numpy as np
 
@@ -28,10 +29,16 @@ class Task1PC:
         self.port = 5000
         self.client_socket = None
 
-        self.stream_listener = StreamListener("TestingScripts/v9_task1.pt")
+        self.stream_listener = StreamListener("v9_task2_tuneup.pt")
+        self.IMG_BLACKLIST = ["40", "marker"]
         self.prev_image = None
+        self.img_time_dict = {}
+        self.time_threshold = -0.5e9
+        self.img_pending_arr = []
         self.stitching_img_dict = {}
         self.stitching_arr = []  # to store the image_id's of the image to stitch
+        self.should_stitch = False
+        self.stitch_len = 0 # number of images to stitch.
 
     def start(self):
         self.pc_receive_thread = threading.Thread(target=self.pc_receive)
@@ -52,93 +59,46 @@ class Task1PC:
             names = result.names
             detected_img_id = names[int(result.boxes[0].cls[0].item())]
             detected_conf_level = result.boxes[0].conf.item()
-            if self.prev_image is None:
-                # New image, can send over
-                # Only if the confidence is over threshold then pass to the PC
-                # TODO: Pass this data to RPI through the PC socket - Flask API
-                message_content = str(detected_conf_level) + "," + detected_img_id
-                self.prev_image = detected_img_id
-                # self.prev_image = names[int(result.boxes[0].cls[0].item())]
-                # print("FIRST: ", self.prev_image)
-            elif detected_img_id != self.prev_image:
-                # New image, can send over
-                message_content = str(detected_conf_level) + "," + detected_img_id
-                self.prev_image = detected_img_id
+            if detected_img_id in self.IMG_BLACKLIST:
+                return
+        
+            self.prev_image = detected_img_id
 
-                # Saving the frames into the dictionary first
+            if detected_img_id not in self.stitching_img_dict or (
+                self.stitching_img_dict[detected_img_id][0] < detected_conf_level
+            ):
+                # If the newly detected confidence level < current one in the dictionary, replace
+                self.stitching_img_dict[detected_img_id] = (
+                    detected_conf_level,
+                    frame,
+                )
+                print(f"Saw {detected_img_id} with confidence level {detected_conf_level}.")
+            
+            # Saving the frames into dictionaries
+            cur_time = time_ns()
+            old_time = cur_time
+            if detected_img_id in self.img_time_dict:
+                old_time = self.img_time_dict[detected_img_id]
+            else:
+                self.img_time_dict[detected_img_id] = old_time
+            
+            rem = len(self.img_pending_arr)
+            if rem > 0:
+                for i, (obstacle_id, timestamp) in enumerate(self.img_pending_arr):
+                    if self.check_timestamp(obstacle_id, detected_img_id, timestamp, old_time, cur_time):
+                        self.img_pending_arr.pop(i)
 
-                if detected_img_id not in self.stitching_img_dict:
-                    self.stitching_img_dict[detected_img_id] = (
-                        detected_conf_level,
-                        frame,
-                    )
-                elif (
-                    detected_img_id in self.stitching_img_dict
-                    and self.stitching_img_dict[detected_img_id][0]
-                    < detected_conf_level
-                ):
-                    # If the newly detected confidence level < current one in the dictionary, replace
-                    self.stitching_img_dict[detected_img_id] = (
-                        detected_conf_level,
-                        frame,
-                    )
-
-                # stitching_img_dict[names[int(result.boxes[0].cls[0].item())]] = (result.boxes[0].conf.item(), frame)
-
-                # stitching_img_dict[1] = (conf, frame)
-                # stitching_img_dict[1][0]
-
-                # directory = "stitching_images/"
-                # files = os.listdir(directory)
-
-                # # If the folder is empty, there won't be any iterations for this for loop
-                # for file in files:
-                #     image_id, confidence = file.split(",")[0], float(
-                #         file.split(",")[1].split(".jpg")[0]
-                #     )
-                #     # If the image_id matches and the confidnce of the current frame is more than the one in the folder
-                #     if (
-                #         image_id == names[int(result.boxes[0].cls[0].item())]
-                #         and confidence > result.boxes[0].conf.item()
-                #     ):
-                #         os.remove(directory + "/" + file)
-                #         cv2.imwrite(directory, frame)
-                #         break
-                #     else:
-                #         # Do nothing, the folder image's confidence level is higher than the current image
-                #         pass
-                # else:
-                #     # If the image_id does not exist in the folder, create new image in the folder
-                #     cv2.imwrite(
-                #         directory
-                #         + "/"
-                #         + names[int(result.boxes[0].cls[0].item())]
-                #         + ","
-                #         + str(result.boxes[0].conf.item())
-                #         + ".jpg",
-                #         frame,
-                #     )
-
-                # if int(result.boxes[0].conf.item()) > 0.7:
-                #     directory = (
-                #         "stitching_images/" + names[int(result.boxes[0].cls[0].item())]
-                #     )
-                #     if not os.path.exists(directory):
-                #         os.makedirs(directory)
-                #     img_path = (
-                #         directory + "/" + str(result.boxes[0].conf.item()) + ".jpg"
-                #     )
-                #     cv2.imwrite(img_path, frame)
+                        if self.should_stitch and len(self.stitching_arr) >= self.stitch_len:
+                            # last image reached.
+                            print("Found last image, stitching now...")
+                            self.stream_listener.close()
+                            stitchImages(self.stitching_arr, self.stitching_img_dict)
+                        break
 
         elif self.prev_image != "NONE":
             # No object detected, send "NONE" over
             # Upon capture image, if no object is detected -- "NONE", continue to wait until a object is detected (not "NONE")
-            message_content = "NONE"
             self.prev_image = "NONE"
-
-        if message_content is not None:
-            print("Sending:", message_content)
-            self.client_socket.send(message_content.encode("utf-8"))
 
     def on_disconnect(self):
         print("Stream disconnected, disconnect.")
@@ -148,6 +108,7 @@ class Task1PC:
         try:
             self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.client_socket.connect((self.host, self.port))
+            self.client_socket.send(bytes(f"TIME,{time_ns()}", "utf-8"))
         except OSError as e:
             print("Error in connecting to PC:", e)
 
@@ -162,6 +123,26 @@ class Task1PC:
         except Exception as e:
             print("Failed to disconnected from PC:", e)
 
+    def check_timestamp(self, obstacle_id, img_id, timestamp, old_time, cur_time):
+        if img_id in self.stitching_arr:
+            return False
+        
+        old_time -= self.time_threshold
+        cur_time += self.time_threshold
+        print(f"Image ID {img_id}: Checking {old_time} <= {timestamp} <= {cur_time}...")
+        if timestamp >= old_time and timestamp <= cur_time:
+            print(f"Matched obstacle ID {obstacle_id} as image ID {img_id}.")
+            self.stitching_arr.append(img_id)
+            print(f"Images found for stitching: {len(self.stitching_arr)}")
+            message_content = f"{obstacle_id},{self.stitching_img_dict[img_id][0]},{img_id}"
+            print("Sending:", message_content)
+            self.client_socket.send(message_content.encode("utf-8"))
+
+            return True
+        
+        print("Not within range.")
+        return False
+        
     def pc_receive(self) -> None:
         print("PC Socket connection started successfully")
         self.connect()
@@ -169,27 +150,37 @@ class Task1PC:
         while not self.exit:
             try:
                 message_rcv = self.client_socket.recv(1024).decode("utf-8")
+                print("Message received from PC:", message_rcv)
 
-                # STITCHING
-                if "STITCH_IMG" in message_rcv:
-                    self.stitching_arr.append(
-                        message_rcv
-                    )  # Append the image_id of the image to stitch
+                if "DETECT" in message_rcv:
+                    #last timestamp sent in
+                    obstacle_id, timestamp_str = message_rcv.split(",")[1:]
+                    timestamp = int(timestamp_str.strip())
+                    
+                    cur_time = time_ns()
+                    has_found = False
+                    for img_id, old_time in self.img_time_dict.items():
+                        if self.check_timestamp(obstacle_id, img_id, timestamp, old_time, cur_time):
+                            has_found = True
+                            del self.img_time_dict[img_id]
+                            break
+                    
+                    if not has_found:
+                        self.img_pending_arr.append((obstacle_id, timestamp))
 
                 elif "PERFORM STITCHING" in message_rcv:
+                    self.stitch_len = int(message_rcv.split(",")[1])
                     # perform stitching
-                    # Save images into folder
-                    for image_id in self.stitching_arr:
-                        if image_id in self.stitching_img_dict:
-                            confidence, frame = self.stitching_img_dict[image_id]
-                            filename = f"stitching_images/{image_id},{confidence}.jpg"
-                            cv2.imwrite(filename, frame)
-                    stitchImages()
+                    if len(self.stitching_arr) < self.stitch_len:
+                        print("Stitch request received, wait for completion...")
+                        self.should_stitch = True
+                    else:
+                        self.stream_listener.close()
+                        stitchImages(self.stitching_arr, self.stitching_img_dict)
 
                 if not message_rcv:
                     print("PC connection dropped")
                     break
-                print("Message received from PC:", message_rcv)
             except OSError as e:
                 print("Error in sending data:", e)
                 break
@@ -208,55 +199,29 @@ def archiveImages():
             os.rename(src_path, dst_path)
 
 
-def stitchImages():
+def stitchImages(id_arr, stitching_dict):
+    col_count = 0
 
-    images = []
-    # change path to where pi camera frames are being saved.
-    imageFolder = "stitching_images/"
+    blank = np.zeros((320, 320, 3), np.uint8)
+    cols = []
+    col_cur = []
+    for id in id_arr:
+        _, img = stitching_dict[id]
+        img = cv2.resize(img, (320, 320))
+        col_cur.append(img)
+        col_count += 1
 
-    for root, dirs, files in os.walk(imageFolder):
-        for file in files:
-            image_path = os.path.join(root, file)
-            img = cv2.imread(image_path)
-            if img is not None:
-                img = cv2.resize(img, (320, 320))
-                images.append(img)
-                # print("Image appended to list")
-
-    column1, column2, column3, column4, canvas = None
-    if len(images) == 2:
-        column1 = np.vstack([images[0], images[1]])
-        canvas = np.hstack(column1)
-    elif len(images) == 3:
-        column1 = np.vstack([images[0], images[1]])
-        column2 = np.vstack([images[2]])
-        canvas = np.hstack([column1, column2])
-    elif len(images) == 4:
-        column1 = np.vstack([images[0], images[1]])
-        column2 = np.vstack([images[2], images[3]])
-        canvas = np.hstack([column1, column2])
-    elif len(images) == 5:
-        column1 = np.vstack([images[0], images[1]])
-        column2 = np.vstack([images[2], images[3]])
-        column3 = np.vstack([images[4]])
-        canvas = np.hstack([column1, column2, column3])
-    elif len(images) == 6:
-        column1 = np.vstack([images[0], images[1]])
-        column2 = np.vstack([images[2], images[3]])
-        column3 = np.vstack([images[4], images[5]])
-        canvas = np.hstack([column1, column2, column3])
-    elif len(images) == 7:
-        column1 = np.vstack([images[0], images[1]])
-        column2 = np.vstack([images[2], images[3]])
-        column3 = np.vstack([images[4], images[5]])
-        column4 = np.vstack([images[6]])
-        canvas = np.hstack([column1, column2, column3, column4])
-    else:
-        column1 = np.vstack([images[0], images[1]])
-        column2 = np.vstack([images[2], images[3]])
-        column3 = np.vstack([images[4], images[5]])
-        column4 = np.vstack([images[6], images[7]])
-        canvas = np.hstack([column1, column2, column3, column4])
+        if col_count == 2:
+            col_count = 0
+            cols.append(np.vstack(col_cur))
+            col_cur.clear()
+        # print("Image appended to list")
+    
+    rem = len(col_cur)
+    if rem > 0 and rem < 2:
+        col_cur.append(blank)
+        cols.append(np.vstack(col_cur))
+    canvas = np.hstack(cols)
 
     # Display collage
     cv2.imshow("Collage", canvas)
@@ -264,8 +229,7 @@ def stitchImages():
     cv2.destroyAllWindows()
 
     # Save collage and save a copy
-    cv2.imwrite("collage.jpg", canvas)
-    archiveImages()
+    cv2.imwrite("collage_task1.jpg", canvas)
 
 
 if __name__ == "__main__":
