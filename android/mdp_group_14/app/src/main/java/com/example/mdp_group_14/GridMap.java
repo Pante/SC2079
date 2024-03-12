@@ -1207,28 +1207,28 @@ public class GridMap extends View{
                         break;
                     // testing new direction of movement (facing forward)
                     case "backleft":
-                        if ((5 < curCoord[1] && curCoord[1] < 20)
-                                && (8 < curCoord[0] && curCoord[0] < 20)) {
-                            curCoord[1] -= 5;
+                        if ((7 < curCoord[1] && curCoord[1] < 20)
+                                && (6 < curCoord[0] && curCoord[0] < 20)) {
+                            curCoord[1] -= 7;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[1] += 5;
+                                curCoord[1] += 7;
                             } else {
-                                curCoord[0] -= 7; //changed for new turning radius
+                                curCoord[0] -= 5; //changed for new turning radius
                                 robotDirection = "right";
                                 validPosition = true;
                             }
                         }
                         break;
                     case "backright":
-                        if ((5 < curCoord[1] && curCoord[1] < 20)
-                                && (0 < curCoord[0] && curCoord[0] < 14)) {
-                            curCoord[1] -= 5;
+                        if ((7 < curCoord[1] && curCoord[1] < 20)
+                                && (0 < curCoord[0] && curCoord[0] < 16)) {
+                            curCoord[1] -= 7;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[1] += 5;
+                                curCoord[1] += 7;
                             } else {
-                                curCoord[0] += 7; //changed for new turning radius
+                                curCoord[0] += 5; //changed for new turning radius
                                 robotDirection = "left";
                                 validPosition = true;
                             }
@@ -1248,14 +1248,14 @@ public class GridMap extends View{
                         }
                         break;
                     case "right":
-                        if ((4 < curCoord[1] && curCoord[1] < 20)
-                                && (0 < curCoord[0] && curCoord[0] < 14)) {
-                            curCoord[0] += 7;
+                        if ((7 < curCoord[1] && curCoord[1] < 20)
+                                && (0 < curCoord[0] && curCoord[0] < 16)) {
+                            curCoord[0] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[0] -= 7;
+                                curCoord[0] -= 5;
                             } else {
-                                curCoord[1] -= 5; //changed for new turning radius
+                                curCoord[1] -= 7; //changed for new turning radius
                                 robotDirection = "down";
                                 validPosition = true;
                             }
@@ -1268,14 +1268,14 @@ public class GridMap extends View{
                         }
                         break;
                     case "left":
-                        if ((0 < curCoord[1] && curCoord[1] < 15)
-                                && (0 < curCoord[0] && curCoord[0] < 14)) {
-                            curCoord[0] += 7;
+                        if ((0 < curCoord[1] && curCoord[1] < 13)
+                                && (0 < curCoord[0] && curCoord[0] < 16)) {
+                            curCoord[0] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[0] -= 7;
+                                curCoord[0] -= 5;
                             } else {
-                                curCoord[1] += 5; //changed for new turning radius
+                                curCoord[1] += 7; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
                             }
@@ -1358,28 +1358,28 @@ public class GridMap extends View{
                         break;
                     // testing new direction of movement (facing down)
                     case "backleft":
-                        if ((0 < curCoord[1] && curCoord[1] < 15)
-                                && (0 < curCoord[0] && curCoord[0] <= 13)) {
-                            curCoord[1] += 5;
+                        if ((0 < curCoord[1] && curCoord[1] < 13)
+                                && (0 < curCoord[0] && curCoord[0] <= 15)) {
+                            curCoord[1] += 7;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[1] -= 5;
+                                curCoord[1] -= 7;
                             } else {
-                                curCoord[0] += 7; //changed for new turning radius
+                                curCoord[0] += 5; //changed for new turning radius
                                 robotDirection = "left";
                                 validPosition = true;
                             }
                         }
                         break;
                     case "backright":
-                        if ((0 < curCoord[1] && curCoord[1] < 15)
-                                && (8 < curCoord[0] && curCoord[0] <= 20)) {
-                            curCoord[1] += 5;
+                        if ((0 < curCoord[1] && curCoord[1] < 13)
+                                && (5 < curCoord[0] && curCoord[0] <= 20)) {
+                            curCoord[1] += 7;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[1] -= 5;
+                                curCoord[1] -= 7;
                             } else {
-                                curCoord[0] -= 7; //changed for new turning radius
+                                curCoord[0] -= 5; //changed for new turning radius
                                 robotDirection = "right";
                                 validPosition = true;
                             }
@@ -1398,14 +1398,14 @@ public class GridMap extends View{
                         }
                         break;
                     case "right":
-                        if ((0 < curCoord[1] && curCoord[1] < 15)
-                                && (8 < curCoord[0] && curCoord[0] < 20)) {
-                            curCoord[0] -= 7;
+                        if ((0 < curCoord[1] && curCoord[1] < 13)
+                                && (6 < curCoord[0] && curCoord[0] < 20)) {
+                            curCoord[0] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[0] += 7;
+                                curCoord[0] += 5;
                             } else {
-                                curCoord[1] += 5; //changed for new turning radius
+                                curCoord[1] += 7; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
                             }
@@ -1418,14 +1418,14 @@ public class GridMap extends View{
                         }
                         break;
                     case "left":
-                        if ((5 < curCoord[1] && curCoord[1] <= 20)
-                                && (8 < curCoord[0] && curCoord[0] < 20)) {
-                            curCoord[0] -= 7;
+                        if ((7 < curCoord[1] && curCoord[1] <= 20)
+                                && (6 < curCoord[0] && curCoord[0] < 20)) {
+                            curCoord[0] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
-                                curCoord[0] += 7;
+                                curCoord[0] += 5;
                             } else {
-                                curCoord[1] -= 5; //changed for new turning radius
+                                curCoord[1] -= 7; //changed for new turning radius
                                 robotDirection = "down";
                                 validPosition = true;
                             }
