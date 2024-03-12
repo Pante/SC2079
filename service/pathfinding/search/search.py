@@ -14,7 +14,8 @@ def search(world: World, objectives: dict[Obstacle, tuple[Vector, set[Vector]]])
     for _ in world.obstacles:
         seg = segment(world, current, objectives)
         if seg is None:
-            print(f'Unable to find path to {objectives.keys()}. Skipping.')
+            for objective in objectives.keys():
+                print(f'Unable to find path to {objective}. Skipping.')
             return segments
 
         obstacle, _, path = seg
