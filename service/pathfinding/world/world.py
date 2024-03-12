@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass
-from typing import List
 
 import numpy as np
 
@@ -19,7 +18,7 @@ class World:
     A world. Clearance computation is optimized for rectangular/square obstacles.
     """
 
-    def __init__(self, size: int, robot: Robot, obstacles: List[Obstacle]):
+    def __init__(self, size: int, robot: Robot, obstacles: list[Obstacle]):
         self.size = size
         self.grid = np.full((size, size), True)
         self.obstacles = obstacles
@@ -37,16 +36,18 @@ class World:
                 0 <= entity.north_east.y < self.size)
 
     def __annotate_grid(self: World) -> None:
+        error = 4 // self.cell_size
+
         self.grid[0:self.robot.north_length, :] = False
         self.grid[:, -self.robot.east_length:] = False
         self.grid[-self.robot.south_length:, :] = False
         self.grid[:, 0:self.robot.west_length] = False
 
         for obstacle in self.obstacles:
-            west_x = max(obstacle.south_west.x - self.robot.clearance // 2, 0)
-            east_x = min(obstacle.north_east.x + (self.robot.clearance // 2) + 1, self.size)
-            south_y = max(obstacle.south_west.y - self.robot.clearance // 2, 0)
-            north_y = min(obstacle.north_east.y + (self.robot.clearance // 2) + 1, self.size)
+            west_x = max(obstacle.south_west.x - self.robot.west_length - error, 0)
+            east_x = min(obstacle.north_east.x + self.robot.east_length + 1 + error, self.size)
+            south_y = max(obstacle.south_west.y - self.robot.south_length - error, 0)
+            north_y = min(obstacle.north_east.y + self.robot.north_length + 1 + error, self.size)
 
             self.grid[west_x:east_x, south_y:north_y] = False
 
@@ -69,10 +70,10 @@ class Entity(ABC):
         assert 0 <= self.south_west.y <= self.north_east.y
         assert (self.north_east.y - self.south_west.y) == (self.north_east.x - self.south_west.x)
         self.centre = Point(self.north_east.x // 2, self.north_east.y // 2)
-        self.north_length = self.north_east.y // 2
-        self.east_length = self.north_east.x // 2
-        self.south_length = self.north_east.y // 2
-        self.west_length = self.north_east.x // 2
+        self.north_length = self.north_east.y - self.centre.y
+        self.east_length = self.north_east.x - self.centre.x
+        self.south_length = self.centre.y - self.south_west.y
+        self.west_length = self.centre.x - self.south_west.x
 
     @property
     def clearance(self):
@@ -83,22 +84,14 @@ class Entity(ABC):
     def vector(self) -> Vector:
         return Vector(self.direction, self.centre.x, self.centre.y)
 
-    @property
-    def north_west(self) -> Point:
-        return Point(self.south_west.x, self.north_east.y)
-
-    @property
-    def south_east(self) -> Point:
-        return Point(self.north_east.x, self.south_west.y)
-
 
 @dataclass(unsafe_hash=True)
 class Obstacle(Entity):
     image_id: int
 
     def __post_init__(self):
-        assert 1 <= self.image_id < 36
         super().__post_init__()
+        assert 1 <= self.image_id < 36
 
 
 @dataclass

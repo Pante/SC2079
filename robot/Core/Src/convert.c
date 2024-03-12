@@ -94,8 +94,8 @@ float get_turning_r_back_cm(float steeringAngle) {
 	return CHASSIS_CM / tan(steeringAngle * M_PI / 180);
 }
 float get_turning_r_robot_cm(float steeringAngle) {
-	float r_steer = get_turning_r_steer_cm(steeringAngle);
-	float L2 = CHASSIS_CM / 4;
+	float r_steer = get_turning_r_back_cm(steeringAngle);
+	float L2 = CHASSIS_CM / 2;
 	float r = sqrt(r_steer * r_steer + L2 * L2);
 	if (steeringAngle < 0) r = -r;
 	return r;

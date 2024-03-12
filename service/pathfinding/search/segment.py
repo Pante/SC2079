@@ -1,15 +1,15 @@
 import heapq
 import math
-from typing import List, Generator
+from typing import Generator
 
-from pathfinding.search.instructions import Turn, Move, TurnInstruction, MoveInstruction
-from pathfinding.search.move import move
+from pathfinding.search.instructions import Turn, Move, TurnInstruction, Straight
+from pathfinding.search.straight import straight
 from pathfinding.search.turn import turn
 from pathfinding.world.primitives import Vector
-from pathfinding.world.world import World
+from pathfinding.world.world import World, Obstacle
 
 
-def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int, List[tuple[Vector, Turn | Move | None]]]:
+def segment(world: World, initial: Vector, objectives: dict[Obstacle, tuple[Vector, set[Vector]]]) -> None | tuple[Obstacle, int, list[tuple[Vector, Turn | Move | None]]]:
     """
     Finds the shortest path of a segment of the overall path.
 
@@ -34,50 +34,53 @@ def segment(world: World, initial: Vector, objectives: set[Vector]) -> tuple[int
     """
     frontier = __PriorityQueue()
     source: dict[Vector, Vector | None] = {}
-    instructions: dict[Vector, Turn | MoveInstruction | None] = {}
+    moves: dict[Vector, Turn | Move | None] = {}
     costs: dict[Vector, int] = {}
 
     frontier.add(0, initial)
     source[initial] = None
-    instructions[initial] = None
+    moves[initial] = None
     costs[initial] = 0
-    current = initial
 
     while not frontier.empty():
         current = frontier.pop()
 
-        if current in objectives:
-            break
+        for obstacle, (_, vectors) in objectives.items():
+            if current in vectors:
+                return __trace(source, moves, costs, obstacle, current)
 
-        for next, instruction in __neighbours(world, current):
-            new_cost = costs[current]
-            match instruction:
-                case MoveInstruction():
-                    new_cost += instruction.amount
-                case Turn():
-                    new_cost += len(instruction.vectors)
-
+        for next, move in __neighbours(world, current):
+            new_cost = costs[current] + len(move.vectors)
             if next not in costs or new_cost < costs[next]:
                 frontier.add(new_cost + __heuristic(next, objectives), next)
                 source[next] = current
-                instructions[next] = instruction
+                moves[next] = move
                 costs[next] = new_cost
 
+    return None
+
+
+def __trace(
+    source: dict[Vector, Vector | None],
+    moves: dict[Vector, Turn | Move | None],
+    costs: dict[Vector, int],
+    obstacle: Obstacle,
+    current: Vector
+) -> tuple[Obstacle, int, list[tuple[Vector, Turn | Move | None]]]:
     path = []
     objective = current
 
     while current is not None:
-        path.append((current, instructions.get(current)))
+        path.append((current, moves.get(current)))
         current = source.get(current)
 
     path.reverse()
-
-    return costs.get(objective, -1), path
+    return obstacle, costs.get(objective, -1), path
 
 
 class __PriorityQueue:
     def __init__(self):
-        self.elements: List[tuple[int, Vector]] = []
+        self.elements: list[tuple[int, Vector]] = []
 
     def empty(self):
         return not self.elements
@@ -89,21 +92,22 @@ class __PriorityQueue:
         return heapq.heappop(self.elements)[1]
 
 
-def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | MoveInstruction], None, None]:
-    for instruction in TurnInstruction:
-        path = turn(world, current, instruction)
+def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
+    for move in TurnInstruction:
+        path = turn(world, current, move)
         if all(map(lambda p: world.contains(p), path)):
-            yield path[-1], Turn(instruction, path)
+            yield path[-1], Turn(move, path)
 
-    for instruction in Move:
-        for cells in [10, 5, 1]:
-            path = move(current, instruction, cells)
+    for move in Straight:
+        modifier = 1 if move == Straight.FORWARD else -1
+        for length in [5, 1]:
+            path = straight(current, modifier, length)
             if all(map(lambda p: world.contains(p), path)):
-                yield path[-1], MoveInstruction(instruction, cells)
+                yield path[-1], Move(move, path)
 
 
-def __heuristic(current: Vector, objectives: set[Vector]) -> int:
+def __heuristic(current: Vector, objectives: dict[Obstacle, tuple[Vector, set[Vector]]]) -> int:
     """
     The Euclidean distance between two vectors. This is preferred over Manhattan distance which is not admissible.
     """
-    return min(int(math.sqrt((objective.x - current.x) ** 2 + (objective.y - current.y) ** 2)) for objective in objectives)
+    return min(int(math.sqrt((vector.x - current.x) ** 2 + (vector.y - current.y) ** 2)) for vector, _ in objectives.values())

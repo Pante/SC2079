@@ -4,15 +4,15 @@ from pathfinding.world.primitives import Direction, Vector
 from pathfinding.world.world import Obstacle, World
 
 
-def generate_objectives(world: World) -> dict[Obstacle, set[Vector]]:
-    objectives: dict[Obstacle, set[Vector]] = {}
+def generate_objectives(world: World) -> dict[Obstacle, tuple[Vector, set[Vector]]]:
+    objectives = dict()
     for obstacle in world.obstacles:
         generated = __generate_objectives(world, obstacle)
         if not generated:
             print(f"WARNING: Could not generate objectives for {obstacle}. Skipping.")
             continue
 
-        objectives[obstacle] = generated
+        objectives[obstacle] = next(iter(generated)), generated
 
     return objectives
 
@@ -27,13 +27,13 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     """
 
     """
-    The minimum distance (in grid cells) between the obstacle and objective, inclusive. (Total cm / cm per cell).
+    The minimum distance (in grid cells) between the obstacle and centre of objective, inclusive. (Total cm / cm per cell).
     """
-    minimum_gap = 22 // world.cell_size
+    minimum_gap = 20 // world.cell_size
     """
-    The maximum distance (in grid cells) between the obstacle and objective, exclusive. (Total cm / cm per cell).
+    The maximum distance (in grid cells) between the obstacle and centre of objective, exclusive. (Total cm / cm per cell).
     """
-    maximum_gap = 32 // world.cell_size
+    maximum_gap = 28 // world.cell_size
 
     """
     The offset to the sides (in grid cells) between the obstacle and objective, inclusive. 
@@ -42,7 +42,6 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     offset = 0 // world.cell_size
 
     objectives = set()
-
     for alignment in range(-offset, obstacle.clearance + offset):
         for gap in range(minimum_gap, maximum_gap):
             objective = __suggest_objective(obstacle, gap + 1, alignment)
@@ -70,29 +69,27 @@ def __suggest_objective(obstacle: Obstacle, gap: int, alignment: int) -> Vector:
         case Direction.NORTH:
             return Vector(
                 Direction.SOUTH,
-                max(obstacle.north_east.x - clearance + alignment, 0),
-                max(obstacle.north_east.y + gap, 0),
+                obstacle.north_east.x - clearance + alignment,
+                obstacle.north_east.y + gap
             )
 
         case Direction.EAST:
             return Vector(
                 Direction.WEST,
-                max(obstacle.north_east.x + gap, 0),
-                max(obstacle.north_east.y - clearance + alignment, 0),
+                obstacle.north_east.x + gap,
+                obstacle.north_east.y - clearance + alignment
             )
 
         case Direction.SOUTH:
-            south_east = obstacle.south_east
             return Vector(
                 Direction.NORTH,
-                max(south_east.x - clearance + alignment, 0),
-                max(south_east.y - gap, 0),
+                obstacle.south_west.x + clearance - alignment,
+                obstacle.south_west.y - gap
             )
 
         case Direction.WEST:
-            north_west = obstacle.north_west
             return Vector(
                 Direction.EAST,
-                max(north_west.x - gap, 0),
-                max(north_west.y - clearance + alignment, 0),
+                obstacle.south_west.x - gap,
+                obstacle.south_west.y + clearance - alignment,
             )

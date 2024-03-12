@@ -10,7 +10,6 @@ jinja2 = "*"
 marshmallow = "*"
 marshmallow_enum="*"
 numpy = "*"
-python_tsp = "*"
 pydantic = "*"
 
 [dev-packages]
