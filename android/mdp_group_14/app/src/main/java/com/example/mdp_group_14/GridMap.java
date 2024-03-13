@@ -1193,7 +1193,7 @@ public class GridMap extends View{
                         break;
                     case "left":
                         if ((0 < curCoord[1] && curCoord[1] < 15)
-                                && (6 < curCoord[0] && curCoord[0] < 20)) {
+                                && (6 < curCoord[0] && curCoord[0] < 21)) {
                             curCoord[1] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
@@ -1208,7 +1208,7 @@ public class GridMap extends View{
                     // testing new direction of movement (facing forward)
                     case "backleft":
                         if ((7 < curCoord[1] && curCoord[1] < 20)
-                                && (6 < curCoord[0] && curCoord[0] < 20)) {
+                                && (6 < curCoord[0] && curCoord[0] < 21)) {
                             curCoord[1] -= 7;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
@@ -1284,7 +1284,7 @@ public class GridMap extends View{
                     // testing new direction of movement (facing right)
                     case "backleft":
                         if ((0 < curCoord[1] && curCoord[1] < 15)
-                                && (8 < curCoord[0] && curCoord[0] < 20)) {
+                                && (8 < curCoord[0] && curCoord[0] < 21)) {
                             curCoord[1] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
@@ -1298,7 +1298,7 @@ public class GridMap extends View{
                         break;
                     case "backright":
                         if ((5 < curCoord[1] && curCoord[1] < 20)
-                                && (8 < curCoord[0] && curCoord[0] < 20)) {
+                                && (8 < curCoord[0] && curCoord[0] < 21)) {
                             curCoord[1] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
@@ -1399,7 +1399,7 @@ public class GridMap extends View{
                         break;
                     case "right":
                         if ((0 < curCoord[1] && curCoord[1] < 13)
-                                && (6 < curCoord[0] && curCoord[0] < 20)) {
+                                && (6 < curCoord[0] && curCoord[0] < 21)) {
                             curCoord[0] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
@@ -1419,7 +1419,7 @@ public class GridMap extends View{
                         break;
                     case "left":
                         if ((7 < curCoord[1] && curCoord[1] <= 20)
-                                && (6 < curCoord[0] && curCoord[0] < 20)) {
+                                && (6 < curCoord[0] && curCoord[0] < 21)) {
                             curCoord[0] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
