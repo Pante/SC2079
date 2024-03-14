@@ -45,6 +45,7 @@
 #define SERIAL_BUF_SIZE 20
 #define SERIAL_RING_SIZE 1000
 #define DIST_DIFF_DEFAULT 10
+#define TICKS_ES_MAX 4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -218,7 +219,8 @@ int main(void)
 
   OLED_ShowString(0, 0, "Press USER when ready...");
   OLED_Refresh_Gram();
-  while (!user_is_pressed());	//wait for user to place car.
+  HAL_Delay(500);
+//  while (!user_is_pressed());	//wait for user to place car.
   OLED_Clear();
   OLED_ShowString(0, 0, "Setting sensors bias...");
   OLED_Refresh_Gram();
@@ -237,6 +239,9 @@ int main(void)
 		  ticksServo = (SERVO_TURN_PERIOD / MS_FRAME),
 		  ticksRefresh = lcm_uint8(ticksUltrasound, ticksServo);
 
+  //ticking for error stabilization.
+  uint8_t ticksES = 0;
+
   Command *cmd = NULL;							//current command.
   float steeringAngle = 0;						//current steering angle.
   float motorDist = 0, estDist = 0,
@@ -245,6 +250,7 @@ int main(void)
 
   float distTarget = 0;							//decide distance target.
   float distDiff = 0, brakingDist = 0; 			//current distance difference.
+  float distDiffOld = 0;						//track old distance difference (to see if stationary).
   float wDiff = 0, wTarget = 0;					//current angular velocity difference and target.
   float rBack = 0, rRobot = 0;					//turning radii at the back and centre of robot.
   /* ----- End: OS Parameters ----- */
@@ -325,10 +331,12 @@ int main(void)
 
 		//calculate difference in angular velocity.
 		if (rBack != 0) wTarget = get_w_ms(estSpeed, rBack - GYRO_CENTER_OFFSET_CM);
+		else wTarget = 0;
 		float wGyro = cmd->dir * sensors.gyroZ;
 		wDiff = (wGyro - wTarget); //gyro is flipped when going backwards.
 
 		estAngle += abs_float(wGyro * MS_FRAME);
+		distDiffOld = distDiff;
 		switch (cmd->distType) {
 			case TARGET:
 				distDiff = distTarget - estDist;
@@ -379,10 +387,12 @@ int main(void)
 
 		float timeLeft = estSpeed > 0 ? distDiff / estSpeed : 1e10;
 		if (shouldBrake) {
-			if (distDiff < 0.03 * brakingDist * nextAngleDiff / SERVO_WIDTH) {
-				steeringAngle = nextAngle;
-				servo_setAngle(nextAngle);
-			}
+//			if (distDiff < 0.03 * brakingDist * nextAngleDiff / SERVO_WIDTH) {
+//			if (ticksES > TICKS_ES_MAX * 0.9) {
+//				//stabilized halfway; start turning
+//				steeringAngle = nextAngle;
+//				servo_setAngle(nextAngle);
+//			}
 		}
 		else if (!(ticksElapsed % ticksServo)) {
 			//turn a small angle every SERVO_TURN_PERIOD ms.
@@ -415,17 +425,24 @@ int main(void)
 			}
 		}
 
-		if (distDiff <= 0) {
-			//target achieved; move to next command.
-			commands_end(&huart3, cmd);
-			cmd = NULL;
+		float absDistDiff = abs_float(distDiff),
+				absDistDiffChange = abs_float(distDiff - distDiffOld);
+		if (absDistDiff < 0.1 || (shouldBrake && absDistDiff < 1 && absDistDiffChange < 0.05)) {
+			//check for stabilization (if not in continuous motion).
+			if (!shouldBrake || ++ticksES >= TICKS_ES_MAX) {
+				//target achieved; move to next command.
+				ticksES = 0;
+				commands_end(&huart3, cmd);
+				cmd = NULL;
 
-			servo_setAngle(nextAngle);
-			if (shouldBrake) {
-				motor_setDrive(0, 0);
-				dist_reset(0);
-			} else dist_reset(estSpeed);
-
+				servo_setAngle(nextAngle);
+				if (shouldBrake) {
+					motor_setDrive(0, 0);
+					dist_reset(0);
+				} else dist_reset(estSpeed);
+			}
+		} else {
+			ticksES = 0;
 		}
 	}
 	/* ----- End: Drive PID Control ----- */

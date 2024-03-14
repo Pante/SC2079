@@ -36,6 +36,10 @@ uint8_t lcm_uint8(uint8_t x, uint8_t y) {
     return max;
 }
 
+int16_t abs_int16(int16_t a) {
+	return a < 0 ? -a : a;
+}
+
 uint16_t get_uint16(char *buf, uint16_t size) {
 	uint16_t ret = 0, i = 0;
 	while (i < size) {

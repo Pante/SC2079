@@ -4,23 +4,27 @@
 static TIM_HandleTypeDef *motor_pwm_tim, *l_enc_tim, *r_enc_tim;
 
 //for matching motor speeds.
-static uint16_t pwmValAccel = 0, pwmValTarget = 0,
+static int16_t pwmValAccel = 0, pwmValTarget = 0,
 	lPwmVal = 0, rPwmVal = 0;
 
+//for bi-directional correction.
+static int8_t curDir = 0;
+
 static PidDef pidMatch;
-const static float Kp_match = 1.8e4;
-const static float Ki_match = 9.0e2;
-const static float Kd_match = 1.0e4;
+const static float Kp_match = 5e4;
+const static float Ki_match = 6e2;
+const static float Kd_match = 1e3;
 
 static PidDef pidDistTarget;
-const static float Kp_distTarget = 0.22;
-const static float Ki_distTarget = 0.0012;
+
+const static float Kp_distTarget = 0.55;
+const static float Ki_distTarget = 0.0011;
 const static float Kd_distTarget = 0.1;
 
 static PidDef pidDistAway;
-const static float Kp_distAway = 0.98;
-const static float Ki_distAway = 0.00001;
-const static float Kd_distAway = 0.11;
+const static float Kp_distAway = 1.52;
+const static float Ki_distAway = 7e-5;
+const static float Kd_distAway = 0.25;
 
 void motor_init(TIM_HandleTypeDef *pwm, TIM_HandleTypeDef *l_enc, TIM_HandleTypeDef *r_enc) {
 	//assign timer pointers.
@@ -49,10 +53,14 @@ static void setPwmLR() {
 	__HAL_TIM_SetCompare(motor_pwm_tim, L_CHANNEL,
 		lPwmVal > MOTOR_PWM_MAX
 		? MOTOR_PWM_MAX
+		: lPwmVal < MOTOR_PWM_MIN
+		? MOTOR_PWM_MIN
 		: lPwmVal);
 	__HAL_TIM_SetCompare(motor_pwm_tim, R_CHANNEL,
 		rPwmVal > MOTOR_PWM_MAX
 		? MOTOR_PWM_MAX
+		: rPwmVal < MOTOR_PWM_MIN
+		? MOTOR_PWM_MIN
 		: rPwmVal);
 }
 
@@ -67,11 +75,32 @@ static void resetEncoders() {
 	timer_reset(r_enc_tim);
 }
 
-static uint16_t getSpeedPwm(uint8_t speed) {
-	uint16_t val = MOTOR_PWM_MAX / 100 * speed;
-	if (val < MOTOR_PWM_MIN) val = MOTOR_PWM_MIN;
+static int16_t getSpeedPwm(uint8_t speed) {
+	int16_t val = MOTOR_PWM_MAX / 100 * speed;
 
 	return val;
+}
+
+static void setDriveDir(int8_t dir) {
+	if (dir > 0) {
+		//forward.
+		HAL_GPIO_WritePin(MOTORA_IN1_GPIO_Port, MOTORA_IN1_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(MOTORA_IN2_GPIO_Port, MOTORA_IN2_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(MOTORB_IN1_GPIO_Port, MOTORB_IN1_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(MOTORB_IN2_GPIO_Port, MOTORB_IN2_Pin, GPIO_PIN_RESET);
+	} else if (dir < 0) {
+		//backward.
+		HAL_GPIO_WritePin(MOTORA_IN1_GPIO_Port, MOTORA_IN1_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(MOTORA_IN2_GPIO_Port, MOTORA_IN2_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(MOTORB_IN1_GPIO_Port, MOTORB_IN1_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(MOTORB_IN2_GPIO_Port, MOTORB_IN2_Pin, GPIO_PIN_SET);
+	} else {
+		//full stop.
+		HAL_GPIO_WritePin(MOTORA_IN1_GPIO_Port, MOTORA_IN1_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(MOTORA_IN2_GPIO_Port, MOTORA_IN2_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(MOTORB_IN1_GPIO_Port, MOTORB_IN1_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(MOTORB_IN2_GPIO_Port, MOTORB_IN2_Pin, GPIO_PIN_RESET);
+	}
 }
 
 float motor_getDist() {
@@ -79,11 +108,13 @@ float motor_getDist() {
 			rCounter = __HAL_TIM_GET_COUNTER(r_enc_tim);
 	int16_t lCount = (int16_t) lCounter,
 			rCount = (int16_t) rCounter;
-	if (lCount < 0) lCount = -lCount;
-	if (rCount < 0) rCount = -rCount;
 
-	uint16_t pulses = ((uint16_t) lCount) + ((uint16_t) rCount);
-	pulses >>= 1;
+	//left motor is opposite in direction to right motor.
+	lCount = -lCount;
+
+	//average and flip.
+	int16_t pulses = (lCount + rCount) / 2;
+	if (pulses < 0) pulses = -pulses;
 
 	return get_distance_cm(pulses);
 }
@@ -93,13 +124,32 @@ void motor_pwmCorrection(float wDiff, float rBack, float rRobot, float distDiff,
 	//adjust speed based on distance to drive.
 	if (distDiff < brakingDist) {
 		PidDef *pidBrake = distType == TARGET ? &pidDistTarget : &pidDistAway;
-		uint16_t pwmValNext = getSpeedPwm(speedNext);
-		if (pwmValNext < pwmValTarget) pwmValAccel = pwmValNext + pid_adjust(pidBrake, distDiff, 1) / brakingDist * (pwmValTarget - pwmValNext);
+		int16_t pwmValNext = getSpeedPwm(speedNext);
+		if (pwmValNext < pwmValTarget) {
+			 pwmValNext += pid_adjust(pidBrake, distDiff / brakingDist, 1) * (pwmValTarget - pwmValNext);
+			 pwmValAccel = pwmValNext;
+			 int16_t diff = pwmValNext - pwmValAccel;
+			 if (abs_int16(diff) > MOTOR_PWM_ACCEL) {
+				 //gently accelerate to intercept.
+				 pwmValAccel += diff < 0 ? -MOTOR_PWM_ACCEL : MOTOR_PWM_ACCEL;
+			 } else {
+				 //allow for change.
+				 pwmValAccel += diff;
+			 }
+		}
 	} else if (pwmValAccel < pwmValTarget) pwmValAccel += MOTOR_PWM_ACCEL;
 	if (pwmValAccel > pwmValTarget) pwmValAccel = pwmValTarget;
 
+	if (pwmValAccel < 0) {
+		setDriveDir(-curDir);
+		wDiff = -wDiff;
+		pwmValAccel = -pwmValAccel;
+	} else {
+		setDriveDir(curDir);
+	}
+
 	float offset = pid_adjust(&pidMatch, wDiff, 1) * pwmValAccel / pwmValTarget;
-//	float offset = 0;
+	if (offset > MOTOR_PWM_OFFSET_MAX) offset = offset < 0 ? -MOTOR_PWM_OFFSET_MAX : MOTOR_PWM_OFFSET_MAX;
 	float lScale = 1, rScale = 1;
 
 	if (rBack != 0 && rRobot != 0) {
@@ -133,28 +183,6 @@ void motor_pwmCorrection(float wDiff, float rBack, float rRobot, float distDiff,
 	setPwmLR();
 }
 
-static void setDriveDir(int8_t dir) {
-	if (dir > 0) {
-		//forward.
-		HAL_GPIO_WritePin(MOTORA_IN1_GPIO_Port, MOTORA_IN1_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(MOTORA_IN2_GPIO_Port, MOTORA_IN2_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(MOTORB_IN1_GPIO_Port, MOTORB_IN1_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(MOTORB_IN2_GPIO_Port, MOTORB_IN2_Pin, GPIO_PIN_RESET);
-	} else if (dir < 0) {
-		//backward.
-		HAL_GPIO_WritePin(MOTORA_IN1_GPIO_Port, MOTORA_IN1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(MOTORA_IN2_GPIO_Port, MOTORA_IN2_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(MOTORB_IN1_GPIO_Port, MOTORB_IN1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(MOTORB_IN2_GPIO_Port, MOTORB_IN2_Pin, GPIO_PIN_SET);
-	} else {
-		//full stop.
-		HAL_GPIO_WritePin(MOTORA_IN1_GPIO_Port, MOTORA_IN1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(MOTORA_IN2_GPIO_Port, MOTORA_IN2_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(MOTORB_IN1_GPIO_Port, MOTORB_IN1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(MOTORB_IN2_GPIO_Port, MOTORB_IN2_Pin, GPIO_PIN_RESET);
-	}
-}
-
 //speed: 0 - 100
 void motor_setDrive(int8_t dir, uint8_t speed) {
 	if (dir == 0) {
@@ -175,6 +203,7 @@ void motor_setDrive(int8_t dir, uint8_t speed) {
 	resetEncoders();
 	resetPwmParams();
 
+	curDir = dir;
 	setDriveDir(dir);
 	setPwmLR();
 }

@@ -9,8 +9,9 @@
 //PWM Parameters
 #define MOTOR_PWM_PERIOD 7200
 #define MOTOR_PWM_MAX 6000 //safe value!
-#define MOTOR_PWM_MIN 250 //minimum speed
-#define MOTOR_PWM_ACCEL 15
+#define MOTOR_PWM_MIN 375 //minimum speed
+#define MOTOR_PWM_ACCEL 25 //maximum change in PWM value allowed (smooth transitioning)
+#define MOTOR_PWM_OFFSET_MAX 1000 //maximum offset allowed
 #define MOTOR_BRAKING_DIST_CM_TARGET 16.0f //16cm at max speed
 #define MOTOR_BRAKING_DIST_CM_AWAY 40.0f //40.0cm at max speed
 //L, R PWM Channels
