@@ -217,10 +217,10 @@ int main(void)
   servo_setAngle(0);
   motor_setDrive(0, 0);
 
-  OLED_ShowString(0, 0, "Press USER when ready...");
-  OLED_Refresh_Gram();
-  HAL_Delay(500);
+//  OLED_ShowString(0, 0, "Press USER when ready...");
+//  OLED_Refresh_Gram();
 //  while (!user_is_pressed());	//wait for user to place car.
+  HAL_Delay(500);
   OLED_Clear();
   OLED_ShowString(0, 0, "Setting sensors bias...");
   OLED_Refresh_Gram();
@@ -247,6 +247,10 @@ int main(void)
   float motorDist = 0, estDist = 0,
 		  estAngle = 0,
 		  estDistOld = 0; 						//distance estimations.
+
+  //for distance tracking (for use with INFO_DIST command).
+  float distTrack = 0;
+  uint8_t shouldTrackDist = 0;
 
   float distTarget = 0;							//decide distance target.
   float distDiff = 0, brakingDist = 0; 			//current distance difference.
@@ -287,39 +291,60 @@ int main(void)
 		cmd = commands_pop();
 
 		if (cmd != NULL) {
-			estDistOld = 0;
-			estAngle = 0;
-			motor_setDrive(cmd->dir, cmd->speed);
-			if (cmd->dir != 0) {
-				distTarget = cmd->val;
-				distDiff = DIST_DIFF_DEFAULT;
-				brakingDist = (cmd->distType == TARGET
-					? MOTOR_BRAKING_DIST_CM_TARGET
-					: MOTOR_BRAKING_DIST_CM_AWAY
-				) * cmd->speed / 100;
+			//perform command setup based on
+			switch (cmd->opType) {
+				case DRIVE:
+					estDistOld = 0;
+					estAngle = 0;
+					motor_setDrive(cmd->dir, cmd->speed);
+					if (cmd->dir != 0) {
+						distTarget = cmd->val;
+						distDiff = DIST_DIFF_DEFAULT;
+						brakingDist = (cmd->distType == TARGET
+							? MOTOR_BRAKING_DIST_CM_TARGET
+							: MOTOR_BRAKING_DIST_CM_AWAY
+						) * cmd->speed / 100;
 
-				steeringAngle = cmd->steeringAngle;
-				servo_setAngle(steeringAngle);
-				if (steeringAngle != 0) {
-					rBack = get_turning_r_back_cm(steeringAngle);
-					rRobot = get_turning_r_robot_cm(steeringAngle);
-					if (cmd->distType == TARGET) {
-						distTarget = abs_float(get_arc_length(cmd->val, rBack));
+						steeringAngle = cmd->steeringAngle;
+						servo_setAngle(steeringAngle);
+						if (steeringAngle != 0) {
+							rBack = get_turning_r_back_cm(steeringAngle);
+							rRobot = get_turning_r_robot_cm(steeringAngle);
+							if (cmd->distType == TARGET) {
+								distTarget = abs_float(get_arc_length(cmd->val, rBack));
+							}
+						} else {
+							rBack = 0;
+							rRobot = 0;
+							wTarget = 0;
+						}
+					} else {
+						commands_end(&huart3, cmd);
+						cmd = NULL;
 					}
-				} else {
-					rBack = 0;
-					rRobot = 0;
-					wTarget = 0;
-				}
-			} else {
-				commands_end(&huart3, cmd);
-				cmd = NULL;
+					break;
+
+				case INFO_DIST:
+					shouldTrackDist = !shouldTrackDist;
+					if (shouldTrackDist) {
+						distTrack = 0;
+					} else {
+						//write distance tracked into string.
+						free(cmd->str);
+						cmd->str_size = 8; //D<6.2f>\n = 8 characters
+						cmd->str = malloc(cmd->str_size * sizeof(uint8_t));
+						snprintf(cmd->str, cmd->str_size, "D%6.2f\n", distTrack);
+					}
+
+					commands_end(&huart3, cmd);
+					cmd = NULL;
+					break;
 			}
 		}
 	}
 	/* ----- End: Get next command (if any) ----- */
 
-	/* ----- Start: Drive PID Control ----- */
+	/* ----- Start: Command Control Loop ----- */
 	if (cmd != NULL && cmd->dir != 0) {
 		//calculate distance.
 		motorDist = motor_getDist();
@@ -356,7 +381,7 @@ int main(void)
 				break;
 		}
 
-		Command *next = commands_peek();
+		Command *next = commands_peek_next_drive();
 
 		float nextAngle = next != NULL ? next->steeringAngle : 0;
 		float nextAngleDiff = abs_float(nextAngle - cmd->steeringAngle);
@@ -421,7 +446,7 @@ int main(void)
 				}
 
 				commands_end(&huart3, next);
-				next = commands_peek();
+				next = commands_peek_next_drive();
 			}
 		}
 
@@ -440,12 +465,15 @@ int main(void)
 					motor_setDrive(0, 0);
 					dist_reset(0);
 				} else dist_reset(estSpeed);
+
+				//add estimated travel distance to tracking distance (if tracked).
+				if (shouldTrackDist) distTrack += estDist;
 			}
 		} else {
 			ticksES = 0;
 		}
 	}
-	/* ----- End: Drive PID Control ----- */
+	/* ----- End: Command Control Loop ----- */
 
 	/* ----- Start: Paced Loop Control ----- */
 	while (!newTick) {									//wait for new tick.

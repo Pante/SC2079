@@ -4,6 +4,7 @@ static Command *cur = NULL;
 
 static Command *get_new_cmd() {
 	Command *new = (Command *) malloc(sizeof(Command));
+	new->opType = DRIVE;
 	new->dir = 0;
 	new->speed = 0;
 	new->steeringAngle = 0;
@@ -31,6 +32,10 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 
 	//first byte: command flag
 	switch (c) {
+		case CMD_INFO_DIST:
+			next->opType = INFO_DIST;
+			break;
+
 		case CMD_FULL_STOP:
 			next->dir = 0;
 			break;
@@ -60,13 +65,15 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 			return;
 	}
 
-	if (c != CMD_FULL_STOP) {
+	if (next->opType == DRIVE && c != CMD_FULL_STOP) {
 		temp++;
 		next->speed = parse_uint16_t_until(&temp, CMD_SEP, 3);
 		temp++;
 		next->steeringAngle = parse_float_until(&temp, CMD_SEP, 6);
 		temp++;
 		next->val = parse_float_until(&temp, CMD_END, 6);
+	} else {
+		temp++;
 	}
 
 	//copy command.
@@ -97,8 +104,11 @@ Command *commands_pop() {
 	return ret;
 }
 
-Command *commands_peek() {
-	return cur;
+//find the next drive command (for chaining).
+Command *commands_peek_next_drive() {
+	Command *temp = cur;
+	while (temp != NULL && temp->opType != DRIVE) temp = temp->next;
+	return temp;
 }
 
 void commands_end(UART_HandleTypeDef *uart, Command *cmd) {
