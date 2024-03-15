@@ -45,7 +45,7 @@ public class MappingFragment extends Fragment {
     static boolean dragStatus;
     static boolean changeObstacleStatus;
 
-
+    String direction = "";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +56,12 @@ public class MappingFragment extends Fragment {
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.activity_map_config, container,  false);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Shared Preferences", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        direction = sharedPreferences.getString("direction","");
 
+        if (savedInstanceState != null)
+            direction = savedInstanceState.getString("direction");
         gridMap = Home.getGridMap();
         final DirectionsFragment directionFragment = new DirectionsFragment();
         final EmergencyFragment emergencyFragment = new EmergencyFragment();
@@ -72,6 +77,7 @@ public class MappingFragment extends Fragment {
         changeObstacleSwitch = root.findViewById(R.id.changeObstacleSwitch);
         // testing
         emergencyBtn = root.findViewById(R.id.eBtn);
+
         // for hidden functionalities
         emergencyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -274,8 +280,31 @@ public class MappingFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 showLog("Clicked directionChangeImageBtn");
-                directionFragment.show(getActivity().getFragmentManager(),
-                        "Direction Fragment");
+//                directionFragment.show(getActivity().getFragmentManager(),
+//                        "Direction Fragment");
+                BluetoothCommunications.getMessageReceivedTextView().append(direction);
+                switch(direction)
+                {
+                    case "None":
+                    case "up":
+                        direction="right";
+                        break;
+                    case "right":
+                        direction="down";
+                        break;
+                    case "down":
+                        direction="left";
+                        break;
+                    case "left":
+                        direction="up";
+                        break;
+                }
+                editor.putString("direction",direction);
+                Home.refreshDirection(direction);
+                Toast.makeText(getActivity(), "Saving direction...", Toast.LENGTH_SHORT).show();
+                showLog("Exiting saveBtn");
+                editor.commit();
+
                 showLog("Exiting directionChangeImageBtn");
             }
         });
