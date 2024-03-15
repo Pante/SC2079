@@ -1361,13 +1361,13 @@ public class GridMap extends View{
                                 validPosition = false;
                                 curCoord[1] -= 5;
                             } else {
-                                for (int i = curCoord[0]; i <= curCoord[0]+7; i++) {
-                                    cells[20-i][20-tempCurCood1-1].setType("explored");
-                                    cells[20-i][20-tempCurCood1].setType("explored");
+                                for (int i = curCoord[0]-7; i <= curCoord[0]-1; i++) {
+                                    cells[i][20-tempCurCood1-1].setType("explored");
+                                    cells[i][20-tempCurCood1].setType("explored");
                                 }
-                                for (int j = tempCurCood1; j <= tempCurCood1+5; j++) {
-                                    cells[curCoord[0]][20 - j - 1].setType("explored");
-                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                for (int j = tempCurCood1; j <= tempCurCood1+4; j++) {
+                                    cells[curCoord[0]-7][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-8][20 - j - 1].setType("explored");
                                 }
                                 curCoord[0] -= 7; //changed for new turning radius
                                 robotDirection = "down";
@@ -1386,14 +1386,14 @@ public class GridMap extends View{
                                 curCoord[1] += 5;
                             } else {
 
-//                                for (int j = tempCurCood1-5; j <= tempCurCood1-1; j++) {
-//                                    cells[curCoord[0]][20-j-1].setType("explored");
-//                                    cells[curCoord[0]-1][20-j-1].setType("explored");
-//                                }
-//                                for (int i = tempCurCood0-7; i <= tempCurCood0-1; i++) {
-////                                    cells[i][tempCurCood1-1].setType("explored");
-//                                    cells[i][tempCurCood1].setType("explored");
-//                                }
+                                for (int i = curCoord[0]-7; i <= curCoord[0]; i++) {
+                                    cells[i][20-tempCurCood1-1].setType("explored");
+                                    cells[i][20-tempCurCood1].setType("explored");
+                                }
+                                for (int j = tempCurCood1-4; j <= tempCurCood1; j++) {
+                                    cells[curCoord[0]-7][20-j].setType("explored");
+                                    cells[curCoord[0]-8][20-j].setType("explored");
+                                }
                                 curCoord[0] -= 7; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
