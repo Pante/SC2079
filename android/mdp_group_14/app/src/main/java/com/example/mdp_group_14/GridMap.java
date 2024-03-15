@@ -503,6 +503,8 @@ public class GridMap extends View{
     // note that curCoord refers to the coordinate of the BOTTOM RIGHT cell of the robot
     public void setCurCoord(int col, int row, String direction) {
         showLog("Entering setCurCoord");
+        BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString(col));
+        BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString(row));
         // although rows are from 0 to 19, if the row value given is 0 or > 19, the robot will have to be in an invalid position
         if (row < 1 || row > 19) {
             showLog("y is out of bounds");
@@ -891,8 +893,8 @@ public class GridMap extends View{
                     View mView = ((Activity) this.getContext()).getLayoutInflater()
                             .inflate(R.layout.activity_dialog,
                                     null);
-                    mBuilder.setTitle("Change Existing Obstacle ID/Bearing");
-                    final Spinner mIDSpinner = mView.findViewById(R.id.imageIDSpinner2);
+                    mBuilder.setTitle("Change Existing Bearing");
+//                    final Spinner mIDSpinner = mView.findViewById(R.id.imageIDSpinner2);
                     final Spinner mBearingSpinner = mView.findViewById(R.id.bearingSpinner2);
 
 
@@ -900,7 +902,7 @@ public class GridMap extends View{
                             this.getContext(), R.array.imageID_array,
                             android.R.layout.simple_spinner_item);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    mIDSpinner.setAdapter(adapter);
+//                    mIDSpinner.setAdapter(adapter);
                     ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(
                             this.getContext(), R.array.imageBearing_array,
                             android.R.layout.simple_spinner_item);
@@ -908,11 +910,11 @@ public class GridMap extends View{
                     mBearingSpinner.setAdapter(adapter2);
 
                     // start at current id and bearing
-                    if (imageId.equals("")||imageId.equals("Nil")) {
-                        mIDSpinner.setSelection(0);
-                    } else {
-                        mIDSpinner.setSelection(Integer.parseInt(imageId));
-                    }
+//                    if (imageId.equals("")||imageId.equals("Nil")) {
+//                        mIDSpinner.setSelection(0);
+//                    } else {
+//                        mIDSpinner.setSelection(Integer.parseInt(imageId));
+//                    }
                     switch (imageBearing) {
                         case "North": mBearingSpinner.setSelection(0);
                             break;
@@ -927,10 +929,10 @@ public class GridMap extends View{
                     mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            String newID = mIDSpinner.getSelectedItem().toString();
+//                            String newID = mIDSpinner.getSelectedItem().toString();
                             String newBearing = mBearingSpinner.getSelectedItem().toString();
 
-                            ITEM_LIST.get(tRow - 1)[tCol - 1] = newID;
+//                            ITEM_LIST.get(tRow - 1)[tCol - 1] = newID;
                             imageBearings.get(tRow - 1)[tCol - 1] = newBearing;
 
 
@@ -943,10 +945,10 @@ public class GridMap extends View{
                             }
 
 
-                            showLog("tRow - 1 = " + (tRow - 1));
-                            showLog("tCol - 1 = " + (tCol - 1));
-                            showLog("newID = " + newID);
-                            showLog("newBearing = " + newBearing);
+//                            showLog("tRow - 1 = " + (tRow - 1));
+//                            showLog("tCol - 1 = " + (tCol - 1));
+//                            showLog("newID = " + newID);
+//                            showLog("newBearing = " + newBearing);
 
 
                             String oldObstacleId = UUID.randomUUID().toString();
@@ -954,8 +956,8 @@ public class GridMap extends View{
                                 oldObstacleId = val2IdxMap.get(oldItem);
                             }
 
-                            val2IdxMap.put(newID, oldObstacleId);
-                            if(!newID.equals("Nil")) cells[tCol][20 - tRow].setType("image"); // if new id is set then show on obstacle on app
+//                            val2IdxMap.put(newID, oldObstacleId);
+//                            if(!newID.equals("Nil")) cells[tCol][20 - tRow].setType("image"); // if new id is set then show on obstacle on app
                             else cells[tCol][20 - tRow].setType("obstacle");
                             int obstacleNumber = GridMap.obstacleCoord.size();
                             //updateStatus( (obstacleid+1) + "," + newID + ","+(tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
@@ -1161,6 +1163,8 @@ public class GridMap extends View{
 
         // check if got obstacle when moving one grid up before turning in each case
         // checking for each combination of (current robot facing direction, movement direction)
+        int tempCurCood1=-1;
+        int tempCurCood0=-1;
         switch (robotDirection) {
             case "up":
                 switch (direction) {
@@ -1174,14 +1178,26 @@ public class GridMap extends View{
                         if ((0 < curCoord[1] && curCoord[1] < 15)
                                 //curCoord[0] must be at least 1
                                 && (0 < curCoord[0] && curCoord[0] < 14)) {
+                            tempCurCood1=curCoord[1];
+
                             curCoord[1] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] -= 5; //reset to original position
                             } else {
-                                curCoord[0] += 7; //changed for new turning radius
+
                                 robotDirection = "right";
                                 validPosition = true;
+                                for (int i = curCoord[0]; i <= curCoord[0]+7; i++) {
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = tempCurCood1; j <= tempCurCood1+4; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+
+                                curCoord[0] += 7; //changed for new turning radius
                             }
                         }
                         break;
@@ -1194,14 +1210,25 @@ public class GridMap extends View{
                     case "left":
                         if ((0 < curCoord[1] && curCoord[1] < 15)
                                 && (6 < curCoord[0] && curCoord[0] < 21)) {
+                            tempCurCood1=curCoord[1];
+
                             curCoord[1] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] -= 5;
                             } else {
-                                curCoord[0] -= 7; //changed for new turning radius
+
                                 robotDirection = "left";
                                 validPosition = true;
+                                for (int i = curCoord[0]-7; i <= curCoord[0]-1; i++) {
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = tempCurCood1; j <= tempCurCood1+4; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+                                curCoord[0] -= 7; //changed for new turning radius
                             }
                         }
                         break;
@@ -1209,29 +1236,51 @@ public class GridMap extends View{
                     case "backleft":
                         if ((7 < curCoord[1] && curCoord[1] < 20)
                                 && (6 < curCoord[0] && curCoord[0] < 21)) {
+                            tempCurCood1=curCoord[1];
                             curCoord[1] -= 7;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] += 7;
                             } else {
-                                curCoord[0] -= 5; //changed for new turning radius
+
                                 robotDirection = "right";
                                 validPosition = true;
+
+                                for (int i = curCoord[0]-5; i <= curCoord[0]-1; i++) {
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = tempCurCood1-7; j <= tempCurCood1; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+                                curCoord[0] -= 5; //changed for new turning radius
                             }
                         }
                         break;
                     case "backright":
                         if ((7 < curCoord[1] && curCoord[1] < 20)
                                 && (0 < curCoord[0] && curCoord[0] < 16)) {
+                            tempCurCood1=curCoord[1];
                             curCoord[1] -= 7;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] += 7;
                             } else {
-                                curCoord[0] += 5; //changed for new turning radius
+
                                 robotDirection = "left";
                                 validPosition = true;
+                                for (int i = curCoord[0]; i <= curCoord[0]+5; i++) {
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = tempCurCood1-7; j <= tempCurCood1; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+                                curCoord[0] += 5; //changed for new turning radius
                             }
+
                         }
                         break;
                     default:
@@ -1250,14 +1299,26 @@ public class GridMap extends View{
                     case "right":
                         if ((7 < curCoord[1] && curCoord[1] < 20)
                                 && (0 < curCoord[0] && curCoord[0] < 16)) {
+                            tempCurCood0=curCoord[0];
                             curCoord[0] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[0] -= 5;
                             } else {
-                                curCoord[1] -= 7; //changed for new turning radius
+
                                 robotDirection = "down";
                                 validPosition = true;
+
+                                for (int i = tempCurCood0; i <= tempCurCood0+4; i++) {
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = curCoord[1]-7; j <= curCoord[1]-1; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+
+                                curCoord[1] -= 7; //changed for new turning radius
                             }
                         }
                         break;
@@ -1270,11 +1331,20 @@ public class GridMap extends View{
                     case "left":
                         if ((0 < curCoord[1] && curCoord[1] < 13)
                                 && (0 < curCoord[0] && curCoord[0] < 16)) {
+                            tempCurCood0=curCoord[0];
                             curCoord[0] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[0] -= 5;
                             } else {
+                                for (int i = tempCurCood0; i <= tempCurCood0+4; i++) {
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = curCoord[1]; j <= curCoord[1]+7; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
                                 curCoord[1] += 7; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
@@ -1285,11 +1355,20 @@ public class GridMap extends View{
                     case "backleft":
                         if ((0 < curCoord[1] && curCoord[1] < 15)
                                 && (8 < curCoord[0] && curCoord[0] < 21)) {
+                            tempCurCood1=curCoord[1];
                             curCoord[1] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] -= 5;
                             } else {
+                                for (int i = curCoord[0]; i <= curCoord[0]+7; i++) {
+                                    cells[20-i][20-tempCurCood1-1].setType("explored");
+                                    cells[20-i][20-tempCurCood1].setType("explored");
+                                }
+                                for (int j = tempCurCood1; j <= tempCurCood1+5; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
                                 curCoord[0] -= 7; //changed for new turning radius
                                 robotDirection = "down";
                                 validPosition = true;
@@ -1299,11 +1378,22 @@ public class GridMap extends View{
                     case "backright":
                         if ((5 < curCoord[1] && curCoord[1] < 20)
                                 && (8 < curCoord[0] && curCoord[0] < 21)) {
+                            tempCurCood1=curCoord[1];
+                            tempCurCood0=curCoord[0];
                             curCoord[1] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] += 5;
                             } else {
+
+//                                for (int j = tempCurCood1-5; j <= tempCurCood1-1; j++) {
+//                                    cells[curCoord[0]][20-j-1].setType("explored");
+//                                    cells[curCoord[0]-1][20-j-1].setType("explored");
+//                                }
+//                                for (int i = tempCurCood0-7; i <= tempCurCood0-1; i++) {
+////                                    cells[i][tempCurCood1-1].setType("explored");
+//                                    cells[i][tempCurCood1].setType("explored");
+//                                }
                                 curCoord[0] -= 7; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
