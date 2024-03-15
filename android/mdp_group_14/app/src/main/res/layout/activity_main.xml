@@ -34,20 +34,25 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/nav_icon" />
 
+            <ImageView
+                android:layout_width="340dp"
+                android:layout_height="100dp"
 
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/transparent"
-                android:fontFamily="sans-serif"
-                android:gravity="center"
-                android:minHeight="?actionBarSize"
-                android:padding="@dimen/appbar_padding"
-                android:text="MDP Group 14"
-                android:textColor="@color/colorBlack"
-                android:textSize="25sp"
-                android:textStyle="bold" />
+                android:src="@drawable/group_name" />
+
+<!--            <TextView-->
+<!--                android:id="@+id/title"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:background="@color/transparent"-->
+<!--                android:fontFamily="sans-serif"-->
+<!--                android:gravity="center"-->
+<!--                android:minHeight="?actionBarSize"-->
+<!--                android:padding="@dimen/appbar_padding"-->
+<!--                android:text="MDP Group 14"-->
+<!--                android:textColor="@color/colorBlack"-->
+<!--                android:textSize="25sp"-->
+<!--                android:textStyle="bold" />-->
 
 
         </androidx.appcompat.widget.Toolbar>
