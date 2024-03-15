@@ -67,7 +67,7 @@ public class GridMap extends View{
     private static ArrayList<int[]> obstacleCoord = new ArrayList<>();
     // controls whether or not the robot is to be re-drawn upon calling onDraw() after an invalidate()
     // SHOULD be 'true' upon selecting a start position using SET START POINT btn, and back to false if robot goes out of bounds
-    private static boolean canDrawRobot = false;
+    public static boolean canDrawRobot = false;
     private static boolean startCoordStatus = false;
     private static boolean setObstacleStatus = false;
     private static final boolean unSetCellStatus = false;
@@ -580,7 +580,7 @@ public class GridMap extends View{
         this.invalidate();
     }
 
-    private void updateRobotAxis(int col, int row, String direction) {
+    public void updateRobotAxis(int col, int row, String direction) {
         TextView xAxisTextView =  ((Activity)this.getContext()).findViewById(R.id.xAxisTextView);
         TextView yAxisTextView =  ((Activity)this.getContext()).findViewById(R.id.yAxisTextView);
         TextView directionAxisTextView =  ((Activity)this.getContext())

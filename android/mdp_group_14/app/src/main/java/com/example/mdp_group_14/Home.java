@@ -269,12 +269,23 @@ public class Home extends Fragment {
         gridMap.setRobotDirection(direction);
         int x = gridMap.getCurCoord()[0];
         int y = gridMap.getCurCoord()[1];
+        String dir;
         String newDir = gridMap.getRobotDirection();
         newDir = newDir.toUpperCase();
         directionAxisTextView.setText(sharedPreferences.getString("direction","")); //changes the UI direction display as well
         //printMessage("Direction is set to " + direction); //OLD VER
-        printMessage("ROBOT,"+ x + "," + y + "," + newDir);
-        //showLog("ROBOT,"+ x +"," + y + "," + newDir); //for troubleshooting
+
+        dir= (newDir.equals("up"))?"NORTH":(direction.equals("down"))?"SOUTH":(direction.equals("left"))?"WEST":"EAST";
+        if ((x - 2)>=0 && (y - 1)>=0)
+        {
+//          BluetoothCommunications.getMessageReceivedTextView().append("ROBOT" + "," + (col - 2)*5 + "," + (row - 1)*5 + "," + dir.toUpperCase());
+            Home.printMessage("ROBOT" + "," + (x-2)*5 + "," + (y-1)*5 + "," + dir.toUpperCase());
+        }
+        else{
+            showLog("out of grid");
+        }
+//        printMessage("ROBOT,"+ x + "," + y + "," + dir);
+//        BluetoothCommunications.getMessageReceivedTextView().append("ROBOT,"+ (x-1) +"," + (y-1) + "," + dir+"\n"); //for troubleshooting
 
     }
 
