@@ -73,7 +73,7 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 		temp++;
 		next->val = parse_float_until(&temp, CMD_END, 6);
 	} else {
-		temp++;
+		*(++temp) = CMD_END;
 	}
 
 	//copy command.
