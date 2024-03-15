@@ -1415,14 +1415,24 @@ public class GridMap extends View{
                     case "right":
                         if ((5 < curCoord[1] && curCoord[1] < 20)
                                 && (8 < curCoord[0] && curCoord[0] <= 20)) {
+                            tempCurCood1=curCoord[1]; //added
                             curCoord[1] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] += 5;
                             } else {
-                                curCoord[0] -= 7; //changed for new turning radius
                                 robotDirection = "left";
                                 validPosition = true;
+                                for (int i = curCoord[0]-7; i <= curCoord[0]-1; i++) { //x path
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = tempCurCood1-5; j <= tempCurCood1; j++) { //y path
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+
+                                curCoord[0] -= 7; //changed for new turning radius
                             }
                         }
                         break;
@@ -1435,14 +1445,24 @@ public class GridMap extends View{
                     case "left":
                         if ((5 < curCoord[1] && curCoord[1] < 20)
                                 && (0 < curCoord[0] && curCoord[0] <= 13)) {
+                            tempCurCood1=curCoord[1]; //added
                             curCoord[1] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] += 5;
                             } else {
-                                curCoord[0] += 7; //changed for new turning radius
+
                                 robotDirection = "right";
                                 validPosition = true;
+                                for (int i = curCoord[0]; i <= curCoord[0]+7; i++) {
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = tempCurCood1-5; j <= tempCurCood1; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+                                curCoord[0] += 7; //changed for new turning radius
                             }
                         }
                         break;
@@ -1450,28 +1470,50 @@ public class GridMap extends View{
                     case "backleft":
                         if ((0 < curCoord[1] && curCoord[1] < 13)
                                 && (0 < curCoord[0] && curCoord[0] <= 15)) {
+                            tempCurCood1=curCoord[1]; //added
                             curCoord[1] += 7;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] -= 7;
                             } else {
-                                curCoord[0] += 5; //changed for new turning radius
                                 robotDirection = "left";
                                 validPosition = true;
+
+                                for (int i = curCoord[0]; i <= curCoord[0]+5; i++) {
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = tempCurCood1; j <= tempCurCood1+6; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+
+                                curCoord[0] += 5; //changed for new turning radius
                             }
                         }
                         break;
                     case "backright":
                         if ((0 < curCoord[1] && curCoord[1] < 13)
                                 && (5 < curCoord[0] && curCoord[0] <= 20)) {
+                            tempCurCood1=curCoord[1]; //added
                             curCoord[1] += 7;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] -= 7;
                             } else {
-                                curCoord[0] -= 5; //changed for new turning radius
                                 robotDirection = "right";
                                 validPosition = true;
+
+                                for (int i = curCoord[0]-5; i <= curCoord[0]-1; i++) {
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = tempCurCood1; j <= tempCurCood1+6; j++) {
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+
+                                curCoord[0] -= 5; //changed for new turning radius
                             }
                         }
                         break;
@@ -1490,14 +1532,25 @@ public class GridMap extends View{
                     case "right":
                         if ((0 < curCoord[1] && curCoord[1] < 13)
                                 && (6 < curCoord[0] && curCoord[0] < 21)) {
+                            tempCurCood0=curCoord[0]; //added
                             curCoord[0] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[0] += 5;
                             } else {
-                                curCoord[1] += 7; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
+
+                                for (int i = tempCurCood0-5; i <= tempCurCood0; i++) { // x axis
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = curCoord[1]; j <= curCoord[1]+7; j++) { //y axis
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+
+                                curCoord[1] += 7; //changed for new turning radius
                             }
                         }
                         break;
@@ -1510,14 +1563,25 @@ public class GridMap extends View{
                     case "left":
                         if ((7 < curCoord[1] && curCoord[1] <= 20)
                                 && (6 < curCoord[0] && curCoord[0] < 21)) {
+                            tempCurCood0=curCoord[0]; //added
                             curCoord[0] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[0] += 5;
                             } else {
-                                curCoord[1] -= 7; //changed for new turning radius
                                 robotDirection = "down";
                                 validPosition = true;
+
+                                for (int i = tempCurCood0-5; i <= tempCurCood0-1; i++) { // x axis
+                                    cells[i][20-curCoord[1]-1].setType("explored");
+                                    cells[i][20-curCoord[1]].setType("explored");
+                                }
+                                for (int j = curCoord[1]-7; j < curCoord[1]; j++) { //y axis
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+
+                                curCoord[1] -= 7; //changed for new turning radius
                             }
                         }
                         break;
@@ -1525,14 +1589,25 @@ public class GridMap extends View{
                     case "backleft":
                         if ((5 < curCoord[1] && curCoord[1] < 20)
                                 && (0 < curCoord[0] && curCoord[0] < 14)) {
+                            tempCurCood1=curCoord[1]; //added
                             curCoord[1] -= 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] += 5;
                             } else {
-                                curCoord[0] += 7; //changed for new turning radius
                                 robotDirection = "up";
                                 validPosition = true;
+
+                                for (int i = curCoord[0]; i <= curCoord[0]+7; i++) { //x axis
+                                    cells[i][20-tempCurCood1].setType("explored");
+                                    cells[i][20-tempCurCood1-1].setType("explored");
+                                }
+                                for (int j = tempCurCood1-5; j <= tempCurCood1; j++) { //y axis
+                                    cells[curCoord[0]][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                }
+
+                                curCoord[0] += 7; //changed for new turning radius
                             }
                         }
                         break;
