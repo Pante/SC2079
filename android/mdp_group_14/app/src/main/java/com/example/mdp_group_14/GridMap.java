@@ -1598,13 +1598,13 @@ public class GridMap extends View{
                                 robotDirection = "up";
                                 validPosition = true;
 
-                                for (int i = curCoord[0]; i <= curCoord[0]+7; i++) { //x axis
+                                for (int i = curCoord[0]; i <= curCoord[0]+6; i++) { //x axis
                                     cells[i][20-tempCurCood1].setType("explored");
                                     cells[i][20-tempCurCood1-1].setType("explored");
                                 }
-                                for (int j = tempCurCood1-5; j <= tempCurCood1; j++) { //y axis
-                                    cells[curCoord[0]][20 - j - 1].setType("explored");
-                                    cells[curCoord[0]-1][20 - j - 1].setType("explored");
+                                for (int j = tempCurCood1-5; j <= tempCurCood1-1; j++) { //y axis
+                                    cells[curCoord[0]+7][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]+6][20 - j - 1].setType("explored");
                                 }
 
                                 curCoord[0] += 7; //changed for new turning radius
@@ -1614,14 +1614,24 @@ public class GridMap extends View{
                     case "backright":
                         if ((0 < curCoord[1] && curCoord[1] < 15)
                                 && (0 < curCoord[0] && curCoord[0] < 14)) {
+                            tempCurCood1=curCoord[1]; //added
                             curCoord[1] += 5;
                             if (checkForObstacleCollision(curCoord, obstacleCoord)) {
                                 validPosition = false;
                                 curCoord[1] -= 5;
                             } else {
-                                curCoord[0] += 7; //changed for new turning radius
                                 robotDirection = "down";
                                 validPosition = true;
+                                for (int i = curCoord[0]; i <= curCoord[0]+6; i++) { //x axis
+                                    cells[i][20-tempCurCood1].setType("explored");
+                                    cells[i][20-tempCurCood1-1].setType("explored");
+                                }
+                                for (int j = tempCurCood1; j <= tempCurCood1+5; j++) { //y axis
+                                    cells[curCoord[0]+7][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]+6][20 - j - 1].setType("explored");
+                                }
+
+                                curCoord[0] += 7; //changed for new turning radius
                             }
                         }
                         break;
