@@ -50,7 +50,13 @@ def segment(world: World, initial: Vector, objectives: dict[Obstacle, tuple[Vect
                 return __trace(source, moves, costs, obstacle, current)
 
         for next, move in __neighbours(world, current):
-            new_cost = costs[current] + len(move.vectors)
+            new_cost = costs[current]
+            match move:
+                case Turn():
+                    new_cost += move.turn.arc_length(world.cell_size)
+                case Move():
+                    new_cost += len(move.vectors)
+
             if next not in costs or new_cost < costs[next]:
                 frontier.add(new_cost + __heuristic(next, objectives), next)
                 source[next] = current
@@ -95,7 +101,7 @@ class __PriorityQueue:
 def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
     for move in TurnInstruction:
         path = turn(world, current, move)
-        if all(map(lambda p: world.contains(p), path)):
+        if path:
             yield path[-1], Turn(move, path)
 
     for move in Straight:
@@ -110,4 +116,7 @@ def __heuristic(current: Vector, objectives: dict[Obstacle, tuple[Vector, set[Ve
     """
     The Euclidean distance between two vectors. This is preferred over Manhattan distance which is not admissible.
     """
+    if len(objectives.values()) == 0:
+        return 0
+
     return min(int(math.sqrt((vector.x - current.x) ** 2 + (vector.y - current.y) ** 2)) for vector, _ in objectives.values())
