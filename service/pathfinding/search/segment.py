@@ -50,9 +50,13 @@ def segment(world: World, initial: Vector, objectives: dict[Obstacle, tuple[Vect
                 return __trace(source, moves, costs, obstacle, current)
 
         for next, move in __neighbours(world, current):
+            new_cost = costs[current]
+            match move:
+                case Turn():
+                    new_cost += move.turn.arc_length(world.cell_size)
+                case Move():
+                    new_cost += len(move.vectors)
 
-
-            new_cost = costs[current] + len(move.vectors)
             if next not in costs or new_cost < costs[next]:
                 frontier.add(new_cost + __heuristic(next, objectives), next)
                 source[next] = current
