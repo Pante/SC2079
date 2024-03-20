@@ -101,7 +101,7 @@ class __PriorityQueue:
 def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
     for move in TurnInstruction:
         path = turn(world, current, move)
-        if all(map(lambda p: world.contains(p), path)):
+        if path:
             yield path[-1], Turn(move, path)
 
     for move in Straight:
