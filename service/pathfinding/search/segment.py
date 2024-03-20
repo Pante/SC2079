@@ -50,6 +50,8 @@ def segment(world: World, initial: Vector, objectives: dict[Obstacle, tuple[Vect
                 return __trace(source, moves, costs, obstacle, current)
 
         for next, move in __neighbours(world, current):
+
+
             new_cost = costs[current] + len(move.vectors)
             if next not in costs or new_cost < costs[next]:
                 frontier.add(new_cost + __heuristic(next, objectives), next)
@@ -110,4 +112,7 @@ def __heuristic(current: Vector, objectives: dict[Obstacle, tuple[Vector, set[Ve
     """
     The Euclidean distance between two vectors. This is preferred over Manhattan distance which is not admissible.
     """
+    if len(objectives.values()) == 0:
+        return 0
+
     return min(int(math.sqrt((vector.x - current.x) ** 2 + (vector.y - current.y) ** 2)) for vector, _ in objectives.values())

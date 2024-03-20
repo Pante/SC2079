@@ -36,6 +36,20 @@ class TurnInstruction(str, Enum):
     BACKWARD_LEFT = 'BACKWARD_LEFT'
     BACKWARD_RIGHT = 'BACKWARD_RIGHT'
 
+    @property
+    def radius(self):
+        match self:
+            case TurnInstruction.FORWARD_LEFT:
+                return 40
+            case TurnInstruction.FORWARD_RIGHT:
+                return 42
+            case TurnInstruction.BACKWARD_LEFT:
+                return 38
+            case TurnInstruction.BACKWARD_RIGHT:
+                return 40
+
+
+
 
 @dataclass
 class Turn:
