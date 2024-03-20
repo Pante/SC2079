@@ -14,7 +14,8 @@ static float lpf(float a, float old, float new) {
 }
 
 static I2C_HandleTypeDef *hi2c_ptr;
-static ADC_HandleTypeDef *hadc_ptr;
+static ADC_HandleTypeDef *hadc_L_ptr;
+static ADC_HandleTypeDef *hadc_R_ptr;
 static TIM_HandleTypeDef *hic_ptr;
 static Sensors *sensors_ptr;
 
@@ -30,10 +31,11 @@ static float read_mag_angle() {
 	return -atan2(mag[1], mag[0]) * 180 / M_PI;
 }
 
-void sensors_init(I2C_HandleTypeDef *i2c_ptr, ADC_HandleTypeDef *adc_ptr, TIM_HandleTypeDef *ic_ptr, Sensors *sens_ptr) {
+void sensors_init(I2C_HandleTypeDef *i2c_ptr, ADC_HandleTypeDef *adc_L_ptr, ADC_HandleTypeDef *adc_R_ptr, TIM_HandleTypeDef *ic_ptr, Sensors *sens_ptr) {
 	hi2c_ptr = i2c_ptr;
-	hadc_ptr = adc_ptr;
 	hic_ptr = ic_ptr;
+	hadc_L_ptr = adc_L_ptr;
+	hadc_R_ptr = adc_R_ptr;
 	sensors_ptr = sens_ptr;
 
 	ICM20948_init(hi2c_ptr, ICM_I2C_ADDR, GYRO_SENS, ACCEL_SENS);
@@ -63,11 +65,7 @@ void sensors_read_usDist(float pulse_s) {
 	sensors_ptr->usDist = lpf(a_usDist, sensors_ptr->usDist, pulse_s * 34300 / 2);
 }
 
-void sensors_read_irDist() {
-	HAL_ADC_Start(hadc_ptr);
-	HAL_ADC_PollForConversion(hadc_ptr, HAL_MAX_DELAY);
-
-	uint16_t value = (uint16_t) HAL_ADC_GetValue(hadc_ptr);
+static float irValueToDist(uint16_t value) {
 	float div = pow(((float) value) / 4095, 1.226);
 	float dist = (div < 6.3028 / DIST_IR_MAX)
 		? DIST_IR_MAX
@@ -75,8 +73,18 @@ void sensors_read_irDist() {
 
 	dist -= DIST_IR_OFFSET;
 	if (dist < DIST_IR_MIN) dist = DIST_IR_MIN;
+	return dist;
+}
+void sensors_read_irDist() {
+	HAL_ADC_Start(hadc_L_ptr);
+	HAL_ADC_Start(hadc_R_ptr);
+	while (HAL_ADC_PollForConversion(hadc_L_ptr, HAL_MAX_DELAY) != HAL_OK
+			&& HAL_ADC_PollForConversion(hadc_R_ptr, HAL_MAX_DELAY) != HAL_OK);
 
-	sensors_ptr->irDist = lpf(a_irDist, sensors_ptr->irDist, dist);
+	uint16_t lVal = (uint16_t) HAL_ADC_GetValue(hadc_L_ptr),
+		rVal = (uint16_t) HAL_ADC_GetValue(hadc_R_ptr);
+	sensors_ptr->irDist[0] = lpf(a_irDist, sensors_ptr->irDist[0], irValueToDist(lVal));
+	sensors_ptr->irDist[1] = lpf(a_irDist, sensors_ptr->irDist[1], irValueToDist(rVal));
 }
 
 void sensors_read_gyroZ() {
@@ -105,8 +113,8 @@ void sensors_set_bias(uint16_t count) {
 	uint16_t i;
 	uint8_t j;
 	float gyroZTotal = 0, gyroZ = 0,
-		accelTotal[3] = {0}, accel[3],
-		headingTotal = 0;
+		accelTotal[3] = {0}, accel[3];
+//		headingTotal = 0;
 
 	for (i = 0; i < count; i++) {
 		ICM20948_readGyroscope_Z(hi2c_ptr, ICM_I2C_ADDR, GYRO_SENS, &gyroZ); //gyroscope bias
@@ -115,7 +123,7 @@ void sensors_set_bias(uint16_t count) {
 		ICM20948_readAccelerometer_all(hi2c_ptr, ICM_I2C_ADDR, ACCEL_SENS, accel); //accelerometer bias
 		for (j = 0; j < 3; j++) accelTotal[j] += accel[j];
 
-		headingTotal += read_mag_angle(); //heading bias
+//		headingTotal += read_mag_angle(); //heading bias
 	}
 
 	sensors_ptr->gyroZ_bias = gyroZTotal / count;
@@ -123,15 +131,7 @@ void sensors_set_bias(uint16_t count) {
 	for (i = 0; i < 3; i++) sensors_ptr->accel_bias[i] = accelTotal[i] / count;
 	sensors_ptr->accel_bias[2] -= GRAVITY; //normally z accelerometer should read gravity.
 
-	float heading_bias = headingTotal / count;
-	sensors_ptr->heading_bias = heading_bias;
-	angle_reset(heading_bias);
-}
-
-void sensors_dist_warmup(uint16_t count) {
-	for (uint16_t i = 0; i < count; i++) {
-		sensors_us_trig();
-		sensors_read_irDist();
-		HAL_Delay(20);
-	}
+//	float heading_bias = headingTotal / count;
+//	sensors_ptr->heading_bias = heading_bias;
+//	angle_reset(heading_bias);
 }

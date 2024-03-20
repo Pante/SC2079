@@ -90,24 +90,34 @@ float parse_float_until(uint8_t **buf_ptr, uint8_t until, uint8_t sizeExpected) 
 	return (whole + frac) * sign;
 }
 
-
+static float get_L(float steeringAngle) {
+	return CHASSIS_CM + WHEELBASE_CM_FRONT / 2 * tan(abs_float(steeringAngle) * M_PI / 180);
+}
 static float get_turning_r_steer_cm(float steeringAngle) {
-	return CHASSIS_CM / sin(steeringAngle * M_PI / 180);
+	return get_L(steeringAngle) / sin(steeringAngle * M_PI / 180);
 }
 float get_turning_r_back_cm(float steeringAngle) {
-	return CHASSIS_CM / tan(steeringAngle * M_PI / 180);
+	return get_L(steeringAngle) / tan(steeringAngle * M_PI / 180);
 }
 float get_turning_r_robot_cm(float steeringAngle) {
 	float r_steer = get_turning_r_back_cm(steeringAngle);
-	float L2 = CHASSIS_CM / 2;
+	float L2 = get_L(steeringAngle) / 2;
 	float r = sqrt(r_steer * r_steer + L2 * L2);
 	if (steeringAngle < 0) r = -r;
 	return r;
 }
 
 //angular velocity (with actual translational speed).
-float get_w_ms(float speed_cm_ms, float turning_r_robot_cm) {
-	return speed_cm_ms / turning_r_robot_cm *  180 / M_PI;
+float get_w_ms(float speed_cm_ms, float turning_r) {
+	return speed_cm_ms / turning_r *  180 / M_PI;
+}
+
+float get_w_gyro(float speed_cm_ms, float gyro) {
+//	if (abs_float(gyro) < 1e-5) return 0;
+	return gyro;
+	return gyro - 0.001;
+//	float r = speed_cm_ms / (gyro * M_PI / 180) + GYRO_CENTER_OFFSET_CM;
+//	return speed_cm_ms / r * 180 / M_PI;
 }
 
 static float mod_360(float angle) {
@@ -132,7 +142,7 @@ float angle_diff_dir(float a1, float a2, int8_t dir) {
 	return diff;
 }
 
-float get_distance_cm(uint16_t pulses) {
+float get_distance_cm(int16_t pulses) {
 	return ((float) pulses) / MOTOR_PPR * 2 * M_PI * WHEEL_R_CM;
 }
 

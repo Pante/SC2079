@@ -60,6 +60,22 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 			next->distType = STOP_AWAY;
 			break;
 
+		case CMD_FORWARD_DIST_L:
+			next->dir = 1;
+			next->distType = STOP_L;
+			break;
+		case CMD_FORWARD_DIST_R:
+			next->dir = 1;
+			next->distType = STOP_R;
+			break;
+		case CMD_BACKWARD_DIST_L:
+			next->dir = -1;
+			next->distType = STOP_L;
+			break;
+		case CMD_BACKWARD_DIST_R:
+			next->dir = -1;
+			next->distType = STOP_R;
+			break;
 		default:
 			//invalid command, return.
 			return;

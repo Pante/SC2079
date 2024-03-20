@@ -41,11 +41,13 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define MS_FRAME 2.5f
+//8MHz / 16000 = 2.0ms frame.
+#define MS_FRAME 2.0f
 #define SERIAL_BUF_SIZE 20
 #define SERIAL_RING_SIZE 1000
-#define DIST_DIFF_DEFAULT 10
-#define TICKS_ES_MAX 4
+#define DIST_DIFF_DEFAULT 50
+#define BRAKE_SPEED 20
+#define TICKS_ES_MAX 8
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,6 +57,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc2;
 
 I2C_HandleTypeDef hi2c1;
 
@@ -103,6 +106,7 @@ static void MX_TIM4_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
+static void MX_ADC2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -128,7 +132,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 
 	else if (htim == &htim7) {
-		//8MHz / 20000 = 2.5ms frame.
 		newTick = 1;
 	}
 }
@@ -197,17 +200,18 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM6_Init();
   MX_TIM7_Init();
+  MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
 
   /* ----- Start: Initialize libraries ----- */
-  OLED_Init();										//initialize OLED display.
-  magcal_init(&hi2c1, &magCalParams);				//initialize magnetometer calibration.
-  sensors_init(&hi2c1, &hadc1, &htim4, &sensors); 	//initialize motion sensors.
-  motor_init(&htim8, &htim2, &htim3); 				//initialize motor PWM and encoders.
-  servo_init(&htim1); 								//initialize servo PWM.
-  delay_us_init(&htim6);							//initialize us timer.
+  OLED_Init();												//initialize OLED display.
+  magcal_init(&hi2c1, &magCalParams);						//initialize magnetometer calibration.
+  sensors_init(&hi2c1, &hadc1, &hadc2, &htim4, &sensors); 	//initialize motion sensors.
+  motor_init(&htim8, &htim2, &htim3); 						//initialize motor PWM and encoders.
+  servo_init(&htim1); 										//initialize servo PWM.
+  delay_us_init(&htim6);									//initialize us timer.
 
-  dist_init();										//initialize distance tracking.
+  dist_init();												//initialize distance tracking.
   /* ----- End: Initialize libraries ----- */
 
   /* ----- Start: Car setup ----- */
@@ -222,12 +226,12 @@ int main(void)
 //  while (!user_is_pressed());	//wait for user to place car.
   HAL_Delay(500);
   OLED_Clear();
-  OLED_ShowString(0, 0, "Setting sensors bias...");
+  OLED_ShowString(0, 0, "Calibrating...");
   OLED_Refresh_Gram();
 
   sensors_set_bias(500); 		// set initial bias.
-  OLED_Clear();
-  OLED_ShowString(0, 0, "Active.");
+
+  OLED_ShowString(0, 0, "Calibration done.");
   OLED_Refresh_Gram();
 
   /* ----- End: Car setup ----- */
@@ -235,9 +239,13 @@ int main(void)
   /* ----- Start: OS Parameters ----- */
   //ticking for longer timing requirements for ultrasound, and servo turning.
   uint8_t ticksElapsed = 0,
-		  ticksUltrasound = (17.5f / MS_FRAME) + 1,
-		  ticksServo = (SERVO_TURN_PERIOD / MS_FRAME),
-		  ticksRefresh = lcm_uint8(ticksUltrasound, ticksServo);
+		  ticksUsElapsed = 0,
+		  ticksUs = (uint8_t) (US_MIN_DELAY / MS_FRAME) + 1,
+		  ticksServo = (uint8_t) (SERVO_TURN_PERIOD / MS_FRAME),
+		  ticksServoFull = (uint8_t) (SERVO_TURN_PERIOD * SERVO_WIDTH / SERVO_TURN_STEP) / MS_FRAME,
+		  ticksMotor = (uint8_t) (MOTOR_CORRECTION_PERIOD / MS_FRAME),
+		  ticksRefresh = lcm_uint8(lcm_uint8(ticksUs, ticksServo), ticksMotor),
+		  ticksDelay = ticksServoFull - 1;
 
   //ticking for error stabilization.
   uint8_t ticksES = 0;
@@ -261,10 +269,12 @@ int main(void)
 
   /* ----- Start: Interrupts ----- */
   HAL_UART_Receive_IT(&huart3, &ring_serial[ring_i], 1);	//start receiving serial.
-  HAL_ADC_Start(&hadc1);									//start continuous ADC conversion.
   HAL_TIM_Base_Start_IT(&htim7);							//start paced loop timer.
   /* ----- End: Interrupts ----- */
 
+  OLED_Clear();
+  OLED_ShowString(0, 0, "Active.");
+  OLED_Refresh_Gram();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -276,104 +286,131 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	/* ----- Start: Sensor reading ----- */
 	//trigger distance measurement.
-	if (!(ticksElapsed % ticksUltrasound)) {
+	if (!(ticksElapsed % ticksUs)) {
 		sensors_us_trig();
 	}
 
-	sensors_read_irDist();
 	sensors_read_accel();
 	sensors_read_gyroZ();
-//	sensors_read_heading(MS_FRAME, sensors.gyroZ);
+	sensors_read_irDist();
 	/* ----- End: Sensor reading ----- */
 
 	/* ----- Start: Get next command (if any) ----- */
 	if (cmd == NULL) {
-		cmd = commands_pop();
+		if (!ticksDelay) {
+			cmd = commands_pop();
 
-		if (cmd != NULL) {
-			//perform command setup based on
-			switch (cmd->opType) {
-				case DRIVE:
-					estDistOld = 0;
-					estAngle = 0;
-					motor_setDrive(cmd->dir, cmd->speed);
-					if (cmd->dir != 0) {
-						distTarget = cmd->val;
-						distDiff = DIST_DIFF_DEFAULT;
-						brakingDist = (cmd->distType == TARGET
-							? MOTOR_BRAKING_DIST_CM_TARGET
-							: MOTOR_BRAKING_DIST_CM_AWAY
-						) * cmd->speed / 100;
+			if (cmd != NULL) {
+				//perform command setup based on
+				switch (cmd->opType) {
+					case DRIVE:
+						estDistOld = 0;
+						estAngle = 0;
+						motor_setDrive(cmd->dir, cmd->speed);
+						if (cmd->dir != 0) {
+							distTarget = cmd->val;
+							distDiff = DIST_DIFF_DEFAULT;
+							brakingDist = (cmd->distType == TARGET
+								? MOTOR_BRAKING_DIST_CM_TARGET
+								: MOTOR_BRAKING_DIST_CM_AWAY
+							) * cmd->speed / 100;
 
-						steeringAngle = cmd->steeringAngle;
-						servo_setAngle(steeringAngle);
-						if (steeringAngle != 0) {
-							rBack = get_turning_r_back_cm(steeringAngle);
-							rRobot = get_turning_r_robot_cm(steeringAngle);
-							if (cmd->distType == TARGET) {
-								distTarget = abs_float(get_arc_length(cmd->val, rBack));
+
+							steeringAngle = cmd->steeringAngle;
+							servo_setAngle(steeringAngle);
+							if (steeringAngle != 0) {
+								rBack = get_turning_r_back_cm(steeringAngle);
+								rRobot = get_turning_r_robot_cm(steeringAngle);
+								if (cmd->distType == TARGET) {
+									distTarget = abs_float(get_arc_length(cmd->val, rBack));
+								}
+							} else {
+								rBack = 0;
+								rRobot = 0;
+								wTarget = 0;
 							}
 						} else {
-							rBack = 0;
-							rRobot = 0;
-							wTarget = 0;
+							commands_end(&huart3, cmd);
+							cmd = NULL;
 						}
-					} else {
+						break;
+
+					case INFO_DIST:
+						shouldTrackDist = !shouldTrackDist;
+						if (shouldTrackDist) {
+							distTrack = 0;
+						} else {
+							//write distance tracked into string.
+							free(cmd->str);
+							cmd->str_size = 8; //D<6.2f>\n = 8 characters
+							cmd->str = malloc(cmd->str_size * sizeof(uint8_t));
+							snprintf(cmd->str, cmd->str_size, "D%6.2f\n", distTrack);
+						}
+
 						commands_end(&huart3, cmd);
 						cmd = NULL;
-					}
-					break;
-
-				case INFO_DIST:
-					shouldTrackDist = !shouldTrackDist;
-					if (shouldTrackDist) {
-						distTrack = 0;
-					} else {
-						//write distance tracked into string.
-						free(cmd->str);
-						cmd->str_size = 8; //D<6.2f>\n = 8 characters
-						cmd->str = malloc(cmd->str_size * sizeof(uint8_t));
-						snprintf(cmd->str, cmd->str_size, "D%6.2f\n", distTrack);
-					}
-
-					commands_end(&huart3, cmd);
-					cmd = NULL;
-					break;
+						break;
+				}
+			}
+		} else {
+			Command *peek = commands_peek_next_drive();
+			if (peek != NULL) {
+				servo_setAngle(peek->steeringAngle);
+				if (ticksDelay > 0) ticksDelay--;
 			}
 		}
 	}
+
 	/* ----- End: Get next command (if any) ----- */
 
 	/* ----- Start: Command Control Loop ----- */
 	if (cmd != NULL && cmd->dir != 0) {
 		//calculate distance.
 		motorDist = motor_getDist();
-		estDist = dist_get_cm(MS_FRAME, cmd->dir * sensors.accel[1], motorDist);
+		estDist = cmd->dir * dist_get_cm(MS_FRAME, sensors.accel[1], motorDist);
 
 		//estimate current speed.
 		float estSpeed = (estDist - estDistOld) / MS_FRAME;
 		estDistOld = estDist;
 
 		//calculate difference in angular velocity.
-		if (rBack != 0) wTarget = get_w_ms(estSpeed, rBack - GYRO_CENTER_OFFSET_CM);
+		float wGyro;
+		wGyro = cmd->dir * sensors.gyroZ;
+
+		if (rBack != 0) {
+			wTarget = get_w_ms(estSpeed, rBack);
+		}
 		else wTarget = 0;
-		float wGyro = cmd->dir * sensors.gyroZ;
 		wDiff = (wGyro - wTarget); //gyro is flipped when going backwards.
 
-		estAngle += abs_float(wGyro * MS_FRAME);
+		float angleChange = wGyro * MS_FRAME;
+		if (steeringAngle < 0) angleChange = -angleChange;
+		estAngle += angleChange;
+
 		distDiffOld = distDiff;
 		switch (cmd->distType) {
 			case TARGET:
-				distDiff = distTarget - estDist;
 				if (rBack != 0) {
-					if (estAngle >= cmd->val) distDiff = 0;
-					else distDiff = abs_float(get_arc_length(cmd->val - estAngle, rBack));
+					distDiff = get_arc_length(cmd->val - estAngle, abs_float(rBack));
+				} else {
+					distDiff = distTarget - estDist;
 				}
 				break;
 			case STOP_AWAY:
 				if (usCaptureComplete) {
-					float frontDistDiff = (dist_get_front(sensors.usDist, sensors.irDist) - cmd->val) * cmd->dir;
-					distDiff = frontDistDiff;
+					distDiff = (sensors.usDist - cmd->val) * cmd->dir;
+				}
+				break;
+			case STOP_L:
+			case STOP_R:
+				uint8_t i = cmd->distType == STOP_L ? 0 : 1;
+				float irVal = sensors.irDist[i];
+				float cmdVal = cmd->val;
+				if (cmdVal < 0) {
+					cmdVal = -cmdVal;
+					distDiff = irVal > cmdVal ? DIST_DIFF_DEFAULT : 0;
+				} else {
+					distDiff = irVal < cmdVal ? DIST_DIFF_DEFAULT : 0;
 				}
 				break;
 			default:
@@ -382,55 +419,6 @@ int main(void)
 		}
 
 		Command *next = commands_peek_next_drive();
-
-		float nextAngle = next != NULL ? next->steeringAngle : 0;
-		float nextAngleDiff = abs_float(nextAngle - cmd->steeringAngle);
-		uint8_t shouldBrake = cmd->distType == STOP_AWAY
-				? 1
-				: next != NULL
-				? next->dir != cmd->dir
-					|| next->dir < 0 //avoid smooth turning while reversing.
-					|| nextAngleDiff > SERVO_WIDTH
-				: 1;
-		uint8_t turnSpeed = next != NULL ? min_uint8(20, next->speed) : 20;
-
-		//motor correction.
-		motor_pwmCorrection(
-			wDiff, rBack, rRobot, distDiff,
-			brakingDist, cmd->distType,
-			shouldBrake ? 0 : turnSpeed
-		);
-
-//		float turnMs = 144.0f * turnSpeed / 25 * nextAngleDiff / SERVO_WIDTH;
-//		uint8_t shouldTurn = shouldBrake
-//			? distDiff < 0.025 * brakingDist
-//			: estSpeed > 0
-//			  	  ? distDiff / estSpeed < turnMs
-//				  : 0;
-//		if (shouldTurn) servo_setAngle(nextAngle);
-
-
-		float timeLeft = estSpeed > 0 ? distDiff / estSpeed : 1e10;
-		if (shouldBrake) {
-//			if (distDiff < 0.03 * brakingDist * nextAngleDiff / SERVO_WIDTH) {
-//			if (ticksES > TICKS_ES_MAX * 0.9) {
-//				//stabilized halfway; start turning
-//				steeringAngle = nextAngle;
-//				servo_setAngle(nextAngle);
-//			}
-		}
-		else if (!(ticksElapsed % ticksServo)) {
-			//turn a small angle every SERVO_TURN_PERIOD ms.
-			float diff = abs_float(steeringAngle - next->steeringAngle);
-			if (timeLeft < (SERVO_TURN_PERIOD) * (diff / SERVO_TURN_STEP)) {
-				//should increment.
-				float step = min_float(SERVO_TURN_STEP, diff);
-				if (nextAngle < steeringAngle) step = -step;
-				steeringAngle += step;
-				servo_setAngle(steeringAngle);
-			}
-		}
-
 		if (next != NULL) {
 			if (commands_type_match(cmd, next)) {
 				//absorb next command into current command.
@@ -450,11 +438,49 @@ int main(void)
 			}
 		}
 
+		float nextAngle = next != NULL ? next->steeringAngle : 0;
+		float nextAngleDiff = abs_float(nextAngle - cmd->steeringAngle);
+		uint8_t shouldBrake = cmd->distType == STOP_AWAY
+				? 1
+				: next != NULL
+				? next->dir != cmd->dir
+//					|| next->dir < 0 //avoid smooth turning while reversing.
+					|| nextAngleDiff > SERVO_WIDTH
+				: 1;
+		uint8_t turnSpeed = next != NULL ? min_uint8(BRAKE_SPEED, next->speed) : BRAKE_SPEED;
+
+		//motor correction.
+		motor_pwmCorrection(
+			wDiff, rBack, distDiff,
+			brakingDist, cmd->distType,
+			shouldBrake ? 0 : turnSpeed
+		);
+
+		float timeLeft = estSpeed > 0 ? distDiff / estSpeed : 1e10;
+
+		uint8_t shouldEnd = 0;
+		if (!shouldBrake && !(ticksElapsed % ticksServo)) {
+			//turn a small angle every SERVO_TURN_PERIOD ms.
+			float diff = abs_float(steeringAngle - next->steeringAngle);
+			if (diff > 0 && timeLeft < (SERVO_TURN_PERIOD) * (diff / SERVO_TURN_STEP)) {
+				//should increment.
+				float step = min_float(SERVO_TURN_STEP, diff);
+				if (nextAngle < steeringAngle) step = -step;
+				steeringAngle += step;
+				servo_setAngle(steeringAngle);
+
+				if (diff < SERVO_TURN_STEP) {
+					shouldEnd = 1;
+				}
+			}
+		}
+
 		float absDistDiff = abs_float(distDiff),
 				absDistDiffChange = abs_float(distDiff - distDiffOld);
-		if (absDistDiff < 0.1 || (shouldBrake && absDistDiff < 1 && absDistDiffChange < 0.05)) {
+
+		if (shouldEnd || absDistDiff < 0.05 || (shouldBrake && absDistDiff < 1.0 && absDistDiffChange < 0.25)) {
 			//check for stabilization (if not in continuous motion).
-			if (!shouldBrake || ++ticksES >= TICKS_ES_MAX) {
+			if (shouldEnd || !shouldBrake || ++ticksES >= TICKS_ES_MAX) {
 				//target achieved; move to next command.
 				ticksES = 0;
 				commands_end(&huart3, cmd);
@@ -462,6 +488,7 @@ int main(void)
 
 				servo_setAngle(nextAngle);
 				if (shouldBrake) {
+					ticksDelay = (SERVO_TURN_PERIOD * SERVO_TURN_STEP) / MS_FRAME * abs_float(nextAngle - steeringAngle) - 1;
 					motor_setDrive(0, 0);
 					dist_reset(0);
 				} else dist_reset(estSpeed);
@@ -483,6 +510,9 @@ int main(void)
 			uint8_t c = ring_serial[track_i];
 			buf_serial[buf_i++] = c;
 			if (c == CMD_END) {
+//				uint8_t *temp = buf_serial;
+//				uint16_t val = parse_uint16_t_until(&temp, CMD_END, 4);
+//				servo_setVal(val);
 				commands_process(&huart3, buf_serial, buf_i);
 				buf_i = 0;
 			}
@@ -589,6 +619,58 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief ADC2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC2_Init(void)
+{
+
+  /* USER CODE BEGIN ADC2_Init 0 */
+
+  /* USER CODE END ADC2_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC2_Init 1 */
+
+  /* USER CODE END ADC2_Init 1 */
+
+  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+  */
+  hadc2.Instance = ADC2;
+  hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+  hadc2.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc2.Init.ScanConvMode = DISABLE;
+  hadc2.Init.ContinuousConvMode = DISABLE;
+  hadc2.Init.DiscontinuousConvMode = DISABLE;
+  hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc2.Init.NbrOfConversion = 1;
+  hadc2.Init.DMAContinuousRequests = DISABLE;
+  hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  if (HAL_ADC_Init(&hadc2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_12;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC2_Init 2 */
+
+  /* USER CODE END ADC2_Init 2 */
 
 }
 
@@ -915,7 +997,7 @@ static void MX_TIM7_Init(void)
   htim7.Instance = TIM7;
   htim7.Init.Prescaler = 2-1;
   htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim7.Init.Period = 20000-1;
+  htim7.Init.Period = 16000-1;
   htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
   {
