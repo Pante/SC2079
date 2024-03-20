@@ -81,7 +81,14 @@ public class GridMap extends View{
     Map<String, String> val2IdxMap;
 
     private boolean mapDrawn = false;
+    private static final int CELL_LENGTH = 5; //length of each cell in cm
+    private static final int LEFT_TURNING_RADIUS = 40;
+    private static final int RIGHT_TURNING_RADIUS = 41;
+    private static final int BLEFT_TURNING_RADIUS = 37;
+    private static final int BRIGHT_TURNING_RADIUS = 41;
 
+    public int movesRx=0;
+    public int moves=0;
     public ArrayList<String[]> ITEM_LIST = new ArrayList<>(Arrays.asList(
             new String[20], new String[20], new String[20], new String[20], new String[20],
             new String[20], new String[20], new String[20], new String[20], new String[20],

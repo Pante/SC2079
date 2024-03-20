@@ -131,7 +131,7 @@ public class EmergencyFragment extends DialogFragment {
                 else{
 //                    gridMap.setRobotDirection("up");
 //                    gridMap.updateRobotAxis(col, row, "up");
-                    BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString(col)+Integer.toString(row)+obstDir);
+//                    BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString(col)+Integer.toString(row)+obstDir);
                     gridMap.canDrawRobot = true;
                     gridMap.setStartCoordStatus(true);
                     gridMap.setStartCoord(col+1,row+1);

@@ -361,7 +361,7 @@ public class Home extends Fragment {
                 String[] cmd = message.split("\\|");
                 String[] sentCoords = cmd[1].split(",");
                 String[] sentDirection = sentCoords[2].split("\\.");
-                BluetoothCommunications.getMessageReceivedTextView().append("\n");
+//                BluetoothCommunications.getMessageReceivedTextView().append("\n");
                 String direction = "";
                 String abc = String.join("", sentDirection);
                 if (abc.contains("EAST")) {

@@ -266,7 +266,9 @@ public class MappingFragment extends Fragment {
                         }
                         gridMap.imageBearings.get(Integer.parseInt(coords[1]))[Integer.parseInt(coords[0])] = direction;
                         gridMap.setObstacleCoord(Integer.parseInt(coords[0]) + 1, Integer.parseInt(coords[1]) + 1);
+
                     }
+
                     gridMap.invalidate();
                     showLog("Exiting Load Button");
                     showToast("Loaded saved map");
@@ -282,7 +284,7 @@ public class MappingFragment extends Fragment {
                 showLog("Clicked directionChangeImageBtn");
 //                directionFragment.show(getActivity().getFragmentManager(),
 //                        "Direction Fragment");
-                BluetoothCommunications.getMessageReceivedTextView().append(direction);
+//                BluetoothCommunications.getMessageReceivedTextView().append(direction);
                 switch(direction)
                 {
                     case "None":
