@@ -24,26 +24,21 @@ class Task2PC:
         self.port = 5000
         self.client_socket = None
 
-        self.stream_listener = StreamListener("TestingScripts/v9_task1.pt")
+        self.stream_listener = StreamListener("v9 task2_stop removed.pt")
         self.prev_image = None
 
     def start(self):
-        try:
-            self.pc_receive_thread = threading.Thread(target=self.pc_receive)
-            self.stream_thread = threading.Thread(target=self.stream_start)
-            self.pc_receive_thread.start()  # Receive from PC
-            self.stream_thread.start()  # Start stream
-        except KeyboardInterrupt:
-            print("Exiting program")
-        finally:
-            self.disconnect()
+        self.pc_receive_thread = threading.Thread(target=self.pc_receive)
+        self.stream_thread = threading.Thread(target=self.stream_start)
+        self.pc_receive_thread.start()  # Receive from PC
+        self.stream_thread.start()  # Start stream
 
     def stream_start(self):
         self.stream_listener.start_stream_read(
             self.on_result, self.on_disconnect, conf_threshold=0.65, show_video=True
         )
 
-    def on_result(self, result):
+    def on_result(self, result, frame):
         message_content = None
 
         if result is not None:

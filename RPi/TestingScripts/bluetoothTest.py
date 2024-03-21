@@ -45,7 +45,7 @@ class BluetoothConnectionTest:
             while user_input < 5:
                 user_input = int(
                     input(
-                        "1: Send a message, 2: Exit, 3: Test MOVE/TURN, 4. TURN Instruction"
+                        "1: Send a message, 2: Exit, 3: Test MOVE/TURN, 4. TURN Instruction, 5. Random String"
                     )
                 )
                 if user_input == 1:
@@ -74,6 +74,12 @@ class BluetoothConnectionTest:
                         direction = input("Direction: ")
                         final_msg_sending = inst + "," + direction + ",0"
                         self.android.send(final_msg_sending)
+                    except OSError as e:
+                        print("Error in sending data: {e}")
+                elif user_input == 5:
+                    try:
+                        txt = input("Enter message...")
+                        self.android.send(txt)
                     except OSError as e:
                         print("Error in sending data: {e}")
                 else:

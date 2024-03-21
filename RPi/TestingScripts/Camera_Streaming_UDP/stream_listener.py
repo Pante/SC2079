@@ -67,9 +67,7 @@ class StreamListener:
             # perform actions based on results.
             annotated_frame = frame
             if len(res.boxes) > 0:
-                if show_video:
-                    annotated_frame = res.plot()
-
+                annotated_frame = res.plot()
                 on_result(res, annotated_frame)
             else:
                 on_result(None, None)
@@ -86,30 +84,3 @@ class StreamListener:
     # release all resources and close.
     def close(self):
         self.sock.close()
-
-
-# result handler.
-def handle_result(res):
-    if res is None:
-        return
-    print("CONFIDENCE LEVEL: ", res.boxes[0].conf.item())
-    print("CLASS: ", res.names[int(res.boxes[0].cls[0].item())])
-
-
-# disconnect handler.
-def handle_disconnect():
-    print("disconnected.")
-
-
-# # sample use of this class.
-def stream_listener_test():
-    # load the StreamListener class with the weights file.
-    listener = StreamListener('../v9_task1.pt')
-
-#     # pass in the handlers and start stream reading.
-#     listener.start_stream_read(handle_result, handle_disconnect, show_video=False)
-
-#     # release resources on disconnect.
-#     listener.close()
-
-# stream_listener_test() # comment this out when actually using!
