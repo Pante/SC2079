@@ -36,7 +36,7 @@ class World:
                 0 <= entity.north_east.y < self.size)
 
     def __annotate_grid(self: World) -> None:
-        error = 4 // self.cell_size
+        error = round(5 // self.cell_size)
 
         self.grid[0:self.robot.north_length, :] = False
         self.grid[:, -self.robot.east_length:] = False

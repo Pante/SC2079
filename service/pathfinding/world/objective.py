@@ -33,7 +33,7 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     """
     The maximum distance (in grid cells) between the obstacle and centre of objective, exclusive. (Total cm / cm per cell).
     """
-    maximum_gap = 28 // world.cell_size
+    maximum_gap = 30 // world.cell_size
 
     """
     The offset to the sides (in grid cells) between the obstacle and objective, inclusive. 
