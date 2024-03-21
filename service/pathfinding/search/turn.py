@@ -19,7 +19,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
     """
 
     # The turning radius (in grid cells). The turning radius is assumed to be 25cm.
-    turning_radius = 32 // world.cell_size
+    turning_radius = instruction.radius(world.cell_size)
 
     match (start.direction, instruction):
         # Initially facing north
@@ -36,7 +36,6 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             )
             curve.append(Vector(Direction.WEST, curve[-1].x - world.robot.east_length, curve[-1].y))
             return curve
-
 
         case (Direction.NORTH, TurnInstruction.FORWARD_RIGHT):
             initial = Vector(start.direction, start.x, start.y - world.robot.south_length)

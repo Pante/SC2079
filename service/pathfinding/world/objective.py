@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathfinding.world.primitives import Direction, Vector
-from pathfinding.world.world import Obstacle, World
+from pathfinding.world.world import Obstacle, World, Robot
 
 
 def generate_objectives(world: World) -> dict[Obstacle, tuple[Vector, set[Vector]]]:
@@ -44,14 +44,14 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     objectives = set()
     for alignment in range(-offset, obstacle.clearance + offset):
         for gap in range(minimum_gap, maximum_gap):
-            objective = __suggest_objective(obstacle, gap + 1, alignment)
+            objective = __suggest_objective(world.robot, obstacle, gap + 1, alignment)
             if world.contains(objective):
                 objectives.add(objective)
 
     return objectives
 
 
-def __suggest_objective(obstacle: Obstacle, gap: int, alignment: int) -> Vector:
+def __suggest_objective(robot: Robot, obstacle: Obstacle, gap: int, alignment: int) -> Vector:
     """
     Creates an objective from this obstacle.
 
@@ -70,13 +70,13 @@ def __suggest_objective(obstacle: Obstacle, gap: int, alignment: int) -> Vector:
             return Vector(
                 Direction.SOUTH,
                 obstacle.north_east.x - clearance + alignment,
-                obstacle.north_east.y + gap
-            )
+                obstacle.north_east.y + robot.south_length + gap,
+                )
 
         case Direction.EAST:
             return Vector(
                 Direction.WEST,
-                obstacle.north_east.x + gap,
+                obstacle.north_east.x + robot.west_length + gap,
                 obstacle.north_east.y - clearance + alignment
             )
 
@@ -84,12 +84,12 @@ def __suggest_objective(obstacle: Obstacle, gap: int, alignment: int) -> Vector:
             return Vector(
                 Direction.NORTH,
                 obstacle.south_west.x + clearance - alignment,
-                obstacle.south_west.y - gap
+                obstacle.south_west.y - robot.north_length - gap
             )
 
         case Direction.WEST:
             return Vector(
                 Direction.EAST,
-                obstacle.south_west.x - gap,
+                obstacle.south_west.x - robot.east_length - gap,
                 obstacle.south_west.y + clearance - alignment,
-            )
+                )
