@@ -2,23 +2,46 @@
 
 static TIM_HandleTypeDef *pwm_tim;
 
-#define SERVO_LOOKUP_SIZE 13
-static float lookup[13][2] = {
-	{-25, 3800},
-	{-23, 3850},
-	{-21, 3900},
-	{-17, 4000},
-	{-14, 4200},
-	{-8.5, 4350},
-	{-7, 4500},
+#define SERVO_LOOKUP_SIZE 38
+static float lookup[38][2] = {
+	{-35, 3200},
+	{-32, 3300},
+	{-29, 3400},
+	{-26, 3500},
+	{-24, 3600},
+	{-22, 3750},
+	{-20, 3800},
+	{-18, 3900},
+	{-14, 4000},
+	{-13, 4100},
+	{-10, 4200},
+	{-7, 4300},
+	{-6, 4400},
+	{-4, 4500},
+	{-2, 4600},
+	{-1, 4700},
 	{0, 4800},
-	{2, 5100},
-	{7, 5400},
-	{11, 5700},
+	{1, 4900},
+	{1.5, 5000},
+	{3, 5100},
+	{4.5, 5200},
+	{7, 5300},
+	{8.5, 5400},
+	{10, 5500},
+	{12, 5600},
+	{13, 5700},
+	{14, 5800},
+	{15, 5900},
 	{16, 6000},
-	{22.5, 6300},
+	{17, 6100},
+	{20, 6200},
+	{21, 6300},
+	{22, 6400},
+	{23, 6500},
 	{24, 6600},
-	{25, 6900}
+	{25, 6700},
+	{25.5, 6800},
+	{26, 6900}
 };
 
 void servo_init(TIM_HandleTypeDef *pwm) {
@@ -32,9 +55,12 @@ void servo_setVal(uint32_t val) {
 
 void servo_setAngle(float angle) {
 	//clamp angle to within width.
+	if (angle < -SERVO_WIDTH) angle = -SERVO_WIDTH;
+	else if (angle > SERVO_WIDTH) angle = SERVO_WIDTH;
+
 	uint32_t val = 0;
-	if (angle <= -SERVO_WIDTH) val = lookup[0][1];
-	else if (angle >= SERVO_WIDTH) val = lookup[SERVO_LOOKUP_SIZE - 1][1];
+	if (angle <= lookup[0][0]) val = lookup[0][0];
+	else if (angle >= lookup[SERVO_LOOKUP_SIZE - 1][0]) val = lookup[SERVO_LOOKUP_SIZE - 1][0];
 	else {
 		uint8_t i;
 		float min_val, max_val;
