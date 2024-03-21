@@ -23,227 +23,243 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
     offset = 3 // world.cell_size
 
     match (start.direction, instruction):
-        # Initially facing north
+        # y facing north
         case (Direction.NORTH, TurnInstruction.FORWARD_LEFT):
-            initial = Vector(start.direction, start.x, start.y - world.robot.south_length + offset)
+            x = start.x
+            y = start.y - world.robot.south_length + offset
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.WEST,
-                    initial.x - turning_radius - world.robot.east_length + offset,
-                    initial.y + turning_radius,
+                    x - turning_radius - world.robot.east_length + offset,
+                    y + turning_radius,
                 ),
-                initial.x - turning_radius,
-                initial.y,
+                x - turning_radius,
+                y,
                 1,
             )
 
         case (Direction.NORTH, TurnInstruction.FORWARD_RIGHT):
-            initial = Vector(start.direction, start.x, start.y - world.robot.south_length + offset)
+            x = start.x
+            y = start.y - world.robot.south_length + offset
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.EAST,
-                    initial.x + turning_radius + world.robot.west_length - offset,
-                    initial.y + turning_radius,
+                    x + turning_radius + world.robot.west_length - offset,
+                    y + turning_radius,
                 ),
-                initial.x + turning_radius,
-                initial.y,
+                x + turning_radius,
+                y,
                 2,
             )
 
         case (Direction.NORTH, TurnInstruction.BACKWARD_LEFT):
-            initial = Vector(start.direction, start.x, start.y - world.robot.south_length + offset)
+            x = start.x
+            y = start.y - world.robot.south_length + offset
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.EAST,
-                    initial.x - turning_radius + world.robot.west_length - offset,
-                    initial.y - turning_radius,
+                    x - turning_radius + world.robot.west_length - offset,
+                    y - turning_radius,
                 ),
-                initial.x - turning_radius,
-                initial.y,
+                x - turning_radius,
+                y,
                 4,
             )
 
         case (Direction.NORTH, TurnInstruction.BACKWARD_RIGHT):
-            initial = Vector(start.direction, start.x, start.y - world.robot.south_length + offset)
+            x = start.x
+            y = start.y - world.robot.south_length + offset
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.WEST,
-                    initial.x + turning_radius - world.robot.west_length + offset,
-                    initial.y - turning_radius,
+                    x + turning_radius - world.robot.west_length + offset,
+                    y - turning_radius,
                 ),
-                initial.x + turning_radius,
-                initial.y,
+                x + turning_radius,
+                y,
                 3,
             )
 
-        # Initially facing east
+        # y facing east
         case (Direction.EAST, TurnInstruction.FORWARD_LEFT):
-            initial = Vector(start.direction, start.x - world.robot.west_length + offset, start.y)
+            x = start.x - world.robot.west_length + offset
+            y = start.y
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.NORTH,
-                    initial.x + turning_radius,
-                    initial.y + turning_radius + world.robot.south_length - offset,
+                    x + turning_radius,
+                    y + turning_radius + world.robot.south_length - offset,
                 ),
-                initial.x,
-                initial.y + turning_radius,
+                x,
+                y + turning_radius,
                 4,
             )
 
         case (Direction.EAST, TurnInstruction.FORWARD_RIGHT):
-            initial = Vector(start.direction, start.x - world.robot.west_length + offset, start.y)
+            x = start.x - world.robot.west_length + offset
+            y = start.y
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.SOUTH,
-                    initial.x + turning_radius,
-                    initial.y - turning_radius - world.robot.north_length + offset,
+                    x + turning_radius,
+                    y - turning_radius - world.robot.north_length + offset,
                 ),
-                initial.x,
-                initial.y - turning_radius,
+                x,
+                y - turning_radius,
                 1,
             )
 
         case (Direction.EAST, TurnInstruction.BACKWARD_LEFT):
-            initial = Vector(start.direction, start.x - world.robot.west_length + offset, start.y)
+            x = start.x - world.robot.west_length + offset
+            y = start.y
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.SOUTH,
-                    initial.x - turning_radius,
-                    initial.y + turning_radius - world.robot.north_length + offset,
+                    x - turning_radius,
+                    y + turning_radius - world.robot.north_length + offset,
                 ),
-                initial.x,
-                initial.y + turning_radius,
+                x,
+                y + turning_radius,
                 3,
             )
 
         case (Direction.EAST, TurnInstruction.BACKWARD_RIGHT):
-            initial = Vector(start.direction, start.x - world.robot.west_length + offset, start.y)
+            x = start.x - world.robot.west_length + offset
+            y = start.y
             return __curve(
                 turning_radius,
-                Vector(Direction.NORTH, initial.x - turning_radius, initial.y - turning_radius),
-                initial.x,
-                initial.y - turning_radius + world.robot.south_length - offset,
+                Vector(Direction.NORTH, x - turning_radius, y - turning_radius),
+                x,
+                y - turning_radius + world.robot.south_length - offset,
                 2,
             )
 
-        # Initially facing south
+        # y facing south
         case (Direction.SOUTH, TurnInstruction.FORWARD_LEFT):
-            initial = Vector(start.direction, start.x, start.y + world.robot.north_length - offset)
+            x = start.x
+            y = start.y + world.robot.north_length - offset
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.EAST,
-                    initial.x + turning_radius + world.robot.west_length - offset,
-                    initial.y - turning_radius,
+                    x + turning_radius + world.robot.west_length - offset,
+                    y - turning_radius,
                 ),
-                initial.x + turning_radius,
-                initial.y,
+                x + turning_radius,
+                y,
                 3,
             )
 
         case (Direction.SOUTH, TurnInstruction.FORWARD_RIGHT):
-            initial = Vector(start.direction, start.x, start.y + world.robot.north_length - offset)
+            x = start.x
+            y = start.y + world.robot.north_length - offset
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.WEST,
-                    initial.x - turning_radius - world.robot.east_length + offset,
-                    initial.y - turning_radius,
+                    x - turning_radius - world.robot.east_length + offset,
+                    y - turning_radius,
                 ),
-                initial.x - turning_radius,
-                initial.y,
+                x - turning_radius,
+                y,
                 4,
             )
 
         case (Direction.SOUTH, TurnInstruction.BACKWARD_LEFT):
-            initial = Vector(start.direction, start.x, start.y + world.robot.north_length - offset)
+            x = start.x
+            y = start.y + world.robot.north_length - offset
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.WEST,
-                    initial.x + turning_radius - world.robot.east_length + offset,
-                    initial.y + turning_radius,
+                    x + turning_radius - world.robot.east_length + offset,
+                    y + turning_radius,
                 ),
-                initial.x + turning_radius,
-                initial.y,
+                x + turning_radius,
+                y,
                 2,
             )
 
         case (Direction.SOUTH, TurnInstruction.BACKWARD_RIGHT):
-            initial = Vector(start.direction, start.x, start.y + world.robot.north_length - offset)
+            x = start.x
+            y = start.y + world.robot.north_length - offset
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.EAST,
-                    initial.x - turning_radius + world.robot.west_length - offset,
-                    initial.y + turning_radius,
+                    x - turning_radius + world.robot.west_length - offset,
+                    y + turning_radius,
                 ),
-                initial.x - turning_radius,
-                initial.y,
+                x - turning_radius,
+                y,
                 1,
             )
 
-        # Initially facing west
+        # y facing west
         case (Direction.WEST, TurnInstruction.FORWARD_LEFT):
-            initial = Vector(start.direction, start.x + world.robot.east_length - offset, start.y)
+            x = start.x + world.robot.east_length - offset
+            y = start.y
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.SOUTH,
-                    initial.x - turning_radius,
-                    initial.y - turning_radius - world.robot.north_length + offset,
+                    x - turning_radius,
+                    y - turning_radius - world.robot.north_length + offset,
                 ),
-                initial.x,
-                initial.y - turning_radius,
+                x,
+                y - turning_radius,
                 2,
             )
 
         case (Direction.WEST, TurnInstruction.FORWARD_RIGHT):
-            initial = Vector(start.direction, start.x + world.robot.east_length - offset, start.y)
+            x = start.x + world.robot.east_length - offset
+            y = start.y
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.NORTH,
-                    initial.x - turning_radius,
-                    initial.y + turning_radius + world.robot.south_length - offset,
+                    x - turning_radius,
+                    y + turning_radius + world.robot.south_length - offset,
                 ),
-                initial.x,
-                initial.y + turning_radius,
+                x,
+                y + turning_radius,
                 3,
             )
 
         case (Direction.WEST, TurnInstruction.BACKWARD_LEFT):
-            initial = Vector(start.direction, start.x + world.robot.east_length - offset, start.y)
+            x = start.x + world.robot.east_length - offset
+            y = start.y
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.NORTH,
-                    initial.x + turning_radius,
-                    initial.y - turning_radius + world.robot.south_length - offset,
+                    x + turning_radius,
+                    y - turning_radius + world.robot.south_length - offset,
                 ),
-                initial.x,
-                initial.y - turning_radius,
+                x,
+                y - turning_radius,
                 1,
             )
 
         case (Direction.WEST, TurnInstruction.BACKWARD_RIGHT):
-            initial = Vector(start.direction, start.x + world.robot.east_length - offset, start.y)
+            x = start.x + world.robot.east_length - offset
+            y = start.y
             return __curve(
                 turning_radius,
                 Vector(
                     Direction.SOUTH,
-                    initial.x + turning_radius,
-                    initial.y + turning_radius - world.robot.north_length + offset,
+                    x + turning_radius,
+                    y + turning_radius - world.robot.north_length + offset,
                 ),
-                initial.x,
-                initial.y + turning_radius,
+                x,
+                y + turning_radius,
                 4,
             )
 
