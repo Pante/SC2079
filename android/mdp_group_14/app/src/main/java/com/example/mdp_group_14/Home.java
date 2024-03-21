@@ -48,6 +48,7 @@ public class Home extends Fragment {
     private static SharedPreferences sharedPreferences;
     private static SharedPreferences.Editor editor;
     private static Context context;
+    public static Handler timerHandler = new Handler();
 
     private static GridMap gridMap;
     static TextView xAxisTextView, yAxisTextView, directionAxisTextView;
@@ -265,6 +266,10 @@ public class Home extends Fragment {
         BluetoothCommunications.getMessageReceivedTextView().append(message+ "\n");
     }
 
+    public static void refreshMessageReceivedNS(int message){
+        BluetoothCommunications.getMessageReceivedTextView().append(message+ "\n");
+    }
+
     public static void refreshDirection(String direction) {
         gridMap.setRobotDirection(direction);
         int x = gridMap.getCurCoord()[0];
@@ -343,8 +348,8 @@ public class Home extends Fragment {
             showLog("receivedMessage: message --- " + message);
 
             String[] cmdd = message.split(",");
-            showLog("cmd1 --- " + cmdd[1]);
-            showLog("cmd2 --- " + cmdd[2]);
+//            showLog("cmd1 --- " + cmdd[1]);
+//            showLog("cmd2 --- " + cmdd[2]);
 
 
             int[] global_store = gridMap.getCurCoord();
@@ -412,9 +417,18 @@ public class Home extends Fragment {
                 updateStatus("translation");
                 pathTranslator.translatePath(message); //splitting and translation will be done in PathTranslator
             }
-
-
-
+            else if(message.contains("STOP"))
+            {
+                Home.refreshMessageReceivedNS("STOP received");
+                showLog("received Stop");
+                Home.stopTimerFlag = true;
+                timerHandler.removeCallbacks(ControlFragment.timerRunnableExplore);
+                timerHandler.removeCallbacks(ControlFragment.timerRunnableFastest);
+            }
+            else{
+                BluetoothCommunications.getMessageReceivedTextView().append("unknown message received");
+                showLog("unknown message received");
+            }
         }
     };
 
