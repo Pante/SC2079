@@ -42,8 +42,11 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     offset = 0 // world.cell_size
 
     objectives = set()
-    for alignment in range(-offset, obstacle.clearance + offset):
-        for gap in range(minimum_gap, maximum_gap):
+    for gap in range(minimum_gap, maximum_gap):
+        if obstacle.south_west.x == 0 or obstacle.south_west.y == 0 or obstacle.north_east.x == 199 or obstacle.north_east.y == 199:
+            offset += 2
+
+        for alignment in range(-offset, obstacle.clearance + offset):
             objective = __suggest_objective(world.robot, obstacle, gap + 1, alignment)
             if world.contains(objective):
                 objectives.add(objective)
