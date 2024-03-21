@@ -7,9 +7,9 @@
 #define DIST_S_MOTOR 0.75f
 
 //accurate range of IR sensor.
-#define DIST_IR_MIN 10.0f
+#define DIST_IR_MIN 6.0f
 #define DIST_IR_MAX 70.0f
-#define DIST_IR_OFFSET 2.5f //distance from front of vehicle
+#define DIST_IR_OFFSET 4.5f //distance from front of vehicle
 
 typedef struct {
 	float dist;
@@ -20,6 +20,5 @@ typedef struct {
 void dist_init();
 void dist_reset(float v);
 float dist_get_cm(float msElapsed, float accel, float motorDist);
-float dist_get_front(float usDist, float irDist);
 
 #endif /* INC_DIST_H_ */

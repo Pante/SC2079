@@ -47,6 +47,11 @@
 #define CMD_BACKWARD_DIST_TARGET 't'	//go backward for a target distance/angle.
 #define CMD_BACKWARD_DIST_AWAY 'w'		//go backward until a certain distance apart.
 
+#define CMD_FORWARD_DIST_L 'L'			//go forward until left IR sensor is greater than value provided.
+#define CMD_FORWARD_DIST_R 'R'			//go forward until right IR sensor is greater than value provided.
+#define CMD_BACKWARD_DIST_L 'l'			//go backward until left IR sensor is greater than value provided.
+#define CMD_BACKWARD_DIST_R 'r'			//go backward until right IR sensor is greater than value provided.
+
 #define CMD_INFO_DIST 'D'				//signal start/stop of accumulative distance tracking. (all other fields are not required, i.e., send 'D\n')
 //NOTE: distance tracked is NOT displacement; i.e., send different signals for different directions.
 

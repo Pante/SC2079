@@ -12,7 +12,7 @@
 #define ICM_I2C_ADDR 0
 #define GRAVITY 9.80665e-4f //in cm/ms^2
 typedef struct {
-	float irDist;			//distance from IR sensor.
+	float irDist[2];		//distance from IR sensor, [L, R].
 	volatile float usDist;	//distance from ultrasound sensor.
 
 	float gyroZ;			//gyroscope Z reading.
@@ -24,11 +24,12 @@ typedef struct {
 	float heading_bias;
 } Sensors;
 
+#define US_MIN_DELAY 20.0f //minimum delay
 #define US_IC_CHANNEL TIM_CHANNEL_1
 #define US_TRIG_SET() HAL_GPIO_WritePin(US_TRIG_GPIO_Port,US_TRIG_Pin,GPIO_PIN_SET)
 #define US_TRIG_CLR() HAL_GPIO_WritePin(US_TRIG_GPIO_Port,US_TRIG_Pin,GPIO_PIN_RESET)
 
-void sensors_init(I2C_HandleTypeDef *hi2c1_ptr, ADC_HandleTypeDef *adc_ptr, TIM_HandleTypeDef *ic_ptr, Sensors *sensors_ptr);
+void sensors_init(I2C_HandleTypeDef *hi2c1_ptr, ADC_HandleTypeDef *adc_L_ptr, ADC_HandleTypeDef *adc_R_ptr, TIM_HandleTypeDef *ic_ptr, Sensors *sensors_ptr);
 void sensors_read_irDist();
 void sensors_us_trig();
 void sensors_read_usDist(float pulse_s);
@@ -36,6 +37,5 @@ void sensors_read_gyroZ();
 void sensors_read_accel();
 void sensors_read_heading(float msElapsed, float gyroZ);
 void sensors_set_bias(uint16_t count);
-void sensors_dist_warmup(uint16_t count);
 
 #endif /* INC_SENSORS_H_ */

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from math import pi, floor
 
 from pydantic import BaseModel, Field
 
@@ -35,6 +36,26 @@ class TurnInstruction(str, Enum):
     FORWARD_RIGHT = 'FORWARD_RIGHT'
     BACKWARD_LEFT = 'BACKWARD_LEFT'
     BACKWARD_RIGHT = 'BACKWARD_RIGHT'
+
+    def radius(self, cell_size: int) -> int:
+        """
+        The turning radius (in grid cells). The turning radius is different for each direction.
+
+        :param cell_size: the cell size
+        :return: the turning radius in grid cells.
+        """
+        match self:
+            case TurnInstruction.FORWARD_LEFT:
+                return 40 // cell_size
+            case TurnInstruction.FORWARD_RIGHT:
+                return 42 // cell_size
+            case TurnInstruction.BACKWARD_LEFT:
+                return 38 // cell_size
+            case TurnInstruction.BACKWARD_RIGHT:
+                return 40 // cell_size
+
+    def arc_length(self, cell_size: int) -> int:
+        return floor(self.radius(cell_size) * (pi / 2))
 
 
 @dataclass

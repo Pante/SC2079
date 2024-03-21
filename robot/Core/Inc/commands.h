@@ -15,7 +15,9 @@ enum _cmdOpType {
 };
 enum _cmdDistType {
 	TARGET,			//drive for this distance
-	STOP_AWAY		//stop when roughly this distance away from front.
+	STOP_AWAY,		//stop when roughly this distance away from front.
+	STOP_L,			//stop when left IR sensor is more than threshold.
+	STOP_R,			//stop when right IR sensor is more than threshold.
 };
 
 typedef enum _cmdOpType CmdOpType;

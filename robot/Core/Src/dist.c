@@ -33,13 +33,3 @@ float dist_get_cm(float msElapsed, float accel, float motorDist) {
 
 	return state.dist;
 }
-
-float dist_get_front(float usDist, float irDist) {
-	float dist = usDist;
-	if (usDist > DIST_IR_MIN && usDist < DIST_IR_MAX) {
-		//use IR for averaging.
-		dist = 0.3 * usDist + 0.7 * irDist;
-	}
-
-	return dist;
-}

@@ -6,20 +6,20 @@ static TIM_HandleTypeDef *motor_pwm_tim, *l_enc_tim, *r_enc_tim;
 //for matching motor speeds.
 static int16_t pwmValAccel = 0, pwmValTarget = 0,
 	lPwmVal = 0, rPwmVal = 0;
-
+static int16_t lLastCount = 0, rLastCount = 0;
 //for bi-directional correction.
 static int8_t curDir = 0;
 
 static PidDef pidMatch;
 const static float Kp_match = 5e4;
-const static float Ki_match = 6e2;
-const static float Kd_match = 1e3;
+const static float Ki_match = 7e2;
+const static float Kd_match = 3e3;
 
 static PidDef pidDistTarget;
 
-const static float Kp_distTarget = 0.55;
+const static float Kp_distTarget = 1.1;
 const static float Ki_distTarget = 0.0011;
-const static float Kd_distTarget = 0.1;
+const static float Kd_distTarget = 0.29;
 
 static PidDef pidDistAway;
 const static float Kp_distAway = 1.52;
@@ -73,6 +73,8 @@ static void resetPwmParams() {
 static void resetEncoders() {
 	timer_reset(l_enc_tim);
 	timer_reset(r_enc_tim);
+
+	lLastCount = rLastCount = 0;
 }
 
 static int16_t getSpeedPwm(uint8_t speed) {
@@ -96,31 +98,40 @@ static void setDriveDir(int8_t dir) {
 		HAL_GPIO_WritePin(MOTORB_IN2_GPIO_Port, MOTORB_IN2_Pin, GPIO_PIN_SET);
 	} else {
 		//full stop.
-		HAL_GPIO_WritePin(MOTORA_IN1_GPIO_Port, MOTORA_IN1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(MOTORA_IN2_GPIO_Port, MOTORA_IN2_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(MOTORB_IN1_GPIO_Port, MOTORB_IN1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(MOTORB_IN2_GPIO_Port, MOTORB_IN2_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(MOTORA_IN1_GPIO_Port, MOTORA_IN1_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(MOTORA_IN2_GPIO_Port, MOTORA_IN2_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(MOTORB_IN1_GPIO_Port, MOTORB_IN1_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(MOTORB_IN2_GPIO_Port, MOTORB_IN2_Pin, GPIO_PIN_SET);
 	}
 }
 
+static int16_t getCount(TIM_HandleTypeDef *enc_tim) {
+	uint32_t counter = __HAL_TIM_GET_COUNTER(enc_tim);
+	return (int16_t) counter;
+}
+
 float motor_getDist() {
-	uint32_t lCounter = __HAL_TIM_GET_COUNTER(l_enc_tim),
-			rCounter = __HAL_TIM_GET_COUNTER(r_enc_tim);
-	int16_t lCount = (int16_t) lCounter,
-			rCount = (int16_t) rCounter;
+	int16_t lCount = getCount(l_enc_tim),
+			rCount = getCount(r_enc_tim);
 
 	//left motor is opposite in direction to right motor.
 	lCount = -lCount;
 
-	//average and flip.
-	int16_t pulses = (lCount + rCount) / 2;
-	if (pulses < 0) pulses = -pulses;
+	int16_t pulses = (lCount + rCount) / 2; //average.
+//	if (pulses < 0) pulses = -pulses; //flip.
 
 	return get_distance_cm(pulses);
 }
 
+static float motor_getSpeed(TIM_HandleTypeDef *enc_tim, int16_t *lastCount) {
+	int16_t count = getCount(enc_tim);
+	int16_t diff = abs_int16(count - *lastCount);
+	*lastCount = count;
+	return (float) diff;
+}
+
 //PWM at fixed intervals.
-void motor_pwmCorrection(float wDiff, float rBack, float rRobot, float distDiff, float brakingDist, CmdDistType distType, uint8_t speedNext) {
+void motor_pwmCorrection(float wDiff, float rBack, float distDiff, float brakingDist, CmdDistType distType, uint8_t speedNext) {
 	//adjust speed based on distance to drive.
 	if (distDiff < brakingDist) {
 		PidDef *pidBrake = distType == TARGET ? &pidDistTarget : &pidDistAway;
@@ -148,21 +159,22 @@ void motor_pwmCorrection(float wDiff, float rBack, float rRobot, float distDiff,
 		setDriveDir(curDir);
 	}
 
-	float offset = pid_adjust(&pidMatch, wDiff, 1) * pwmValAccel / pwmValTarget;
-	if (offset > MOTOR_PWM_OFFSET_MAX) offset = offset < 0 ? -MOTOR_PWM_OFFSET_MAX : MOTOR_PWM_OFFSET_MAX;
 	float lScale = 1, rScale = 1;
-
-	if (rBack != 0 && rRobot != 0) {
-		float B2 = WHEELBASE_CM / 2;
-
-		if (rBack < 0 && rRobot < 0) {
-			lScale = (-rBack - B2) / -rRobot;
-			rScale = (-rBack + B2) / -rRobot;
+	if (rBack != 0) {
+		float B2 = WHEELBASE_CM_BACK / 2;
+		if (rBack < 0) {
+			lScale =  (-rBack - B2) / -rBack;
+			rScale = (-rBack + B2) / -rBack;
 		} else {
-			lScale = (rBack + B2) / rRobot;
-			rScale = (rBack - B2) / rRobot;
+			lScale = (rBack + B2) / rBack;
+			rScale = (rBack - B2) / rBack;
 		}
 	}
+
+	float offset = pid_adjust(&pidMatch, wDiff, 1) * pwmValAccel / pwmValTarget;
+//	offset = 0;
+	if (offset > MOTOR_PWM_OFFSET_MAX) offset = offset < 0 ? -MOTOR_PWM_OFFSET_MAX : MOTOR_PWM_OFFSET_MAX;
+
 
 	lPwmVal = pwmValAccel * lScale - offset;
 	rPwmVal = pwmValAccel * rScale + offset;

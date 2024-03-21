@@ -69,7 +69,7 @@ class Entity(ABC):
         assert 0 <= self.south_west.x <= self.north_east.x
         assert 0 <= self.south_west.y <= self.north_east.y
         assert (self.north_east.y - self.south_west.y) == (self.north_east.x - self.south_west.x)
-        self.centre = Point(self.north_east.x // 2, self.north_east.y // 2)
+        self.centre = Point((self.north_east.x - self.south_west.x) // 2, (self.north_east.y - self.south_west.y) // 2)
         self.north_length = self.north_east.y - self.centre.y
         self.east_length = self.north_east.x - self.centre.x
         self.south_length = self.centre.y - self.south_west.y
