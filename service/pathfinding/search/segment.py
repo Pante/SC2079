@@ -56,6 +56,7 @@ def segment(world: World, initial: Vector, objectives: dict[Obstacle, tuple[Vect
                     new_cost += move.turn.arc_length(world.cell_size)
                 case Move():
                     new_cost += len(move.vectors)
+
             if next not in costs or new_cost < costs[next]:
                 frontier.add(new_cost + __heuristic(next, objectives), next)
                 source[next] = current
@@ -100,7 +101,7 @@ class __PriorityQueue:
 def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn | Move], None, None]:
     for move in TurnInstruction:
         path = turn(world, current, move)
-        if all(map(lambda p: world.contains(p), path)):
+        if path is not None:
             yield path[-1], Turn(move, path)
 
     for move in Straight:
