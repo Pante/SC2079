@@ -19,8 +19,6 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
     offset = 4 // world.cell_size
 
     curve: list[Vector] | None
-    destination: Vector
-
     match (start.direction, instruction):
         # Initially facing north
         case (Direction.NORTH, TurnInstruction.FORWARD_LEFT):
@@ -28,6 +26,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.WEST, initial.x - turning_radius - world.robot.east_length + offset, initial.y + turning_radius)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x - turning_radius,
                 initial.y,
@@ -39,6 +38,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.EAST, initial.x + turning_radius + world.robot.west_length - offset, initial.y + turning_radius)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x + turning_radius,
                 initial.y,
@@ -50,6 +50,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.EAST, initial.x - turning_radius + world.robot.west_length - offset, initial.y - turning_radius)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x - turning_radius,
                 initial.y,
@@ -61,6 +62,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.WEST, initial.x + turning_radius - world.robot.west_length + offset, initial.y - turning_radius)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x + turning_radius,
                 initial.y,
@@ -73,6 +75,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.NORTH, initial.x + turning_radius, initial.y + turning_radius + world.robot.south_length - offset)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x,
                 initial.y + turning_radius,
@@ -84,6 +87,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.SOUTH, initial.x + turning_radius, initial.y - turning_radius - world.robot.north_length + offset)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x,
                 initial.y - turning_radius,
@@ -95,6 +99,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.SOUTH, initial.x - turning_radius, initial.y + turning_radius - world.robot.north_length + offset)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x,
                 initial.y + turning_radius,
@@ -106,6 +111,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.NORTH, initial.x - turning_radius, initial.y - turning_radius + world.robot.south_length - offset)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x,
                 initial.y - turning_radius,
@@ -118,6 +124,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.EAST, initial.x + turning_radius + world.robot.west_length - offset, initial.y - turning_radius)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x + turning_radius,
                 initial.y,
@@ -129,6 +136,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.WEST, initial.x - turning_radius - world.robot.east_length + offset, initial.y - turning_radius)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x - turning_radius,
                 initial.y,
@@ -140,7 +148,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.WEST, initial.x + turning_radius - world.robot.east_length + offset, initial.y + turning_radius)
             curve = __curve(
                 world,
-
+                destination,
                 turning_radius,
                 initial.x + turning_radius,
                 initial.y,
@@ -152,6 +160,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.EAST, initial.x - turning_radius + world.robot.west_length - offset, initial.y + turning_radius)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x - turning_radius,
                 initial.y,
@@ -164,6 +173,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.SOUTH, initial.x - turning_radius, initial.y - turning_radius - world.robot.north_length + offset)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x,
                 initial.y - turning_radius,
@@ -175,6 +185,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.NORTH, initial.x - turning_radius, initial.y + turning_radius + world.robot.south_length - offset)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x,
                 initial.y + turning_radius,
@@ -186,6 +197,7 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.NORTH, initial.x + turning_radius, initial.y - turning_radius + world.robot.south_length - offset)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x,
                 initial.y - turning_radius,
@@ -197,20 +209,19 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
             destination = Vector(Direction.SOUTH, initial.x + turning_radius, initial.y + turning_radius - world.robot.north_length + offset)
             curve = __curve(
                 world,
+                destination,
                 turning_radius,
                 initial.x,
                 initial.y + turning_radius,
                 4,
             )
 
-    if curve:
-        curve.append(destination)
-
     return curve
 
 
 def __curve(
     world: World,
+    destination: Vector,
     turning_radius: int,
     centre_x: int,
     centre_y,
@@ -273,5 +284,8 @@ def __curve(
         if 2 * (err - x) + 1 > 0:
             x -= 1
             err += 1 - 2 * x
+
+    if world.contains(destination):
+        path.append(destination)
 
     return path

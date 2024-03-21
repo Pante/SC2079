@@ -46,20 +46,32 @@ class StreamServer:
                 pass
 
     # main server thread.
-    def start(self, resolution=(640, 480), framerate=20, quality=45):
+    def start(self, resolution=(640, 480), framerate=20, quality=45, is_outdoors=False):
+        equalizeHist = False
         # start main camera.
         with picamera.PiCamera(
             resolution=resolution,
             framerate=framerate,
         ) as cam:
             time.sleep(0.1)
+            if is_outdoors:
+                cam.exposure_compensation = 25
+                cam.exposure_mode = 'backlight'
+                cam.awb_mode = 'shade'
+                equalizeHist = True
+            
             cam.hflip = True
             cam.vflip = True
 
             raw = PiRGBArray(cam, cam.resolution)
             for frame in cam.capture_continuous(raw, format="bgr", use_video_port=True):
+                img = frame.array
+                if equalizeHist:
+                    tmp = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    img = cv2.equalizeHist(tmp)
+
                 # get encoding.
-                buffer = cv2.imencode('.jpg', frame.array, [cv2.IMWRITE_JPEG_QUALITY, quality])[1]
+                buffer = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, quality])[1]
                 # encode in base64 for further compression.
                 buffer = base64.b64encode(buffer)
                 # send to client address.
@@ -74,15 +86,3 @@ class StreamServer:
     # close the server.
     def close(self):
         self.exit = True
-
-
-# # sample use of this class.
-# def stream_server_test():
-#     server = StreamServer()
-#     server.start(
-#         resolution=(640, 480),
-#         framerate=20,
-#         quality=45
-#     )
-
-# stream_server_test() # comment this out when actually using!

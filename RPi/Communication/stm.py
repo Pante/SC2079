@@ -75,7 +75,7 @@ class STM():
         """Send command and wait for acknowledge.
         """
 
-        cmd = f"{flag}{speed}|{angle}|{val}\n" if flag != 'S' else 'S\n'
+        cmd = f"{flag}{speed}|{round(angle, 2)}|{round(val, 2)}\n" if flag != 'S' else 'S\n'
         self.send(cmd)
         print(f"Sent {cmd.rstrip()} to STM.")
 		
