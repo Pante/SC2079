@@ -1564,8 +1564,8 @@ public class GridMap extends View{
                     case "right":
                         moves = RIGHT_TURNING_RADIUS/CELL_LENGTH;
                         remainder = RIGHT_TURNING_RADIUS&CELL_LENGTH;
-                        if ((0 < curCoord[1] && curCoord[1] < moves+1)
-                                && (moves < curCoord[0] && curCoord[0] < 21)) {
+                        if ((0 < curCoord[1] && curCoord[1] < 20-(moves+1))
+                                && (moves-1 < curCoord[0] && curCoord[0] < 21)) {
                             tempCurCood0=curCoord[0]; //added
                             curCoord[0] -= moves-1;
                             X_OFFSET -= remainder;
@@ -1630,7 +1630,7 @@ public class GridMap extends View{
                         moves = BLEFT_TURNING_RADIUS/CELL_LENGTH;
                         remainder = BLEFT_TURNING_RADIUS&CELL_LENGTH;
                         if ((moves-1 < curCoord[1] && curCoord[1] < 20)
-                                && (0 < curCoord[0] && curCoord[0] < 20-(moves+1))) {
+                                && (0 < curCoord[0] && curCoord[0] < 20-moves)) {
                             tempCurCood1=curCoord[1]; //added
                             curCoord[1] -= moves-1;
                             Y_OFFSET -= remainder;
@@ -1647,8 +1647,8 @@ public class GridMap extends View{
                                     cells[i][20-tempCurCood1-1].setType("explored");
                                 }
                                 for (int j = tempCurCood1-(moves-1); j <= tempCurCood1-1; j++) { //y axis
-                                    cells[curCoord[0]+7][20 - j - 1].setType("explored");
-                                    cells[curCoord[0]+6][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]+moves+1][20 - j - 1].setType("explored");
+                                    cells[curCoord[0]+moves][20 - j - 1].setType("explored");
                                 }
                                 X_OFFSET += remainder;
                                 curCoord[0] += moves+1; //changed for new turning radius
@@ -1656,10 +1656,10 @@ public class GridMap extends View{
                         }
                         break;
                     case "backright":
+                        moves = BRIGHT_TURNING_RADIUS/CELL_LENGTH;
+                        remainder = BRIGHT_TURNING_RADIUS&CELL_LENGTH;
                         if ((0 < curCoord[1] && curCoord[1] < 20-(moves-1))
-                                && (0 < curCoord[0] && curCoord[0] < 20-(moves+1))) {
-                            moves = BRIGHT_TURNING_RADIUS/CELL_LENGTH;
-                            remainder = BRIGHT_TURNING_RADIUS&CELL_LENGTH;
+                                && (0 < curCoord[0] && curCoord[0] < 20-moves)) {
                             tempCurCood1=curCoord[1]; //added
                             curCoord[1] += moves-1;
                             Y_OFFSET += remainder;
