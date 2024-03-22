@@ -58,7 +58,7 @@ def segment(world: World, initial: Vector, objectives: dict[Obstacle, tuple[Vect
                     new_cost += len(move.vectors)
 
             if next not in costs or new_cost < costs[next]:
-                frontier.add(new_cost + __heuristic(next, objectives), next)
+                frontier.add(new_cost, next)
                 source[next] = current
                 moves[next] = move
                 costs[next] = new_cost
@@ -106,7 +106,7 @@ def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn 
 
     for move in Straight:
         modifier = 1 if move == Straight.FORWARD else -1
-        for length in [5, 1]:
+        for length in [5]:
             path = straight(current, modifier, length)
             if all(map(lambda p: world.contains(p), path)):
                 yield path[-1], Move(move, path)
@@ -114,6 +114,8 @@ def __neighbours(world: World, current: Vector) -> Generator[tuple[Vector, Turn 
 
 def __heuristic(current: Vector, objectives: dict[Obstacle, tuple[Vector, set[Vector]]]) -> int:
     """
+    This function takes longer than the actual time it saves in reality.
+
     The Euclidean distance between two vectors. This is preferred over Manhattan distance which is not admissible.
     """
     if len(objectives) == 0:

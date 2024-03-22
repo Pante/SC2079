@@ -46,7 +46,7 @@ class TurnInstruction(str, Enum):
         """
         match self:
             case TurnInstruction.FORWARD_LEFT:
-                return 40 // cell_size
+                return 39 // cell_size
             case TurnInstruction.FORWARD_RIGHT:
                 return 40 // cell_size
             case TurnInstruction.BACKWARD_LEFT:
