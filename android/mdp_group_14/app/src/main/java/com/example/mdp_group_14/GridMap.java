@@ -29,6 +29,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
+import androidx.compose.runtime.external.kotlinx.collections.immutable.implementations.immutableMap.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1168,10 +1169,10 @@ public class GridMap extends View {
         int remainder = 0;
 
         Integer[] newCoords = Arrays.stream(this.getCurCoord()).boxed().toArray( Integer[]::new );
-        newCoords[0]=newCoords[0]-2;
-        newCoords[1]=newCoords[1]-1;
-        Home.refreshMessageReceivedNS(newCoords[0]);
-        Home.refreshMessageReceivedNS(newCoords[1]);
+//        newCoords[0]=newCoords[0]-2;
+//        newCoords[1]=newCoords[1]-1;
+//        Home.refreshMessageReceivedNS(newCoords[0]);
+//        Home.refreshMessageReceivedNS(newCoords[1]);
         // check if got obstacle when moving one grid up before turning in each case
         // checking for each combination of (current robot facing direction, movement direction)
         int tempCurCood1 = -1;
@@ -1721,24 +1722,43 @@ public class GridMap extends View {
 //                break;
 //        }
 
+        Map.Entry<String, ArrayList<Integer[]>> entry;
         switch (direction) {
             case "forward":
-                if (curCoord[1] != 19) {
-                    curCoord[1] += 1;
-//                            cells[curCoord[0]][curCoord[1]].setType("explored");
-                    validPosition = true;
+            case "back": {
+                Integer[] last = Straight.straight(newCoords, robotDirection, direction);
+                if (last[0] < 2 || last[1] < 1 || 21 <= last[0] || 20 <= last[1]) {
+                    break;
                 }
-                break;
-            case "right":
 
-                ArrayList<Integer[]> a = Turn.turn(newCoords,robotDirection,"right");
-                curCoord[0] = a.get(a.size()-1)[0]+1;
-                curCoord[1] = a.get(a.size()-1)[1];
-                robotDirection = "right";
+                curCoord[0] = last[0];
+                curCoord[1] = last[1];
+                cells[curCoord[0]][20 - curCoord[1]].setType("explored");
                 validPosition = true;
-                Home.refreshMessageReceivedNS(a.get(a.size()-1)[0]);
-                Home.refreshMessageReceivedNS(a.get(a.size()-1)[1]);
+            }
+                break;
 
+            case "left": {
+                entry = Turn.turn(newCoords,robotDirection,"left");
+                Integer[] last = entry.getValue().get(entry.getValue().size() - 1);
+                curCoord[0] = last[0];
+                curCoord[1] = last[1];
+                cells[curCoord[0]][20 - curCoord[1]].setType("explored");
+                robotDirection = entry.getKey();
+                validPosition = true;
+            }
+                break;
+
+            case "right": {
+                entry = Turn.turn(newCoords,robotDirection,"right");
+                Integer[] last = entry.getValue().get(entry.getValue().size() - 1);
+                curCoord[0] = last[0];
+                curCoord[1] = last[1];
+                cells[curCoord[0]][20 - curCoord[1]].setType("explored");
+                robotDirection = entry.getKey();
+                validPosition = true;
+            }
+                break;
 
 
 //                movesRx = ((RIGHT_TURNING_RADIUS % CELL_LENGTH) + movesRx) % 5;
@@ -1758,7 +1778,7 @@ public class GridMap extends View {
 //                        robotDirection = "right";
 //                        validPosition = true;
 //                        for (int i = curCoord[0]; i <= curCoord[0] + moves + 1; i++) {
-//                            cells[i][20 - curCoord[1] - 1].setType("explored");
+//
 //                            cells[i][20 - curCoord[1]].setType("explored");
 //                        }
 //                        for (int j = tempCurCood1; j <= tempCurCood1 + moves - 2; j++) {
@@ -1769,17 +1789,6 @@ public class GridMap extends View {
 //                        curCoord[0] += moves + 1; //changed for new turning radius
 //                    }
 //                }
-                break;
-            case "back":
-                if (curCoord[1] != 1) {
-                    curCoord[1] -= 1;
-                    cells[curCoord[0]][curCoord[1]].setType("explored");
-                    validPosition = true;
-                }
-                break;
-            case "left":
-
-                Turn.turn(newCoords,robotDirection,"left");
 
                 
 
@@ -1810,10 +1819,17 @@ public class GridMap extends View {
 //                        curCoord[0] -= moves + 1; //changed for new turning radius
 //                    }
 //                }
-                break;
             // testing new direction of movement (facing forward)
-            case "backleft":
-                Turn.turn(newCoords,robotDirection,"backleft");
+            case "backleft": {
+                entry = Turn.turn(newCoords,robotDirection,"backleft");
+                Integer[] last = entry.getValue().get(entry.getValue().size() - 1);
+                curCoord[0] = last[0];
+                curCoord[1] = last[1];
+                cells[curCoord[0]][20 - curCoord[1]].setType("explored");
+                robotDirection = entry.getKey();
+                validPosition = true;
+            }
+                break;
 
 //                movesRx = ((BLEFT_TURNING_RADIUS % CELL_LENGTH) + movesRx) % 5;
 //                moves = (BLEFT_TURNING_RADIUS + movesRx) / CELL_LENGTH;
@@ -1839,33 +1855,16 @@ public class GridMap extends View {
 //                        curCoord[0] -= moves - 1; //changed for new turning radius
 //                    }
 //                }
-                break;
-            case "backright":
-                Turn.turn(newCoords,robotDirection,"backright");
 
-//                movesRx = ((BRIGHT_TURNING_RADIUS % CELL_LENGTH) + movesRx) % 5;
-//                moves = (BRIGHT_TURNING_RADIUS + movesRx) / CELL_LENGTH;
-//                if ((moves + 1 < curCoord[1] && curCoord[1] < 20)
-//                        && (0 < curCoord[0] && curCoord[0] < 21 - moves + 1)) {
-//                    tempCurCood1 = curCoord[1];
-//                    curCoord[1] -= moves + 1;
-//                    if (checkForObstacleCollision(curCoord, obstacleCoord)) {
-//                        validPosition = false;
-//                        curCoord[1] += moves + 1;
-//                    } else {
-//                        robotDirection = "left";
-//                        validPosition = true;
-//                        for (int i = curCoord[0]; i <= curCoord[0] + moves - 1; i++) {
-//                            cells[i][20 - curCoord[1] - 1].setType("explored");
-//                            cells[i][20 - curCoord[1]].setType("explored");
-//                        }
-//                        for (int j = tempCurCood1 - moves - 1; j <= tempCurCood1 - 1; j++) {
-//                            cells[curCoord[0]][20 - j - 1].setType("explored");
-//                            cells[curCoord[0] - 1][20 - j - 1].setType("explored");
-//                        }
-//                        curCoord[0] += moves - 1; //changed for new turning radius
-//                    }
-//                }
+            case "backright": {
+                entry = Turn.turn(newCoords,robotDirection,"backright");
+                Integer[] last = entry.getValue().get(entry.getValue().size() - 1);
+                curCoord[0] = last[0];
+                curCoord[1] = last[1];
+                cells[curCoord[0]][20 - curCoord[1]].setType("explored");
+                robotDirection = entry.getKey();
+                validPosition = true;
+            }
                 break;
             default:
                 robotDirection = "error up";

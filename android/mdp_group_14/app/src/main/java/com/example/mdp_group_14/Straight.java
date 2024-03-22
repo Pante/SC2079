@@ -8,28 +8,28 @@ public class Straight {
         switch (movement) {
           case "forward":
             return new Integer[] {start[0], start[1] + 1};
-          case "backward":
+          case "back":
             return new Integer[] {start[0], start[1] - 1};
         }
       case "right":
         switch (movement) {
           case "forward":
             return new Integer[] {start[0] + 1, start[1]};
-          case "backward":
+          case "back":
             return new Integer[] {start[0] - 1, start[1]};
         }
       case "down":
         switch (movement) {
           case "forward":
             return new Integer[] {start[0], start[1] - 1};
-          case "backward":
+          case "back":
             return new Integer[] {start[0], start[1] + 1};
         }
       case "left":
         switch (movement) {
           case "forward":
             return new Integer[] {start[0] - 1, start[1]};
-          case "backward":
+          case "back":
             return new Integer[] {start[0] + 1, start[1]};
         }
     }
