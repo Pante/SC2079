@@ -36,18 +36,19 @@ class World:
                 0 <= entity.north_east.y < self.size)
 
     def __annotate_grid(self: World) -> None:
-        error = round(5 // self.cell_size)
+        edge_error = round(-1 // self.cell_size)
+        obstacle_error = round(5 // self.cell_size)
 
-        self.grid[0:self.robot.north_length, :] = False
-        self.grid[:, -self.robot.east_length:] = False
-        self.grid[-self.robot.south_length:, :] = False
-        self.grid[:, 0:self.robot.west_length] = False
+        self.grid[0:(self.robot.north_length + edge_error), :] = False
+        self.grid[:, -(self.robot.east_length + edge_error):] = False
+        self.grid[-(self.robot.south_length + edge_error):, :] = False
+        self.grid[:, 0:(self.robot.west_length + edge_error)] = False
 
         for obstacle in self.obstacles:
-            west_x = max(obstacle.south_west.x - self.robot.west_length - error, 0)
-            east_x = min(obstacle.north_east.x + self.robot.east_length + 1 + error, self.size)
-            south_y = max(obstacle.south_west.y - self.robot.south_length - error, 0)
-            north_y = min(obstacle.north_east.y + self.robot.north_length + 1 + error, self.size)
+            west_x = max(obstacle.south_west.x - self.robot.west_length - obstacle_error, 0)
+            east_x = min(obstacle.north_east.x + self.robot.east_length + 1 + obstacle_error, self.size)
+            south_y = max(obstacle.south_west.y - self.robot.south_length - obstacle_error, 0)
+            north_y = min(obstacle.north_east.y + self.robot.north_length + 1 + obstacle_error, self.size)
 
             self.grid[west_x:east_x, south_y:north_y] = False
 
