@@ -37,7 +37,7 @@ class World:
 
     def __annotate_grid(self: World) -> None:
         edge_error = round(-1 // self.cell_size)
-        obstacle_error = round(5 // self.cell_size)
+        obstacle_error = round(6 // self.cell_size)
 
         self.grid[0:(self.robot.north_length + edge_error), :] = False
         self.grid[:, -(self.robot.east_length + edge_error):] = False
