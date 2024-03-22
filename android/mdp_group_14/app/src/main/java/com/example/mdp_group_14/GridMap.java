@@ -618,10 +618,10 @@ public class GridMap extends View{
 
         if (((col - 1))>=0 && ((row - 1))>=0)
         {
-            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1)*5 + "," + (19 - row)*5 + "," + (imageBearings.get(19 - row)[col - 1]).toUpperCase());
-            BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString((col - 1)*5)+"\n");
-            BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString((19 - row)*5)+"\n");
-            BluetoothCommunications.getMessageReceivedTextView().append((imageBearings.get(19 - row)[col - 1]).toUpperCase()+"\n");
+            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1)*5 + "," + (19 - row)*5 + "," + (imageBearings.get(19 - row)[col - 1]).toUpperCase()+"\n");
+//            BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString((col - 1)*5)+"\n");
+//            BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString((19 - row)*5)+"\n");
+//            BluetoothCommunications.getMessageReceivedTextView().append((imageBearings.get(19 - row)[col - 1]).toUpperCase()+"\n");
         }
         else{
             showLog("out of grid");
@@ -1310,9 +1310,9 @@ public class GridMap extends View{
                         robotDirection = "error up";
                         break;
                 }
-                Home.refreshMessageReceivedNS("moves: "+Integer.toString(moves));
-                Home.refreshMessageReceivedNS("movesRx: "+Integer.toString(movesRx));
-                Home.refreshMessageReceivedNS("RIGHT_TURNING_RADIUS: "+Integer.toString(RIGHT_TURNING_RADIUS));
+//                Home.refreshMessageReceivedNS("moves: "+Integer.toString(moves));
+//                Home.refreshMessageReceivedNS("movesRx: "+Integer.toString(movesRx));
+//                Home.refreshMessageReceivedNS("RIGHT_TURNING_RADIUS: "+Integer.toString(RIGHT_TURNING_RADIUS));
                 break;
             case "right":
                 switch (direction) {
