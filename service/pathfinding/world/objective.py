@@ -43,7 +43,7 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
 
     objectives = set()
     for gap in range(minimum_gap, maximum_gap):
-        if obstacle.south_west.x == 0 or obstacle.south_west.y == 0 or obstacle.north_east.x == 199 or obstacle.north_east.y == 199:
+        if obstacle.south_west.x == 0 or obstacle.south_west.y == 0 or obstacle.north_east.x == world.size - 1 or obstacle.north_east.y == world.size - 1:
             offset += 2
 
         for alignment in range(-offset, obstacle.clearance + offset):
