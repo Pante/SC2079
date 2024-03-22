@@ -16,7 +16,7 @@ def handle_disconnect():
 # sample use of this class.
 def stream_listener_test():
     # load the StreamListener class with the weights file.
-    listener = StreamListener('../../v12_task1.pt')
+    listener = StreamListener('../../v13_trial3.pt')
 
     # pass in the handlers and start stream reading.
     listener.start_stream_read(handle_result, handle_disconnect, conf_threshold=0.65, show_video=True)

@@ -47,7 +47,7 @@
 #define SERIAL_RING_SIZE 1000
 #define DIST_DIFF_DEFAULT 50
 #define BRAKE_SPEED 20
-#define TICKS_ES_MAX 8
+#define TICKS_ES_MAX 10
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -221,9 +221,9 @@ int main(void)
   servo_setAngle(0);
   motor_setDrive(0, 0);
 
-//  OLED_ShowString(0, 0, "Press USER when ready...");
-//  OLED_Refresh_Gram();
-//  while (!user_is_pressed());	//wait for user to place car.
+  OLED_ShowString(0, 0, "Press USER when ready...");
+  OLED_Refresh_Gram();
+  while (!user_is_pressed());	//wait for user to place car.
   HAL_Delay(500);
   OLED_Clear();
   OLED_ShowString(0, 0, "Calibrating...");
@@ -258,7 +258,7 @@ int main(void)
 
   //for distance tracking (for use with INFO_DIST command).
   float distTrack = 0;
-  uint8_t shouldTrackDist = 0;
+  volatile uint8_t shouldTrackDist = 0;
 
   float distTarget = 0;							//decide distance target.
   float distDiff = 0, brakingDist = 0; 			//current distance difference.
@@ -298,7 +298,9 @@ int main(void)
 
 	/* ----- Start: Get next command (if any) ----- */
 	if (cmd == NULL) {
-		if (!ticksDelay) {
+		Command *peek = commands_peek();
+//		Command *peek;
+		if (!ticksDelay || (peek != NULL && peek->opType != DRIVE)) {
 			cmd = commands_pop();
 
 			if (cmd != NULL) {
@@ -343,7 +345,7 @@ int main(void)
 						} else {
 							//write distance tracked into string.
 							free(cmd->str);
-							cmd->str_size = 8; //D<6.2f>\n = 8 characters
+							cmd->str_size = 9; //D<6.2f>\n\0 = 9 characters
 							cmd->str = malloc(cmd->str_size * sizeof(uint8_t));
 							snprintf(cmd->str, cmd->str_size, "D%6.2f\n", distTrack);
 						}
@@ -351,10 +353,14 @@ int main(void)
 						commands_end(&huart3, cmd);
 						cmd = NULL;
 						break;
+					case INFO_MARKER:
+						commands_end(&huart3, cmd);
+						cmd = NULL;
+						break;
 				}
 			}
 		} else {
-			Command *peek = commands_peek_next_drive();
+			peek = commands_peek_next_drive();
 			if (peek != NULL) {
 				servo_setAngle(peek->steeringAngle);
 				if (ticksDelay > 0) ticksDelay--;
@@ -419,26 +425,26 @@ int main(void)
 				break;
 		}
 
-		Command *next = commands_peek_next_drive();
-		if (next != NULL) {
-			if (commands_type_match(cmd, next)) {
-				//absorb next command into current command.
-				next = commands_pop();
+		Command *next = commands_peek();
+		if (next != NULL && next->opType == DRIVE && commands_type_match(cmd, next)) {
+			//absorb next command into current command.
+			next = commands_pop();
 
-				switch (next->distType) {
-					case TARGET:
-						cmd->val += next->val;
-						break;
-					case STOP_AWAY:
-						cmd->val = next->val;
-						break;
-				}
-
-				commands_end(&huart3, next);
-				next = commands_peek_next_drive();
+			switch (next->distType) {
+				case TARGET:
+					cmd->val += next->val;
+					break;
+				case STOP_AWAY:
+				case STOP_L:
+				case STOP_R:
+					cmd->val = next->val;
+					break;
 			}
+
+			commands_end(&huart3, next);
 		}
 
+		next = commands_peek_next_drive();
 		float nextAngle = next != NULL ? next->steeringAngle : 0;
 		float nextAngleDiff = abs_float(nextAngle - cmd->steeringAngle);
 		uint8_t shouldBrake = cmd->distType == STOP_AWAY
@@ -446,7 +452,8 @@ int main(void)
 				: next != NULL
 				? next->dir != cmd->dir
 //					|| next->dir < 0 //avoid smooth turning while reversing.
-					|| nextAngleDiff > SERVO_WIDTH
+					|| nextAngleDiff > SERVO_WIDTH			//too large a turn.
+					|| nextAngle * cmd->steeringAngle < 0	//opposite direction.
 				: 1;
 		uint8_t turnSpeed = next != NULL ? min_uint8(BRAKE_SPEED, next->speed) : BRAKE_SPEED;
 
@@ -462,9 +469,9 @@ int main(void)
 		uint8_t shouldEnd = 0;
 		if (!shouldBrake && !(ticksElapsed % ticksServo)) {
 			//turn a small angle every SERVO_TURN_PERIOD ms.
-			float diff = abs_float(steeringAngle - next->steeringAngle);
-			if (diff < 0.01) shouldEnd = 1;
-			else if (timeLeft < (SERVO_TURN_PERIOD) * (diff / SERVO_TURN_STEP)) {
+			float diff = abs_float(nextAngle - steeringAngle);
+
+			if (timeLeft < (SERVO_TURN_PERIOD) * (diff / SERVO_TURN_STEP)) {
 				//should increment.
 				float step = min_float(SERVO_TURN_STEP, diff);
 				if (nextAngle < steeringAngle) step = -step;
@@ -479,27 +486,29 @@ int main(void)
 
 		float absDistDiff = abs_float(distDiff),
 				absDistDiffChange = abs_float(distDiff - distDiffOld);
+		uint8_t shouldTick = (shouldBrake
+				&& absDistDiff < 1 && absDistDiffChange < 0.2)	//no change in motion.
+				|| absDistDiff < 0.05;								//error threshold satisfied.
+		ticksES = shouldTick ? ticksES + 1 : 0;
 
-		if (shouldEnd || absDistDiff < 0.05 || (shouldBrake && absDistDiff < 1.0 && absDistDiffChange < 0.25)) {
-			//check for stabilization (if not in continuous motion).
-			if (shouldEnd || !shouldBrake || ++ticksES >= TICKS_ES_MAX) {
-				//target achieved; move to next command.
-				ticksES = 0;
-				commands_end(&huart3, cmd);
-				cmd = NULL;
+		shouldEnd |= ticksES >= TICKS_ES_MAX	//minimum error threshold ticks met.
+					|| distDiff < -0.5; 		//prevent overshoot.
 
-				servo_setAngle(nextAngle);
-				if (shouldBrake) {
-					ticksDelay = (SERVO_TURN_PERIOD / MS_FRAME) * (abs_float(nextAngle - steeringAngle) / SERVO_TURN_STEP);
-					motor_setDrive(0, 0);
-					dist_reset(0);
-				} else dist_reset(estSpeed);
-
-				//add estimated travel distance to tracking distance (if tracked).
-				if (shouldTrackDist) distTrack += estDist;
-			}
-		} else {
+		if (shouldEnd) {
+			//target achieved; move to next command.
 			ticksES = 0;
+			commands_end(&huart3, cmd);
+			cmd = NULL;
+
+			servo_setAngle(nextAngle);
+			if (shouldBrake) {
+				ticksDelay = (SERVO_TURN_PERIOD / MS_FRAME) * (abs_float(nextAngle - steeringAngle) / SERVO_TURN_STEP) + 15;
+				motor_setDrive(0, 0);
+				dist_reset(0);
+			} else dist_reset(estSpeed);
+
+			//add estimated travel distance to tracking distance (if tracked).
+			if (shouldTrackDist) distTrack += estDist;
 		}
 	}
 	/* ----- End: Command Control Loop ----- */

@@ -17,12 +17,12 @@ const static float Kd_match = 3e3;
 
 static PidDef pidDistTarget;
 
-const static float Kp_distTarget = 1.1;
+const static float Kp_distTarget = 1.4;
 const static float Ki_distTarget = 0.0011;
-const static float Kd_distTarget = 0.15;
+const static float Kd_distTarget = 0.12;
 
 static PidDef pidDistAway;
-const static float Kp_distAway = 1.52;
+const static float Kp_distAway = 1.55;
 const static float Ki_distAway = 7e-5;
 const static float Kd_distAway = 0.25;
 
@@ -138,11 +138,10 @@ void motor_pwmCorrection(float wDiff, float rBack, float distDiff, float braking
 		int16_t pwmValNext = getSpeedPwm(speedNext);
 		if (pwmValNext < pwmValTarget) {
 			 pwmValNext += pid_adjust(pidBrake, distDiff / brakingDist, 1) * (pwmValTarget - pwmValNext);
-			 pwmValAccel = pwmValNext;
 			 int16_t diff = pwmValNext - pwmValAccel;
-			 if (abs_int16(diff) > MOTOR_PWM_ACCEL) {
+			 if (diff > MOTOR_PWM_ACCEL) {
 				 //gently accelerate to intercept.
-				 pwmValAccel += diff < 0 ? -MOTOR_PWM_ACCEL : MOTOR_PWM_ACCEL;
+				 pwmValAccel += MOTOR_PWM_ACCEL;
 			 } else {
 				 //allow for change.
 				 pwmValAccel += diff;
@@ -173,8 +172,8 @@ void motor_pwmCorrection(float wDiff, float rBack, float distDiff, float braking
 
 	float offset = pid_adjust(&pidMatch, wDiff, 1) * pwmValAccel / pwmValTarget;
 //	offset = 0;
-	if (offset > MOTOR_PWM_OFFSET_MAX) offset = offset < 0 ? -MOTOR_PWM_OFFSET_MAX : MOTOR_PWM_OFFSET_MAX;
-
+	float offsetMax = pwmValTarget * MOTOR_PWM_OFFSET_MAX_PERCENT;
+	if (offset > offsetMax) offset = offset < 0 ? -offsetMax : offsetMax;
 
 	lPwmVal = pwmValAccel * lScale - offset;
 	rPwmVal = pwmValAccel * rScale + offset;

@@ -8,6 +8,7 @@
  * <flag>: 1 char
  * - use one of the characters below to specify which action to take.
  *
+ * ----------- FOR DRIVE COMMANDS ONLY ------------
  * <speed>: 1-3 chars
  * - specify speed to drive, from 0 to 100 (integer).
  *
@@ -20,6 +21,7 @@
  * - specify distance to drive, from 0 to 500 (float).
  * - (ONLY FOR DIST_TARGET commands) when <angle> != 0:
  * 		specify turn angle to complete, from 0 to 360 (float).
+ * ----------- FOR DRIVE COMMANDS ONLY ------------
  *
  * <SEP>: character specified below as CMD_SEP ('|').
  * <END>: character specified below as CMD_END ('\n').
@@ -52,6 +54,7 @@
 #define CMD_BACKWARD_DIST_L 'l'			//go backward until left IR sensor is greater than value provided.
 #define CMD_BACKWARD_DIST_R 'r'			//go backward until right IR sensor is greater than value provided.
 
+#define CMD_INFO_MARKER 'M'				//signal command has been passed. (used for tracking)
 #define CMD_INFO_DIST 'D'				//signal start/stop of accumulative distance tracking. (all other fields are not required, i.e., send 'D\n')
 //NOTE: distance tracked is NOT displacement; i.e., send different signals for different directions.
 

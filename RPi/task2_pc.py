@@ -1,16 +1,15 @@
-import json
 import socket
 import sys
 import threading
-from multiprocessing import Manager, Process
-from pathlib import Path
+from multiprocessing import Manager
+from stitching import stitch_images, add_to_stitching_dict
 
 sys.path.insert(1, "/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi")
 from TestingScripts.Camera_Streaming_UDP.stream_listener import StreamListener
 
 
 class Task2PC:
-    def __init__(self):
+    def __init__(self, config):
         # self.manager = Manager()
         self.process_PC_receive = None
         self.process_PC_stream = None
@@ -23,9 +22,19 @@ class Task2PC:
         self.host = "192.168.14.14"
         self.port = 5000
         self.client_socket = None
+        print(f"! -- initialising weights file: {config.task2_weights}....")
+        self.stream_listener = StreamListener(config.task2_weights)
 
-        self.stream_listener = StreamListener("v9 task2_stop removed.pt")
-        self.prev_image = None
+        self.stitching_arr = []
+        self.stitching_dict = {}
+        self.filename = "task2"
+
+        self.obstacle_id = 1
+        self.obstacle_img_id = None
+
+        # left and right arrow IDs
+        self.LEFT_ARROW_ID = "39"
+        self.RIGHT_ARROW_ID = "38"
 
     def start(self):
         self.pc_receive_thread = threading.Thread(target=self.pc_receive)
@@ -35,41 +44,27 @@ class Task2PC:
 
     def stream_start(self):
         self.stream_listener.start_stream_read(
-            self.on_result, self.on_disconnect, conf_threshold=0.65, show_video=True
+            self.on_result, self.on_disconnect, conf_threshold=0.65, show_video=False
         )
 
     def on_result(self, result, frame):
         message_content = None
 
         if result is not None:
-            names = result.names
+            conf_level = result.boxes[0].conf.item()
+            img_id = result.names[int(result.boxes[0].cls[0].item())]
 
-            if self.prev_image is None:
-                # New image, can send over
-                # Only if the confidence is over threshold then pass to the PC
-                # TODO: Pass this data to RPI through the PC socket - Flask API
-                message_content = (
-                    str(result.boxes[0].conf.item())
-                    + ","
-                    + names[int(result.boxes[0].cls[0].item())]
-                )
-                self.prev_image = names[int(result.boxes[0].cls[0].item())]
-                # print("FIRST: ", self.prev_image)
-            elif names[int(result.boxes[0].cls[0].item())] != self.prev_image:
-                # New image, can send over
-                message_content = (
-                    str(result.boxes[0].conf.item())
-                    + ","
-                    + names[int(result.boxes[0].cls[0].item())]
-                )
-                self.prev_image = names[int(result.boxes[0].cls[0].item())]
-                # print("SECOND: ", self.prev_image)
-
-        elif self.prev_image != "NONE":
-            # No object detected, send "NONE" over
-            # Upon capture image, if no object is detected -- "NONE", continue to wait until a object is detected (not "NONE")
-            message_content = "NONE"
-            self.prev_image = "NONE"
+            if img_id not in [self.LEFT_ARROW_ID, self.RIGHT_ARROW_ID]:
+                print(f"Detected invalid image {img_id}, skipping...")
+                return
+            
+            if self.obstacle_img_id is None:
+                # Detected a different image, send over.
+                message_content = f"{conf_level},{img_id}"
+                self.obstacle_img_id = img_id
+            
+            if img_id == self.obstacle_img_id:
+                add_to_stitching_dict(self.stitching_dict, self.obstacle_id, conf_level, frame)
 
         if message_content is not None:
             print("Sending:", message_content)
@@ -108,11 +103,20 @@ class Task2PC:
                     print("PC connection dropped")
                     break
                 print("Message received from PC:", message_rcv)
+
+                if "SEEN" in message_rcv:
+                    self.obstacle_id += 1
+                    self.obstacle_img_id = None
+
+                elif "STITCH" in message_rcv:
+                    stitch_images([1, 2], self.stitching_dict, filename=self.filename)
             except OSError as e:
                 print("Error in sending data:", e)
                 break
 
 
-if __name__ == "__main__":
-    pcMain = Task2PC()
+def main(config):
+    print("# ------------- Running Task 2, PC ---------------- #")
+    print(f"You are {'out' if config.is_outdoors else 'in'}doors.")
+    pcMain = Task2PC(config)
     pcMain.start()

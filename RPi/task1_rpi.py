@@ -195,7 +195,7 @@ class Task1RPI:
                 break
 
     def stream_start(self):
-        StreamServer().start(framerate=15, quality=45)
+        StreamServer().start(framerate=20, quality=45)
 
     def get_api_object(self, Object, dir, sw, size, id=None):
         # TODO: test 200x200

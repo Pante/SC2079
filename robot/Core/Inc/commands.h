@@ -11,7 +11,8 @@ enum _cmdOpType {
 	DRIVE,			//is a drive command, i.e., robot will move.
 
 	//Commands related to relaying information.
-	INFO_DIST		//toggle start/stop of accumulative distance tracking.
+	INFO_DIST,		//toggle start/stop of accumulative distance tracking.
+	INFO_MARKER		//arbitary marker.
 };
 enum _cmdDistType {
 	TARGET,			//drive for this distance
@@ -28,6 +29,7 @@ struct command_t {
 	CmdOpType opType;
 
 	//command string
+	uint8_t shouldSend; 	//if command should be tracked for finishing.
 	uint8_t *str;
 	uint8_t str_size;
 
@@ -49,6 +51,7 @@ typedef struct command_t Command;
 
 void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size);
 Command *commands_pop();
+Command *commands_peek();
 Command *commands_peek_next_drive();
 void commands_end(UART_HandleTypeDef *uart, Command *cmd);
 uint8_t commands_type_match(Command *a, Command *b);
