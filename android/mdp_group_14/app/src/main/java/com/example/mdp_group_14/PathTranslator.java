@@ -8,7 +8,7 @@ import android.widget.Toast;
 public class PathTranslator {
     private static final String TAG = "PathTranslator";
     private static GridMap gridMap;
-    private static final int CELL_LENGTH = 5; //length of each cell in cm
+    private static final int CELL_LENGTH = 10; //length of each cell in cm
     private static final int MILLI_DELAY = 200;    // delay between movement commands
 
     // Turning radius differs for each turn :/
@@ -262,12 +262,14 @@ public class PathTranslator {
                 moves = commandValue / CELL_LENGTH;
                 for(int i = 0; i < moves; i++) {
                     gridMap.moveRobot("forward");
+
+
                     Home.refreshLabel();    // update x and y coordinate displayed
                     // display different statuses depending on validity of robot action
                     if (gridMap.getValidPosition()){
                         showLog("moving forward");}
                     else {
-                        Home.printMessage("obstacle");
+//                        Home.printMessage("obstacle");
                         showLog("Unable to move forward");
                     }
 

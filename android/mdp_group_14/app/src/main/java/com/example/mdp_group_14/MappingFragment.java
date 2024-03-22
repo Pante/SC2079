@@ -114,7 +114,7 @@ public class MappingFragment extends Fragment {
                         showLog("Click count error!!");
                 }
                 // Display "hidden" message in chat box - in case you forget what each image represents
-                Home.refreshMessageReceivedNS(path);
+//                Home.refreshMessageReceivedNS(path);
 //                if(clicks >= THRESHOLD) {
                     // emergency protocol
 
@@ -140,7 +140,9 @@ public class MappingFragment extends Fragment {
             public void onClick(View view) {
                 showLog("Clicked resetMapBtn");
                 showToast("Reseting map...");
+                Home.printMessage("CLEAR");
                 gridMap.resetMap();
+
             }
         });
 
