@@ -48,7 +48,9 @@ from TestingScripts.Camera_Streaming_UDP.stream_server import StreamServer
 
 
 class Task1RPI:
-    def __init__(self):
+    def __init__(self, config):
+        self.config = config
+
         self.obstacle_dict = {}  # Obstacle Dict
         self.robot = None  # Robot
         self.prev_image = None
@@ -71,7 +73,7 @@ class Task1RPI:
         self.STM_Stopped = False
 
         self.start_time = 0
-        self.drive_speed = 65
+        self.drive_speed = 40 if config.is_outdoors else 55
         self.drive_angle = 25
     def initialize(self):
         try:
@@ -108,58 +110,58 @@ class Task1RPI:
         self.obstacle_dict = {
             1: self.get_api_object(
                 PathfindingRequestObstacle,
-                E,
-                (5, 80),
-                (5, 5),
+                W,
+                (160, 0),
+                (10, 10),
                 id=1,
             ),
             2: self.get_api_object(
                 PathfindingRequestObstacle,
                 S,
-                (25, 60),
-                (5, 5),
+                (63, 160),
+                (10, 10),
                 id=2,
             ),
             3: self.get_api_object(
                 PathfindingRequestObstacle,
-                N,
-                (40, 25),
-                (5, 5),
+                S,
+                (127, 147),
+                (10, 10),
                 id=3,
             ),
             4: self.get_api_object(
                 PathfindingRequestObstacle,
-                W,
-                (75, 10),
-                (5, 5),
+                N,
+                (88, 74),
+                (10, 10),
                 id=4,
             ),
             5: self.get_api_object(
                 PathfindingRequestObstacle,
                 W,
-                (95, 45),
-                (5, 5),
+                (190, 38),
+                (10, 10),
                 id=5,
             ),
             6: self.get_api_object(
                 PathfindingRequestObstacle,
-                E,
-                (55, 70),
-                (5, 5),
+                N,
+                (49, 10),
+                (10, 10),
                 id=6,
             ),
-            7: self.get_api_object(
-                PathfindingRequestObstacle,
-                S,
-                (80, 95),
-                (5, 5),
-                id=7,
-            ),
+            # 7: self.get_api_object(
+            #     PathfindingRequestObstacle,
+            #     S,
+            #     (80, 95),
+            #     (10, 10),
+            #     id=7,
+            # ),
             # 8: self.get_api_object(
             #     PathfindingRequestObstacle,
             #     W,
             #     (85, 55),
-            #     (5, 5),
+            #     (10, 10),
             #     id=8,
             # ),
         }
@@ -195,7 +197,7 @@ class Task1RPI:
                 break
 
     def stream_start(self):
-        StreamServer().start(framerate=15, quality=45)
+        StreamServer().start(framerate=15, quality=45, is_outdoors=self.config.is_outdoors)
 
     def get_api_object(self, Object, dir, sw, size, id=None):
         # TODO: test 200x200
@@ -203,8 +205,8 @@ class Task1RPI:
         w, h = size
     
         direction = Direction(dir)
-        south_west = PathfindingPoint(x=x*2, y=y*2)
-        north_east = PathfindingPoint(x=(x + w)*2 - 1, y=(y + h)*2 - 1)
+        south_west = PathfindingPoint(x=x, y=y)
+        north_east = PathfindingPoint(x=(x + w) - 1, y=(y + h) - 1)
 
         if id is not None:
             return Object(
@@ -222,55 +224,67 @@ class Task1RPI:
             message_rcv = None
             try:
                 message_rcv = self.android.receive()
-                print("MESSAGE RECEIVED: " + message_rcv)
-                if "BEGIN" in message_rcv:
-                    print("BEGINNNN!")
-                    # TODO: Begin Task 1
-                    self.start()  # Calculate the path
-
-                elif "OBSTACLE" in message_rcv:
-                    print("OBSTACLE!!!!")
-                    id, x, y, dir = message_rcv.split(",")[1:]
-                    id = int(id)
-
-                    if dir == "-1":
-                        if id in self.obstacle_dict:
-                            del self.obstacle_dict[id]
-                            print("Deleted obstacle", id)
-                    elif dir not in ["NORTH", "SOUTH", "EAST", "WEST"]:
-                        print("Invalid direction provided:", dir + ", ignoring...")
+                messages = message_rcv.split('\n')
+                for message_rcv in messages:
+                    if len(message_rcv) == 0:
                         continue
-                    else:
-                        newObstacle = self.get_api_object(
-                            PathfindingRequestObstacle,
-                            dir,
-                            (int(x), int(y)),
-                            (5, 5),
-                            id=id,
+
+                    print("Message received from Android:", message_rcv)
+                    if "BEGIN" in message_rcv:
+                        print("BEGINNNN!")
+                        # TODO: Begin Task 1
+                        self.start()  # Calculate the path
+                    elif "CLEAR" in message_rcv:
+                        print(" --------------- CLEARING OBSTACLES LIST. ---------------- ")
+                        self.obstacle_dict.clear()
+                    elif "OBSTACLE" in message_rcv:
+                        print("OBSTACLE!!!!")
+                        id, x, y, dir = message_rcv.split(",")[1:]
+                        id = int(id)
+
+                        if dir == "-1":
+                            if id in self.obstacle_dict:
+                                del self.obstacle_dict[id]
+                                print("Deleted obstacle", id)
+                        elif dir not in ["NORTH", "SOUTH", "EAST", "WEST"]:
+                            print("Invalid direction provided:", dir + ", ignoring...")
+                            continue
+                        else:
+                            newObstacle = self.get_api_object(
+                                PathfindingRequestObstacle,
+                                dir,
+                                (int(x), int(y)),
+                                (10, 10),
+                                id=id,
+                            )
+                            self.obstacle_dict[id] = newObstacle
+
+                            print("Obstacle set successfully: ", newObstacle)
+                        print(f"--------------- Current list {len(self.obstacle_dict)}: -------------")
+                        obs_items = self.obstacle_dict.items()
+                        if len(obs_items) == 0:
+                            print("! no obstacles.")
+                        else:
+                            for id, obstacle in obs_items:
+                                print(f"{id}: {obstacle}")
+
+                    elif "ROBOT" in message_rcv:
+                        print("NEW ROBOT LOCATION!!!")
+                        x, y, dir = message_rcv.split(",")[1:]
+                        x, y = int(x), int(y)
+
+                        if x < 0 or y < 0:
+                            print("Illegal robot coordinate, ignoring...")
+                            continue
+
+                        self.robot = self.get_api_object(
+                            PathfindingRequestRobot, dir, (int(x), int(y)), (21, 21)
                         )
-                        self.obstacle_dict[id] = newObstacle
-
-                        print("Obstacle set successfully: ", newObstacle)
-                    print("Number of obstacles: ", len(self.obstacle_dict))
-
-                elif "ROBOT" in message_rcv:
-                    print("NEW ROBOT LOCATION!!!")
-                    x, y, dir = message_rcv.split(",")[1:]
-                    x, y = int(x), int(y)
-
-                    if x < 0 or y < 0:
-                        print("Illegal robot coordinate, ignoring...")
-                        continue
-
-                    self.robot = self.get_api_object(
-                        PathfindingRequestRobot, dir, (int(x), int(y)), (12, 12)
-                    )
-                    print("Robot set successfully: ", self.robot)
-                else:
-                    # Catch for messages with no keywords (OBSTACLE/ROBOT/BEGIN)
-                    print("Not a keyword, message received: ", message_rcv)
-                print("Message received from Android:", message_rcv)
-
+                        print("Robot set successfully: ", self.robot)
+                    else:
+                        # Catch for messages with no keywords (OBSTACLE/ROBOT/BEGIN)
+                        print("Not a keyword, message received: ", message_rcv)
+                
             except OSError:
                 self.android_dropped.set()
                 print("Event set: Bluetooth connection dropped")
@@ -351,10 +365,11 @@ class Task1RPI:
 
     def stop(self):
         """Stops all processes on the RPi and disconnects from Android, STM and PC"""
+        time.sleep(0.2)
         self.android.send("STOP")
-        self.android.disconnect()
-        self.stm.disconnect()
-        self.pc.disconnect()
+        # self.android.disconnect()
+        # self.stm.disconnect()
+        # self.pc.disconnect()
         # TODO: Add Stream disconnect/end
         print("Program Ended\n")
 
@@ -472,6 +487,8 @@ class Task1RPI:
         return self.STM_Stopped
 
 
-if __name__ == "__main__":
-    task1 = Task1RPI()  # init
+def main(config):
+    print("# ------------- Running Task 1, RPi ---------------- #")
+    print(f"You are {'out' if config.is_outdoors else 'in'}doors.")
+    task1 = Task1RPI(config)  # init
     task1.initialize()

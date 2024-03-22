@@ -57,8 +57,8 @@ class StreamServer:
             if is_outdoors:
                 cam.exposure_compensation = 25
                 cam.exposure_mode = 'backlight'
-                cam.awb_mode = 'shade'
-                equalizeHist = True
+                cam.awb_mode = 'sunlight'
+                # equalizeHist = True
             
             cam.hflip = True
             cam.vflip = True
@@ -76,7 +76,14 @@ class StreamServer:
                 buffer = base64.b64encode(buffer)
                 # send to client address.
                 if not self.client_addr is None:
-                    self.sock.sendto(buffer, self.client_addr)
+                    buf_len = len(buffer)
+                    if buf_len < self.BUFF_SIZE:
+                        try:
+                            self.sock.sendto(buffer, self.client_addr)
+                        except:
+                            print(f"Error with frame, skipping.")
+                    else:
+                        print(f"Frame too long, skipping: {buf_len}")
                 # reset camera frame.
                 raw.truncate(0)
 

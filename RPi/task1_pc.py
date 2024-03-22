@@ -1,21 +1,17 @@
-import json
-import os
 import socket
 import sys
 import threading
-from multiprocessing import Manager, Process
-from pathlib import Path
-from datetime import datetime as dt
+from multiprocessing import Manager
 from time import time_ns, sleep
-import cv2
-import numpy as np
+from stitching import stitch_images, add_to_stitching_dict
 
 sys.path.insert(1, "/home/raspberrypi/Desktop/MDP Group 14 Repo/SC2079/RPi")
 from TestingScripts.Camera_Streaming_UDP.stream_listener import StreamListener
 
 
 class Task1PC:
-    def __init__(self):
+    def __init__(self, config):
+        self.config = config
         # self.manager = Manager()
         self.process_PC_receive = None
         self.process_PC_stream = None
@@ -29,17 +25,19 @@ class Task1PC:
         self.port = 5000
         self.client_socket = None
 
-        self.stream_listener = StreamListener("v12_task1.pt")
-        self.IMG_BLACKLIST = ["40", "marker"]
+        self.stream_listener = StreamListener(config.task1_weights)
+        self.IMG_BLACKLIST = ["marker"]
         self.prev_image = None
         self.img_time_dict = {}
-        self.time_threshold_ns = 2.0e9
+        self.time_advance_ns = 0.75e9
+        self.time_threshold_ns = 1.5e9
         self.img_pending_arr = []
         self.stitching_img_dict = {}
         self.stitching_arr = []  # to store the image_id's of the image to stitch
         self.should_stitch = False
         self.stitch_len = 0 # number of images to stitch.
 
+        self.filename = "task1" # filename of collage.
         self.start_time = time_ns()
 
     def start(self):
@@ -50,7 +48,7 @@ class Task1PC:
 
     def stream_start(self):
         self.stream_listener.start_stream_read(
-            self.on_result, self.on_disconnect, conf_threshold=0.65, show_video=True
+            self.on_result, self.on_disconnect, conf_threshold=self.config.conf_threshold, show_video=False
         )
         
     def on_result(self, result, frame):
@@ -64,16 +62,7 @@ class Task1PC:
                     continue
             
                 self.prev_image = detected_img_id
-
-                if detected_img_id not in self.stitching_img_dict or (
-                    self.stitching_img_dict[detected_img_id][0] < detected_conf_level
-                ):
-                    # If the newly detected confidence level < current one in the dictionary, replace
-                    self.stitching_img_dict[detected_img_id] = (
-                        detected_conf_level,
-                        frame,
-                    )
-                    print(f"Saw {detected_img_id} with confidence level {detected_conf_level}.")
+                add_to_stitching_dict(self.stitching_img_dict, detected_img_id, detected_conf_level, frame)
                 
                 # Saving the frames into dictionaries
                 cur_time = time_ns()
@@ -102,7 +91,7 @@ class Task1PC:
                             print("Found last image, stitching now...")
                             self.stream_listener.close()
                             self.should_stitch = False
-                            stitchImages(self.stitching_arr, self.stitching_img_dict)
+                            stitch_images(self.filename, self.stitching_arr, self.stitching_img_dict)
 
         elif self.prev_image != "NONE":
             # No object detected, send "NONE" over
@@ -141,7 +130,7 @@ class Task1PC:
         if img_id in self.stitching_arr:
             return 0
         
-        timestamp_int = (timestamp, timestamp + self.time_threshold_ns)
+        timestamp_int = (timestamp - self.time_advance_ns, timestamp + self.time_threshold_ns)
         comp_int = (old_time, cur_time)
         overlap = self.interval_overlap(comp_int, timestamp_int)
 
@@ -193,11 +182,11 @@ class Task1PC:
                         self.should_stitch = True
                         sleep(self.time_threshold_ns * 2e-9)
                         if self.should_stitch:
-                            stitchImages(self.stitching_arr, self.stitching_img_dict)
+                            stitch_images(self.filename, self.stitching_arr, self.stitching_img_dict)
                     else:
                         print("All images present, stitching now...")
                         self.stream_listener.close()
-                        stitchImages(self.stitching_arr, self.stitching_img_dict)
+                        stitch_images(self.filename, self.stitching_arr, self.stitching_img_dict)
 
                 if not message_rcv:
                     print("PC connection dropped")
@@ -206,40 +195,8 @@ class Task1PC:
                 print("Error in sending data:", e)
                 break
 
-def stitchImages(id_arr, stitching_dict):
-    col_count = 0
-
-    blank = np.zeros((320, 320, 3), np.uint8)
-    cols = []
-    col_cur = []
-    for id in id_arr:
-        _, img = stitching_dict[id]
-        img = cv2.resize(img, (320, 320))
-        col_cur.append(img)
-        col_count += 1
-
-        if col_count == 2:
-            col_count = 0
-            cols.append(np.vstack(col_cur))
-            col_cur.clear()
-        # print("Image appended to list")
-    
-    rem = len(col_cur)
-    if rem > 0 and rem < 2:
-        col_cur.append(blank)
-        cols.append(np.vstack(col_cur))
-    canvas = np.hstack(cols)
-
-    # Save collage and save a copy
-    cv2.imwrite(f"collage_{dt.strftime(dt.now(), '%H%M%S')}.jpg", canvas)
-
-    # Display collage
-    window_name = "Collage"
-    cv2.imshow(window_name, canvas)
-    cv2.setWindowProperty(window_name, cv2.WND_PROP_TOPMOST, 1)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    pcMain = Task1PC()
+def main(config):
+    print("# ------------- Running Task 1, PC ---------------- #")
+    print(f"You are {'out' if config.is_outdoors else 'in'}doors.")
+    pcMain = Task1PC(config)
     pcMain.start()

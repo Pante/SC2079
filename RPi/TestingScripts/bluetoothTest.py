@@ -42,10 +42,10 @@ class BluetoothConnectionTest:
 
             user_input = 0
 
-            while user_input < 5:
+            while user_input < 6:
                 user_input = int(
                     input(
-                        "1: Send a message, 2: Exit, 3: Test MOVE/TURN, 4. TURN Instruction, 5. Random String"
+                        "1: Send a message, 2: Exit, 3: Test MOVE/TURN, 4. TURN Instruction, 5. Random String\n"
                     )
                 )
                 if user_input == 1:

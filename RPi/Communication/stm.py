@@ -62,20 +62,16 @@ class STM():
         Returns:
             Optional[str]: message received
         """
-        t = 0
-        message = None
-        while t < ticks:
+        while True:
             if self.serial.in_waiting > 0:
-                message = str(self.serial.read_all(), "utf-8")
-                break
-
-        return message
+                return str(self.serial.read_all(), "utf-8")
     
     def send_cmd(self, flag, speed, angle, val):
         """Send command and wait for acknowledge.
         """
-
-        cmd = f"{flag}{speed}|{round(angle, 2)}|{round(val, 2)}\n" if flag != 'S' else 'S\n'
+        cmd = flag
+        if flag not in ['S', 'D', 'M']:
+            cmd += f"{speed}|{round(angle, 2)}|{round(val, 2)}"
+        cmd += '\n'
         self.send(cmd)
-        print(f"Sent {cmd.rstrip()} to STM.")
 		
