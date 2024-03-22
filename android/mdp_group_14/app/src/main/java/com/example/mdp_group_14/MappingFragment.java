@@ -70,7 +70,7 @@ public class MappingFragment extends Fragment {
         setStartPointToggleBtn = root.findViewById(R.id.startpointToggleBtn);
         directionChangeImageBtn = root.findViewById(R.id.changeDirectionBtn);
         obstacleImageBtn = root.findViewById(R.id.addObstacleBtn);
-        updateButton = root.findViewById(R.id.updateMapBtn);
+//        updateButton = root.findViewById(R.id.updateMapBtn);
         saveMapObstacle = root.findViewById(R.id.saveBtn);
         loadMapObstacle = root.findViewById(R.id.loadBtn);
         dragSwitch = root.findViewById(R.id.dragSwitch);
@@ -342,26 +342,26 @@ public class MappingFragment extends Fragment {
         });
 
         //preload defaults button
-        updateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showLog("Clicked updateButton");
-
-                gridMap.imageBearings.get(9)[5] = "South";
-                gridMap.imageBearings.get(15)[15] = "South";
-                gridMap.imageBearings.get(14)[7] = "West";
-                gridMap.imageBearings.get(4)[15] = "West";
-                gridMap.imageBearings.get(9)[12] = "East";
-                gridMap.setObstacleCoord(5+1, 9+1);
-                gridMap.setObstacleCoord(15+1, 15+1);
-                gridMap.setObstacleCoord(7+1, 14+1);
-                gridMap.setObstacleCoord(15+1, 4+1);
-                gridMap.setObstacleCoord(12+1, 9+1);
-                gridMap.invalidate();
-                updateStatus("i say dont click right why u still click????");
-                showLog("Exiting updateButton");
-            }
-        });
+//        updateButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                showLog("Clicked updateButton");
+//
+//                gridMap.imageBearings.get(9)[5] = "South";
+//                gridMap.imageBearings.get(15)[15] = "South";
+//                gridMap.imageBearings.get(14)[7] = "West";
+//                gridMap.imageBearings.get(4)[15] = "West";
+//                gridMap.imageBearings.get(9)[12] = "East";
+//                gridMap.setObstacleCoord(5+1, 9+1);
+//                gridMap.setObstacleCoord(15+1, 15+1);
+//                gridMap.setObstacleCoord(7+1, 14+1);
+//                gridMap.setObstacleCoord(15+1, 4+1);
+//                gridMap.setObstacleCoord(12+1, 9+1);
+//                gridMap.invalidate();
+//                updateStatus("i say dont click right why u still click????");
+//                showLog("Exiting updateButton");
+//            }
+//        });
         return root;
     }
 

@@ -163,16 +163,16 @@
 
                 </LinearLayout>
             </LinearLayout>
-            <!--                "Preload Defaults"-->
-            <Button
-                android:id="@+id/updateMapBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="13dp"
-                android:paddingEnd="10dp"
-                android:text="DO NOT CLICK"
-                android:background="@drawable/border_black_state"
-                app:backgroundTint="@color/colorYellow"/>
+<!--            "Preload Defaults"-->
+<!--            <Button-->
+<!--                android:id="@+id/updateMapBtn"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="13dp"-->
+<!--                android:paddingEnd="10dp"-->
+<!--                android:text="DO NOT CLICK"-->
+<!--                android:background="@drawable/border_black_state"-->
+<!--                app:backgroundTint="@color/colorYellow"/>-->
 
             <ImageView
                 android:id="@+id/eBtn"

@@ -62,14 +62,15 @@
             android:id="@+id/view_pager2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/bg4"
+
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <com.google.android.material.tabs.TabLayout
 
                 android:id="@+id/tabs2"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="60dp"
+                android:background="@drawable/bg4"
                 app:tabGravity="center"
                 app:tabIndicator="@drawable/selected_tab"
                 app:tabIndicatorAnimationMode="elastic"
@@ -78,6 +79,7 @@
                 app:tabMinWidth="130dp"
                 app:tabMode="scrollable"
                 app:tabRippleColor="@null"
+
                 app:tabSelectedTextColor="@color/colorBlack" />
 
         </androidx.viewpager.widget.ViewPager>

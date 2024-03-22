@@ -1741,6 +1741,9 @@ public class GridMap extends View {
             case "left": {
                 entry = Turn.turn(newCoords,robotDirection,"left");
                 Integer[] last = entry.getValue().get(entry.getValue().size() - 1);
+                if (last[0] < 2 || last[1] < 1 || 20 <= last[0] || 20 <= last[1]) {
+                    break;
+                }
                 curCoord[0] = last[0];
                 curCoord[1] = last[1];
                 cells[curCoord[0]][20 - curCoord[1]].setType("explored");
@@ -1752,6 +1755,9 @@ public class GridMap extends View {
             case "right": {
                 entry = Turn.turn(newCoords,robotDirection,"right");
                 Integer[] last = entry.getValue().get(entry.getValue().size() - 1);
+                if (last[0] < 2 || last[1] < 1 || 20 <= last[0] || 20 <= last[1]) {
+                    break;
+                }
                 curCoord[0] = last[0];
                 curCoord[1] = last[1];
                 cells[curCoord[0]][20 - curCoord[1]].setType("explored");
@@ -1823,6 +1829,9 @@ public class GridMap extends View {
             case "backleft": {
                 entry = Turn.turn(newCoords,robotDirection,"backleft");
                 Integer[] last = entry.getValue().get(entry.getValue().size() - 1);
+                if (last[0] < 2 || last[1] < 1 || 20 <= last[0] || 20 <= last[1]) {
+                    break;
+                }
                 curCoord[0] = last[0];
                 curCoord[1] = last[1];
                 cells[curCoord[0]][20 - curCoord[1]].setType("explored");
@@ -1859,6 +1868,9 @@ public class GridMap extends View {
             case "backright": {
                 entry = Turn.turn(newCoords,robotDirection,"backright");
                 Integer[] last = entry.getValue().get(entry.getValue().size() - 1);
+                if (last[0] < 2 || last[1] < 1 || 20 <= last[0] || 20 <= last[1]) {
+                    break;
+                }
                 curCoord[0] = last[0];
                 curCoord[1] = last[1];
                 cells[curCoord[0]][20 - curCoord[1]].setType("explored");

@@ -39,6 +39,8 @@ import org.json.JSONObject;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Home extends Fragment {
@@ -348,6 +350,11 @@ public class Home extends Fragment {
             showLog("receivedMessage: message --- " + message);
 
             String[] cmdd = message.split(",");
+
+//            if (message.contains(" "))
+//            {
+//                message= Arrays.toString(message.split(" "));
+//            }
 //            showLog("cmd1 --- " + cmdd[1]);
 //            showLog("cmd2 --- " + cmdd[2]);
 
@@ -390,16 +397,38 @@ public class Home extends Fragment {
             else if(message.contains("TARGET")) {
                 try {
                     String[] cmd = message.split(",");
-                    BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no. :" + cmd[1]+ "Prediction: +" + cmd[2] + "\n");
+                    String temp2="-1";
+                    BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no: " + cmd[1]+ "TARGET ID: " + cmd[2] + "\n");
 
+//                    if (cmd[2].contains("STOP"))
+//                    {
+//                        String temp=cmd[2];
+//                        String[] temp1=temp.split(" ");
+//                        temp2=temp1[0];
+//
+//                    }
 
                     gridMap.updateIDFromRpi(String.valueOf(Integer.valueOf(cmd[1])-1), cmd[2]);
                     obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 2);
+
+
+//                    int ob= Integer.parseInt(obstacleID);
+
                 }
                 catch(Exception e)
                 {
                     e.printStackTrace();
                 }
+            }
+            else if(message.contains("ARROW")){
+                String[] cmd = message.split(",");
+//                BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no: " + cmd[1]+ "TARGET ID: " + cmd[2] + "\n");
+
+                Home.refreshMessageReceivedNS("TASK2"+"\n");
+                Home.refreshMessageReceivedNS("obstacle id: "+cmd[1]+", ARROW: "+cmd[2]);
+
+
+//                updateStatus(cmd[0]+" "+ cmd[1]+" "+cmd[2]);
             }
             // OLD VER: Expects a syntax of e.g. Algo|f010. Commented out and implemented new version below
 /*            if(message.contains("Algo")) {
@@ -420,8 +449,9 @@ public class Home extends Fragment {
             else if(message.contains("STOP"))
             {
                 Home.refreshMessageReceivedNS("STOP received");
-                showLog("received Stop");
+//                showLog("received Stop");
                 Home.stopTimerFlag = true;
+                Home.stopWk9TimerFlag=true;
                 timerHandler.removeCallbacks(ControlFragment.timerRunnableExplore);
                 timerHandler.removeCallbacks(ControlFragment.timerRunnableFastest);
             }
