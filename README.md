@@ -13,5 +13,14 @@ It is divided into the following components:
 Other misc components:
 * music - Unused Pokemon theme song that we originally wanted to blast out of a speaker attached to the robot. We unforunately did not have the time to achieve this.
 
+## Members
+* [Bohui](https://github.com/bh555)
+* [Bryan](https://github.com/BryanTohWS)
+* [Junius](https://github.com/Junius00)
+* [Matthias](https://github.com/Pante)
+* [Melissa](https://github.com/seow2002)
+* [Seth](https://github.com/sethlxk)
+* [Zhei En](https://github.com/zheien)
+
 ## Results
 ![telegram-cloud-photo-size-5-6339145891381886138-y](https://github.com/Pante/SC2079/assets/9427324/ddc146c2-a356-4c2f-ac03-80814fd5c9cd)
