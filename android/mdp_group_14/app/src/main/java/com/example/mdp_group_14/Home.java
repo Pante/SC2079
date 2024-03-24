@@ -39,6 +39,8 @@ import org.json.JSONObject;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Home extends Fragment {
@@ -48,6 +50,7 @@ public class Home extends Fragment {
     private static SharedPreferences sharedPreferences;
     private static SharedPreferences.Editor editor;
     private static Context context;
+    public static Handler timerHandler = new Handler();
 
     private static GridMap gridMap;
     static TextView xAxisTextView, yAxisTextView, directionAxisTextView;
@@ -265,10 +268,31 @@ public class Home extends Fragment {
         BluetoothCommunications.getMessageReceivedTextView().append(message+ "\n");
     }
 
+    public static void refreshMessageReceivedNS(int message){
+        BluetoothCommunications.getMessageReceivedTextView().append(message+ "\n");
+    }
+
     public static void refreshDirection(String direction) {
         gridMap.setRobotDirection(direction);
-        directionAxisTextView.setText(sharedPreferences.getString("direction",""));
-        printMessage("Direction is set to " + direction);
+        int x = gridMap.getCurCoord()[0];
+        int y = gridMap.getCurCoord()[1];
+        String dir;
+        String newDir = gridMap.getRobotDirection();
+//        newDir = newDir.toUpperCase();
+        directionAxisTextView.setText(sharedPreferences.getString("direction","")); //changes the UI direction display as well
+        //printMessage("Direction is set to " + direction); //OLD VER
+
+        dir= (newDir.equals("up"))?"NORTH":(newDir.equals("down"))?"SOUTH":(newDir.equals("left"))?"WEST":"EAST";
+        if ((x - 2)>=0 && (y - 1)>=0)
+        {
+//          BluetoothCommunications.getMessageReceivedTextView().append("ROBOT" + "," + (col - 2)*5 + "," + (row - 1)*5 + "," + dir.toUpperCase());
+            Home.printMessage("ROBOT" + "," + (x-2)*5 + "," + (y-1)*5 + "," + dir.toUpperCase());
+        }
+        else{
+            showLog("out of grid");
+        }
+//        printMessage("ROBOT,"+ x + "," + y + "," + dir);
+//        BluetoothCommunications.getMessageReceivedTextView().append("ROBOT,"+ (x-1) +"," + (y-1) + "," + dir+"\n"); //for troubleshooting
 
     }
 
@@ -326,8 +350,13 @@ public class Home extends Fragment {
             showLog("receivedMessage: message --- " + message);
 
             String[] cmdd = message.split(",");
-            showLog("cmd1 --- " + cmdd[1]);
-            showLog("cmd2 --- " + cmdd[2]);
+
+//            if (message.contains(" "))
+//            {
+//                message= Arrays.toString(message.split(" "));
+//            }
+//            showLog("cmd1 --- " + cmdd[1]);
+//            showLog("cmd2 --- " + cmdd[2]);
 
 
             int[] global_store = gridMap.getCurCoord();
@@ -344,7 +373,7 @@ public class Home extends Fragment {
                 String[] cmd = message.split("\\|");
                 String[] sentCoords = cmd[1].split(",");
                 String[] sentDirection = sentCoords[2].split("\\.");
-                BluetoothCommunications.getMessageReceivedTextView().append("\n");
+//                BluetoothCommunications.getMessageReceivedTextView().append("\n");
                 String direction = "";
                 String abc = String.join("", sentDirection);
                 if (abc.contains("EAST")) {
@@ -368,16 +397,38 @@ public class Home extends Fragment {
             else if(message.contains("TARGET")) {
                 try {
                     String[] cmd = message.split(",");
-                    BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no. :" + cmd[1]+ "Prediction: +" + cmd[2] + "\n");
+                    String temp2="-1";
+                    BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no: " + cmd[1]+ "TARGET ID: " + cmd[2] + "\n");
 
+//                    if (cmd[2].contains("STOP"))
+//                    {
+//                        String temp=cmd[2];
+//                        String[] temp1=temp.split(" ");
+//                        temp2=temp1[0];
+//
+//                    }
 
                     gridMap.updateIDFromRpi(String.valueOf(Integer.valueOf(cmd[1])-1), cmd[2]);
                     obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 2);
+
+
+//                    int ob= Integer.parseInt(obstacleID);
+
                 }
                 catch(Exception e)
                 {
                     e.printStackTrace();
                 }
+            }
+            else if(message.contains("ARROW")){
+                String[] cmd = message.split(",");
+//                BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no: " + cmd[1]+ "TARGET ID: " + cmd[2] + "\n");
+
+                Home.refreshMessageReceivedNS("TASK2"+"\n");
+                Home.refreshMessageReceivedNS("obstacle id: "+cmd[1]+", ARROW: "+cmd[2]);
+
+
+//                updateStatus(cmd[0]+" "+ cmd[1]+" "+cmd[2]);
             }
             // OLD VER: Expects a syntax of e.g. Algo|f010. Commented out and implemented new version below
 /*            if(message.contains("Algo")) {
@@ -395,9 +446,19 @@ public class Home extends Fragment {
                 updateStatus("translation");
                 pathTranslator.translatePath(message); //splitting and translation will be done in PathTranslator
             }
-
-
-
+            else if(message.contains("STOP"))
+            {
+                Home.refreshMessageReceivedNS("STOP received");
+//                showLog("received Stop");
+                Home.stopTimerFlag = true;
+                Home.stopWk9TimerFlag=true;
+                timerHandler.removeCallbacks(ControlFragment.timerRunnableExplore);
+                timerHandler.removeCallbacks(ControlFragment.timerRunnableFastest);
+            }
+            else{
+                BluetoothCommunications.getMessageReceivedTextView().append("unknown message received");
+                showLog("unknown message received");
+            }
         }
     };
 
