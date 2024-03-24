@@ -275,6 +275,7 @@ int main(void)
   OLED_Clear();
   OLED_ShowString(0, 0, "Active.");
   OLED_Refresh_Gram();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -384,7 +385,7 @@ int main(void)
 		wDiff = (wGyro - wTarget); //gyro is flipped when going backwards.
 
 		float angleChange = wGyro * MS_FRAME;
-		if (steeringAngle < 0) angleChange = -angleChange;
+		if (cmd->steeringAngle < 0) angleChange = -angleChange;
 		estAngle += angleChange;
 
 		distDiffOld = distDiff;
@@ -462,7 +463,8 @@ int main(void)
 		if (!shouldBrake && !(ticksElapsed % ticksServo)) {
 			//turn a small angle every SERVO_TURN_PERIOD ms.
 			float diff = abs_float(steeringAngle - next->steeringAngle);
-			if (diff > 0 && timeLeft < (SERVO_TURN_PERIOD) * (diff / SERVO_TURN_STEP)) {
+			if (diff < 0.01) shouldEnd = 1;
+			else if (timeLeft < (SERVO_TURN_PERIOD) * (diff / SERVO_TURN_STEP)) {
 				//should increment.
 				float step = min_float(SERVO_TURN_STEP, diff);
 				if (nextAngle < steeringAngle) step = -step;
@@ -488,7 +490,7 @@ int main(void)
 
 				servo_setAngle(nextAngle);
 				if (shouldBrake) {
-					ticksDelay = (SERVO_TURN_PERIOD * SERVO_TURN_STEP) / MS_FRAME * abs_float(nextAngle - steeringAngle) - 1;
+					ticksDelay = (SERVO_TURN_PERIOD / MS_FRAME) * (abs_float(nextAngle - steeringAngle) / SERVO_TURN_STEP);
 					motor_setDrive(0, 0);
 					dist_reset(0);
 				} else dist_reset(estSpeed);
@@ -510,9 +512,9 @@ int main(void)
 			uint8_t c = ring_serial[track_i];
 			buf_serial[buf_i++] = c;
 			if (c == CMD_END) {
-//				uint8_t *temp = buf_serial;
-//				uint16_t val = parse_uint16_t_until(&temp, CMD_END, 4);
-//				servo_setVal(val);
+				uint8_t *temp = buf_serial;
+//				float angle = parse_float_until(&temp, CMD_END, 4);
+//				servo_setAngle(angle);
 				commands_process(&huart3, buf_serial, buf_i);
 				buf_i = 0;
 			}

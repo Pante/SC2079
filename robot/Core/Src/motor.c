@@ -19,7 +19,7 @@ static PidDef pidDistTarget;
 
 const static float Kp_distTarget = 1.1;
 const static float Ki_distTarget = 0.0011;
-const static float Kd_distTarget = 0.29;
+const static float Kd_distTarget = 0.15;
 
 static PidDef pidDistAway;
 const static float Kp_distAway = 1.52;

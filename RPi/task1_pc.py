@@ -5,8 +5,8 @@ import sys
 import threading
 from multiprocessing import Manager, Process
 from pathlib import Path
-
-from time import time_ns
+from datetime import datetime as dt
+from time import time_ns, sleep
 import cv2
 import numpy as np
 
@@ -29,16 +29,18 @@ class Task1PC:
         self.port = 5000
         self.client_socket = None
 
-        self.stream_listener = StreamListener("v9_task2_tuneup.pt")
+        self.stream_listener = StreamListener("v12_task1.pt")
         self.IMG_BLACKLIST = ["40", "marker"]
         self.prev_image = None
         self.img_time_dict = {}
-        self.time_threshold = -0.5e9
+        self.time_threshold_ns = 2.0e9
         self.img_pending_arr = []
         self.stitching_img_dict = {}
         self.stitching_arr = []  # to store the image_id's of the image to stitch
         self.should_stitch = False
         self.stitch_len = 0 # number of images to stitch.
+
+        self.start_time = time_ns()
 
     def start(self):
         self.pc_receive_thread = threading.Thread(target=self.pc_receive)
@@ -50,50 +52,57 @@ class Task1PC:
         self.stream_listener.start_stream_read(
             self.on_result, self.on_disconnect, conf_threshold=0.65, show_video=True
         )
-
+        
     def on_result(self, result, frame):
-
-        message_content = None
-        img_id = 1
         if result is not None:
             names = result.names
-            detected_img_id = names[int(result.boxes[0].cls[0].item())]
-            detected_conf_level = result.boxes[0].conf.item()
-            if detected_img_id in self.IMG_BLACKLIST:
-                return
-        
-            self.prev_image = detected_img_id
+            
+            for box in result.boxes:
+                detected_img_id = names[int(box.cls[0].item())]
+                detected_conf_level = box.conf.item()
+                if detected_img_id in self.IMG_BLACKLIST:
+                    continue
+            
+                self.prev_image = detected_img_id
 
-            if detected_img_id not in self.stitching_img_dict or (
-                self.stitching_img_dict[detected_img_id][0] < detected_conf_level
-            ):
-                # If the newly detected confidence level < current one in the dictionary, replace
-                self.stitching_img_dict[detected_img_id] = (
-                    detected_conf_level,
-                    frame,
-                )
-                print(f"Saw {detected_img_id} with confidence level {detected_conf_level}.")
-            
-            # Saving the frames into dictionaries
-            cur_time = time_ns()
-            old_time = cur_time
-            if detected_img_id in self.img_time_dict:
-                old_time = self.img_time_dict[detected_img_id]
-            else:
-                self.img_time_dict[detected_img_id] = old_time
-            
-            rem = len(self.img_pending_arr)
-            if rem > 0:
-                for i, (obstacle_id, timestamp) in enumerate(self.img_pending_arr):
-                    if self.check_timestamp(obstacle_id, detected_img_id, timestamp, old_time, cur_time):
+                if detected_img_id not in self.stitching_img_dict or (
+                    self.stitching_img_dict[detected_img_id][0] < detected_conf_level
+                ):
+                    # If the newly detected confidence level < current one in the dictionary, replace
+                    self.stitching_img_dict[detected_img_id] = (
+                        detected_conf_level,
+                        frame,
+                    )
+                    print(f"Saw {detected_img_id} with confidence level {detected_conf_level}.")
+                
+                # Saving the frames into dictionaries
+                cur_time = time_ns()
+                old_time = cur_time
+                if detected_img_id in self.img_time_dict:
+                    old_time = self.img_time_dict[detected_img_id][0]
+                
+                self.img_time_dict[detected_img_id] = (old_time, cur_time)
+                
+                rem = len(self.img_pending_arr)
+                if rem > 0:
+                    max_overlap = 0
+                    max_obstacle_id = None
+                    for i, (obstacle_id, timestamp) in enumerate(self.img_pending_arr):
+                        overlap = self.check_timestamp(detected_img_id, timestamp, old_time, cur_time)
+                        if overlap > max_overlap:
+                            max_overlap = overlap
+                            max_obstacle_id = obstacle_id
+
+                    if max_obstacle_id is not None:
+                        self.match_image(max_obstacle_id, detected_img_id)
                         self.img_pending_arr.pop(i)
 
                         if self.should_stitch and len(self.stitching_arr) >= self.stitch_len:
                             # last image reached.
                             print("Found last image, stitching now...")
                             self.stream_listener.close()
+                            self.should_stitch = False
                             stitchImages(self.stitching_arr, self.stitching_img_dict)
-                        break
 
         elif self.prev_image != "NONE":
             # No object detected, send "NONE" over
@@ -108,7 +117,6 @@ class Task1PC:
         try:
             self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.client_socket.connect((self.host, self.port))
-            self.client_socket.send(bytes(f"TIME,{time_ns()}", "utf-8"))
         except OSError as e:
             print("Error in connecting to PC:", e)
 
@@ -123,26 +131,30 @@ class Task1PC:
         except Exception as e:
             print("Failed to disconnected from PC:", e)
 
-    def check_timestamp(self, obstacle_id, img_id, timestamp, old_time, cur_time):
-        if img_id in self.stitching_arr:
-            return False
-        
-        old_time -= self.time_threshold
-        cur_time += self.time_threshold
-        print(f"Image ID {img_id}: Checking {old_time} <= {timestamp} <= {cur_time}...")
-        if timestamp >= old_time and timestamp <= cur_time:
-            print(f"Matched obstacle ID {obstacle_id} as image ID {img_id}.")
-            self.stitching_arr.append(img_id)
-            print(f"Images found for stitching: {len(self.stitching_arr)}")
-            message_content = f"{obstacle_id},{self.stitching_img_dict[img_id][0]},{img_id}"
-            print("Sending:", message_content)
-            self.client_socket.send(message_content.encode("utf-8"))
+    def interval_overlap(self, int1, int2):
+        min1, max1 = int1
+        min2, max2 = int2
 
-            return True
+        return min(max1, max2) - max(min1, min2)
+
+    def check_timestamp(self, img_id, timestamp, old_time, cur_time):
+        if img_id in self.stitching_arr:
+            return 0
         
-        print("Not within range.")
-        return False
-        
+        timestamp_int = (timestamp, timestamp + self.time_threshold_ns)
+        comp_int = (old_time, cur_time)
+        overlap = self.interval_overlap(comp_int, timestamp_int)
+
+        return overlap
+    
+    def match_image(self, obstacle_id, img_id):
+        print(f"Matched obstacle ID {obstacle_id} as image ID {img_id}.")
+        self.stitching_arr.append(img_id)
+        print(f"Images found for stitching: {len(self.stitching_arr)}")
+        message_content = f"{obstacle_id},{self.stitching_img_dict[img_id][0]},{img_id}"
+        print("Sending:", message_content)
+        self.client_socket.send(message_content.encode("utf-8"))
+
     def pc_receive(self) -> None:
         print("PC Socket connection started successfully")
         self.connect()
@@ -154,18 +166,23 @@ class Task1PC:
 
                 if "DETECT" in message_rcv:
                     #last timestamp sent in
-                    obstacle_id, timestamp_str = message_rcv.split(",")[1:]
-                    timestamp = int(timestamp_str.strip())
+                    obstacle_id = message_rcv.split(",")[1]
+                    timestamp = time_ns()
                     
-                    cur_time = time_ns()
-                    has_found = False
-                    for img_id, old_time in self.img_time_dict.items():
-                        if self.check_timestamp(obstacle_id, img_id, timestamp, old_time, cur_time):
-                            has_found = True
-                            del self.img_time_dict[img_id]
-                            break
+                    max_overlap = 0
+                    max_img_id = None
+                    for img_id, (old_time, cur_time) in self.img_time_dict.items():
+                        overlap = self.check_timestamp(img_id, timestamp, old_time, cur_time)
+                        print(f"overlap: {overlap}, max overlap: {max_overlap}")
+                        if overlap > 0 and overlap >= max_overlap:
+                            print(f"replacing max overlap with {overlap}")
+                            max_overlap = overlap
+                            max_img_id = img_id
                     
-                    if not has_found:
+                    if max_img_id is not None:
+                        self.match_image(obstacle_id, max_img_id)
+                        del self.img_time_dict[max_img_id]
+                    else:
                         self.img_pending_arr.append((obstacle_id, timestamp))
 
                 elif "PERFORM STITCHING" in message_rcv:
@@ -174,7 +191,11 @@ class Task1PC:
                     if len(self.stitching_arr) < self.stitch_len:
                         print("Stitch request received, wait for completion...")
                         self.should_stitch = True
+                        sleep(self.time_threshold_ns * 2e-9)
+                        if self.should_stitch:
+                            stitchImages(self.stitching_arr, self.stitching_img_dict)
                     else:
+                        print("All images present, stitching now...")
                         self.stream_listener.close()
                         stitchImages(self.stitching_arr, self.stitching_img_dict)
 
@@ -184,20 +205,6 @@ class Task1PC:
             except OSError as e:
                 print("Error in sending data:", e)
                 break
-
-
-def archiveImages():
-    imageFolder = "stitching_images"  # Change to where picam frames are saved.
-    archiveFolder = (
-        "stitching_archive"  # change to folder where you want to archive images.
-    )
-
-    for files in os.walk(imageFolder):
-        for file in files:
-            src_path = os.path.join(imageFolder, file)
-            dst_path = os.path.join(archiveFolder, file)
-            os.rename(src_path, dst_path)
-
 
 def stitchImages(id_arr, stitching_dict):
     col_count = 0
@@ -223,14 +230,15 @@ def stitchImages(id_arr, stitching_dict):
         cols.append(np.vstack(col_cur))
     canvas = np.hstack(cols)
 
+    # Save collage and save a copy
+    cv2.imwrite(f"collage_{dt.strftime(dt.now(), '%H%M%S')}.jpg", canvas)
+
     # Display collage
-    cv2.imshow("Collage", canvas)
+    window_name = "Collage"
+    cv2.imshow(window_name, canvas)
+    cv2.setWindowProperty(window_name, cv2.WND_PROP_TOPMOST, 1)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-    # Save collage and save a copy
-    cv2.imwrite("collage_task1.jpg", canvas)
-
 
 if __name__ == "__main__":
     pcMain = Task1PC()

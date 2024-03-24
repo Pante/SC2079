@@ -39,7 +39,7 @@ def __generate_objectives(world: World, obstacle: Obstacle) -> set[Vector]:
     The offset to the sides (in grid cells) between the obstacle and objective, inclusive. 
     (Total cm / cm per cell). This should be increased as the difference in sizes between obstacles & the robot increases.
     """
-    offset = 0 // world.cell_size
+    offset = 10 // world.cell_size
 
     objectives = set()
     for gap in range(minimum_gap, maximum_gap):
@@ -74,7 +74,7 @@ def __suggest_objective(robot: Robot, obstacle: Obstacle, gap: int, alignment: i
                 Direction.SOUTH,
                 obstacle.north_east.x - clearance + alignment,
                 obstacle.north_east.y + robot.south_length + gap,
-                )
+            )
 
         case Direction.EAST:
             return Vector(

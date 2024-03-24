@@ -52,6 +52,19 @@ class AndroidMessage:
         """
         return json.dumps({'type': self._type, 'value': self._value})
 
+class AndroidDummy():
+    def connect(self):
+        print("Connected to Android dummy.")
+    
+    def disconnect(self):
+        print("Disconnected from Android dummy.")
+
+    def send(self, message):
+        print(f"Sent {message} to Android dummy.")
+    
+    def receive(self):
+        while True:
+            pass
 
 class Android(Link):
     """Class for communicating with Android tablet over Bluetooth connection. 

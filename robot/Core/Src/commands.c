@@ -109,8 +109,8 @@ void commands_process(UART_HandleTypeDef *uart, uint8_t *buf, uint8_t size) {
 		temp->next = next;
 	}
 
-	//acknowledge command has been received and queued.
-	commands_ack(uart, next, CMD_RCV);
+//	//acknowledge command has been received and queued.
+//	commands_ack(uart, next, CMD_RCV);
 }
 
 

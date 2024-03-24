@@ -12,16 +12,14 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
     :param world: The world.
     :param start: The initial vector.
     :param instruction: The turn instruction.
-    :return:
-        The x & y coordinates of the centre of the turning radius,
-        the vector after executing the turn
-        the quadrant of the turn,
+    :return: The path of the turn if it is legal, otherwise returns None.
     """
 
     # The turning radius (in grid cells). The turning radius is assumed to be 25cm.
     turning_radius = instruction.radius(world.cell_size)
     offset = 3 // world.cell_size
 
+    curve: list[Vector] | None
     match (start.direction, instruction):
         # y facing north
         case (Direction.NORTH, TurnInstruction.FORWARD_LEFT):
@@ -283,7 +281,6 @@ def turn(world: World, start: Vector, instruction: TurnInstruction) -> list[Vect
 def __curve(
     world: World,
     turning_radius: int,
-    end: Vector,
     centre_x: int,
     centre_y,
     quadrant: int,
