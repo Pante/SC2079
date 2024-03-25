@@ -56,11 +56,11 @@
                         android:layout_height="50dp"
                         android:layout_marginStart="36dp"
                         android:layout_marginTop="15dp"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        android:background="@drawable/border_black"
                         android:scaleType="centerCrop"
 
-                        app:srcCompat="@mipmap/snorlax"
-                        android:background="@drawable/border_black" />
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:srcCompat="@mipmap/treeobst" />
 
                 </LinearLayout>
 

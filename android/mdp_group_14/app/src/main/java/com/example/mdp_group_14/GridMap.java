@@ -122,13 +122,13 @@ public class GridMap extends View {
         maroonPaint.setStrokeWidth(8);
         obstacleColor.setColor(getResources().getColor(R.color.black));
         imageColor.setColor(getResources().getColor(R.color.rockColor));
-        robotColor.setColor(getResources().getColor(R.color.lightRed));
+        robotColor.setColor(getResources().getColor(R.color.pikaYellow));
         robotColor.setStrokeWidth(2);
         endColor.setColor(Color.RED);
         startColor.setColor(Color.CYAN);
         waypointColor.setColor(Color.GREEN);
-        unexploredColor.setColor(getResources().getColor(R.color.grassGreen));
-        exploredColor.setColor(getResources().getColor(R.color.exploredColor2));
+        unexploredColor.setColor(getResources().getColor(R.color.skyBlue));
+        exploredColor.setColor(getResources().getColor(R.color.lighterYellow));
         arrowColor.setColor(Color.BLACK);
         fastestPathColor.setColor(Color.MAGENTA);
         Paint newpaint = new Paint();
