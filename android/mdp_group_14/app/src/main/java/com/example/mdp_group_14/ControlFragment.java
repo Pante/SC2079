@@ -140,7 +140,7 @@ public class ControlFragment extends Fragment {
                     gridMap.moveRobot("right");
                     Home.refreshLabel();
                     Home.printMessage("fr");
-                    showLog("test");
+//                    showLog("test");
                     System.out.println(Arrays.toString(gridMap.getCurCoord()));
                 }
                 else

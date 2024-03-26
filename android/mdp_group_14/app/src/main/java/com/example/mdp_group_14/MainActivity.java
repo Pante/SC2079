@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 //        sectionsPagerAdapter.addFragment(new BluetoothCommunications(),"CHAT");
         sectionsPagerAdapter2.addFragment(new Home(),"Home");
         sectionsPagerAdapter2.addFragment(new BluetoothSetUp(),"Bluetooth");
-
+        sectionsPagerAdapter2.addFragment(new EmergencyFragment(),"Add Obstacle");
 
         ViewPager viewPager2 = findViewById(R.id.view_pager2);
         viewPager2.setAdapter(sectionsPagerAdapter2);
