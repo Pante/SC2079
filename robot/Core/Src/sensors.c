@@ -3,7 +3,7 @@
 static const uint8_t GYRO_SENS = GYRO_FULL_SCALE_250DPS;
 static const uint8_t ACCEL_SENS = ACCEL_FULL_SCALE_2G;
 static const float a_irDist = 0.95;
-static const float a_usDist = 0.75;
+static const float a_usDist = 0.58;
 static const float a_accel = 0.8;
 static const float a_mag = 0.9;
 static float magOld[2];
@@ -62,7 +62,9 @@ void sensors_us_trig() {
 }
 
 void sensors_read_usDist(float pulse_s) {
-	sensors_ptr->usDist = lpf(a_usDist, sensors_ptr->usDist, pulse_s * 34300 / 2);
+	float new_dist = pulse_s * 34300 / 2;
+//	sensors_ptr->usDist = new_dist;
+	sensors_ptr->usDist = lpf(a_usDist, sensors_ptr->usDist, new_dist);
 }
 
 static float irValueToDist(uint16_t value) {

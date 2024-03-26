@@ -1,13 +1,13 @@
 class Config():
     def __init__(self, task1_weights, task2_weights):
         self.is_outdoors = False
-        self.conf_threshold = 0.7
+        self.conf_threshold = 0.65
         self.task1_weights = task1_weights
         self.task2_weights = task2_weights
 
 class IndoorsConfig(Config):
     def __init__(self):
-        Config.__init__(self, 'v12_task1.pt', 'v9_task2_stop removed.pt')
+        Config.__init__(self, 'v12_task1.pt', 'v9 task2_stop removed.pt')
 
 class OutdoorsConfig(Config):
     def __init__(self):

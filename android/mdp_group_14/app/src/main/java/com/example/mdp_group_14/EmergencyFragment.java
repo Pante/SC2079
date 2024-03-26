@@ -27,8 +27,9 @@ public class EmergencyFragment extends DialogFragment {
     View rootView;
     private SharedPreferences.Editor editor;
     Button addManualBtn, cancelBtn;
+    GridMap gridMap;
     Switch isObstSwitch;
-    boolean isObstacle = true;
+    boolean isObstacle = false;
 
     @Nullable
     @Override
@@ -39,7 +40,7 @@ public class EmergencyFragment extends DialogFragment {
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Shared Preferences", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
-
+        gridMap = Home.getGridMap();
         // buttons
         addManualBtn = rootView.findViewById(R.id.addManualBtn);
         cancelBtn = rootView.findViewById(R.id.cancelManualBtn);
@@ -80,47 +81,78 @@ public class EmergencyFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 showLog("Clicked addManualBtn");
-                EditText chatInput = BluetoothCommunications.getTypeBoxEditText();
-                String old = chatInput.getText().toString();
-                if(old.equals("")) old = "ALG";
-
+//                EditText chatInput = BluetoothCommunications.getTypeBoxEditText();
+//                String old = chatInput.getText().toString();
+//                if(old.equals("")) old = "ALG";
+                String obstDir="NULL";
                 int col = Integer.parseInt(xValSpinner.getSelectedItem().toString());
                 int row = Integer.parseInt(yValSpinner.getSelectedItem().toString());
                 showLog("Col = " + col  + ", Row = " + row);
                 // obstDir
                 String dir = dirValSpinner.getSelectedItem().toString();
-                int obstDir;
+
                 switch(dir) {
-                    case "North":
-                        obstDir = 90;
-                        break;
-                    case "South":
-                        obstDir = -90;
+//                    case "North":
+//                        obstDir = 90;
+//                        break;
+//                    case "South":
+//                        obstDir = -90;
+//                        break;
+//                    case "East":
+//                        obstDir = 0;
+//                        break;
+//                    case "West":
+//                        obstDir = 180;
+//                        break;
+//                    default:
+//                        showLog("Setting default direction: North");
+//                        obstDir = 90;
+                    case "West":
+                        obstDir="left";
                         break;
                     case "East":
-                        obstDir = 0;
+                        obstDir="right";
                         break;
-                    case "West":
-                        obstDir = 180;
+                    case "South":
+                        obstDir="down";
                         break;
-                    default:
-                        showLog("Setting default direction: North");
-                        obstDir = 90;
+                    case "North":
+                        obstDir="up";
+                        break;
                 }
-                showLog("Dir = " + dir + "; algDir = " + obstDir);
+//                showLog("Dir = " + dir + "; algDir = " + obstDir);
+
+                if (isObstacle)
+                {
+                    gridMap.imageBearings.get(row)[col] = dir;
+                    gridMap.setObstacleCoord(col+1, row+1);
+                }
+
+                else{
+//                    gridMap.setRobotDirection("up");
+//                    gridMap.updateRobotAxis(col, row, "up");
+//                    BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString(col)+Integer.toString(row)+obstDir);
+                    gridMap.canDrawRobot = true;
+                    gridMap.setStartCoordStatus(true);
+                    gridMap.setStartCoord(col+1,row+1);
+                    gridMap.updateRobotAxis(col+1, row+1, obstDir);
+                    Home.refreshDirection(obstDir);
+
+                }
 
                 // obstID is acquired based on the obstID set for the PREVIOUS obstacle (prev obst MUST be added in this way)
-                int obstID = 0;
-                if(!old.equals("ALG")) {
-                    obstID = Integer.parseInt(old.substring(old.lastIndexOf(",") + 1)) + 1;
-                }
-                if(!isObstacle) obstID = -1;
-
-                String obstString = "|" + (col * 10 + 5) + "," + (row * 10 + 5) + "," + obstDir + "," + obstID;
-                String newString = old + obstString;
-                chatInput.setText(newString);
+//                int obstID = 0;
+//                if(!old.equals("ALG")) {
+//                    obstID = Integer.parseInt(old.substring(old.lastIndexOf(",") + 1)) + 1;
+//                }
+//                if(!isObstacle) obstID = -1;
+//
+//                String obstString = "|" + (col * 10 + 5) + "," + (row * 10 + 5) + "," + obstDir + "," + obstID;
+//                String newString = old + obstString;
+//                chatInput.setText(newString);
 //                getDialog().dismiss();
-                showToast("Obstacle string added!");
+                gridMap.invalidate();
+                showToast("Obstacle string addedd!");
                 showLog("Exiting addManualBtn");
             }
         });

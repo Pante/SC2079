@@ -7,8 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="lightYellow">#FFFFE0</color>
-    <color name="colorYellow">#ffcb05</color>
+    <color name="lightYellow">#7bcded</color>
+    <color name="colorYellow">#009bd9</color>
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#1E88E5</color>
     <color name="colorWhite">#FFFFFF</color>
@@ -45,6 +45,9 @@
     <color name="superMarioBlue">#009bd9</color>
     <color name="luigiGreen">#b3cf99</color>
     <color name="grassGreen">#40b088</color>
+    <color name="skyBlue">#00b4d8</color>
+    <color name="lighterYellow">#fff8de</color>
+    <color name="pikaYellow">#ffe68a</color>
 
 
 

@@ -56,11 +56,11 @@
                         android:layout_height="50dp"
                         android:layout_marginStart="36dp"
                         android:layout_marginTop="15dp"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        android:background="@drawable/border_black"
                         android:scaleType="centerCrop"
 
-                        app:srcCompat="@mipmap/walnut"
-                        android:background="@drawable/border_black" />
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:srcCompat="@mipmap/treeobst" />
 
                 </LinearLayout>
 
@@ -163,15 +163,16 @@
 
                 </LinearLayout>
             </LinearLayout>
-            <Button
-                android:id="@+id/updateMapBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="13dp"
-                android:paddingEnd="10dp"
-                android:text="Preload Defaults"
-                android:background="@drawable/border_black_state"
-                app:backgroundTint="@color/colorYellow"/>
+<!--            "Preload Defaults"-->
+<!--            <Button-->
+<!--                android:id="@+id/updateMapBtn"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="13dp"-->
+<!--                android:paddingEnd="10dp"-->
+<!--                android:text="DO NOT CLICK"-->
+<!--                android:background="@drawable/border_black_state"-->
+<!--                app:backgroundTint="@color/colorYellow"/>-->
 
             <ImageView
                 android:id="@+id/eBtn"

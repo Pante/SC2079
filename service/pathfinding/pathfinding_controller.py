@@ -143,7 +143,7 @@ def pathfinding(body: PathfindingRequest):
 
     robot = body.robot.to_robot()
     obstacles = [obstacle.to_obstacle() for obstacle in body.obstacles]
-    world = World(100, robot, obstacles)
+    world = World(200, robot, obstacles)
 
     objectives = generate_objectives(world)
     segments = search(world, objectives)
