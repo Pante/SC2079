@@ -66,9 +66,9 @@ class Task2RPI:
         if config.is_outdoors:
             self.theta2 = 10 # angle to face second obstacle after first arc.
             self.drive_speed = 35
-            self.obstacle_speed = 40
+            self.obstacle_speed = 45
             self.wall_track_speed = 35
-            self.carpark_speed = 25
+            self.carpark_speed = 45
         else:
             self.theta2 = 10 # angle to face second obstacle after first arc.
             self.drive_speed = 45
@@ -465,7 +465,7 @@ class Task2RPI:
         print(f"y1: {y1}, y2: {y2}")
         d1 = 0.7 * y1
         self.drive(0, d1)
-        a, d = self.calc_arc(self.wall_dist / 2, y1 - d1  + y2 - self.turning_r * 0.25)
+        a, d = self.calc_arc(self.wall_dist / 2 + self.wheelbase_cm, y1 - d1  + y2 - self.turning_r * 0.25)
         print(f"a: {a}, d: {d}")
         self.drive(-a if self.is_right2 else a, d)
         # self.drive(-angle, 90 - d)

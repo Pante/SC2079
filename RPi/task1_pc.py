@@ -25,6 +25,7 @@ class Task1PC:
         self.port = 5000
         self.client_socket = None
 
+        print(f"! -- initialising weights file: {config.task1_weights}....")
         self.stream_listener = StreamListener(config.task1_weights)
         self.IMG_BLACKLIST = ["marker"]
         self.prev_image = None
@@ -91,7 +92,7 @@ class Task1PC:
                             print("Found last image, stitching now...")
                             self.stream_listener.close()
                             self.should_stitch = False
-                            stitch_images(self.filename, self.stitching_arr, self.stitching_img_dict)
+                            stitch_images(self.stitching_arr, self.stitching_img_dict, filename=self.filename)
 
         elif self.prev_image != "NONE":
             # No object detected, send "NONE" over
@@ -182,11 +183,11 @@ class Task1PC:
                         self.should_stitch = True
                         sleep(self.time_threshold_ns * 2e-9)
                         if self.should_stitch:
-                            stitch_images(self.filename, self.stitching_arr, self.stitching_img_dict)
+                            stitch_images(self.stitching_arr, self.stitching_img_dict, filename=self.filename)
                     else:
                         print("All images present, stitching now...")
                         self.stream_listener.close()
-                        stitch_images(self.filename, self.stitching_arr, self.stitching_img_dict)
+                        stitch_images(self.stitching_arr, self.stitching_img_dict, filename=self.filename)
 
                 if not message_rcv:
                     print("PC connection dropped")

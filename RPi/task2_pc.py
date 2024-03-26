@@ -22,11 +22,12 @@ class Task2PC:
         self.host = "192.168.14.14"
         self.port = 5000
         self.client_socket = None
-
+        print(f"! -- initialising weights file: {config.task2_weights}....")
         self.stream_listener = StreamListener(config.task2_weights)
 
         self.stitching_arr = []
         self.stitching_dict = {}
+        self.filename = "task2"
 
         self.obstacle_id = 1
         self.obstacle_img_id = None
@@ -43,7 +44,7 @@ class Task2PC:
 
     def stream_start(self):
         self.stream_listener.start_stream_read(
-            self.on_result, self.on_disconnect, conf_threshold=0.65, show_video=True
+            self.on_result, self.on_disconnect, conf_threshold=0.65, show_video=False
         )
 
     def on_result(self, result, frame):
@@ -53,19 +54,17 @@ class Task2PC:
             conf_level = result.boxes[0].conf.item()
             img_id = result.names[int(result.boxes[0].cls[0].item())]
 
+            if img_id not in [self.LEFT_ARROW_ID, self.RIGHT_ARROW_ID]:
+                print(f"Detected invalid image {img_id}, skipping...")
+                return
+            
             if self.obstacle_img_id is None:
                 # Detected a different image, send over.
                 message_content = f"{conf_level},{img_id}"
                 self.obstacle_img_id = img_id
             
             if img_id == self.obstacle_img_id:
-                add_to_stitching_dict(self.stitching_dict, img_id, conf_level, frame)
-
-        elif self.obstacle_img_id != "NONE":
-            # No object detected, send "NONE" over
-            # Upon capture image, if no object is detected -- "NONE", continue to wait until a object is detected (not "NONE")
-            message_content = "NONE"
-            self.obstacle_img_id = "NONE"
+                add_to_stitching_dict(self.stitching_dict, self.obstacle_id, conf_level, frame)
 
         if message_content is not None:
             print("Sending:", message_content)
@@ -110,7 +109,7 @@ class Task2PC:
                     self.obstacle_img_id = None
 
                 elif "STITCH" in message_rcv:
-                    stitch_images([1, 2], self.stitching_dict)
+                    stitch_images([1, 2], self.stitching_dict, filename=self.filename)
             except OSError as e:
                 print("Error in sending data:", e)
                 break
