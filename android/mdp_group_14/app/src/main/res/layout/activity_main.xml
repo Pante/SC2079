@@ -36,7 +36,7 @@
                 android:src="@drawable/nav_icon2" />
 
             <ImageView
-                android:layout_width="500dp"
+                android:layout_width="450dp"
                 android:layout_height="100dp"
 
                 android:src="@drawable/group_name2" />
