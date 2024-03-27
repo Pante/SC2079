@@ -23,4 +23,12 @@ Other misc components:
 * [Zhei En](https://github.com/zheien)
 
 ## Results
-![telegram-cloud-photo-size-5-6339145891381886138-y](https://github.com/Pante/SC2079/assets/9427324/ddc146c2-a356-4c2f-ac03-80814fd5c9cd)
+
+**Task 1:**
+
+![task 1 leaderboard-1](https://github.com/Pante/SC2079/assets/9427324/63c0b7df-2cd6-4ab6-a096-7543b3eee692)
+
+
+**Task 2:**
+
+![task 2 leaderboard(1)](https://github.com/Pante/SC2079/assets/9427324/2969a2ac-4442-4e5c-a6b2-a2b90acee73e)
