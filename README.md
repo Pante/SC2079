@@ -4,7 +4,7 @@ This mono-repository contains the entire codebase for MDP.
 
 It is divided into the following components:
 * RPi - Contains the Raspberry Pi codebase that is responsible for communicating between the Android tablet, STM, image recongition service & pathfinding service.
-* Image Rec - Contains codes responsible for AI image recognition training. Model used is Yolov8, a You Only Look Once Image recognition algorithm. Detection method is instance segmentation Includes archive of AI models trained. Dataset for this model can be found [here](https://universe.roboflow.com/my-space-gprvy/yukto-s-c/dataset/61)
+* Image Rec - Contains codes responsible for AI image recognition training. Model used is Yolov8, a You Only Look Once Image recognition algorithm. Detection method is instance segmentation. Includes archive of AI models trained. Dataset for this model can be found [here](https://universe.roboflow.com/my-space-gprvy/yukto-s-c/dataset/61)
 * Android - The Android tablet codebase.
 * Openapi Simulator Client - An outdated simulator for the pathfinding service. See `Simulator Client` instead. It is built using NextJS and uses a [generated OpenAPI client](https://github.com/OpenAPITools/openapi-generator) to communicate with the pathfinding service. (It might no longer work as it was abandoned after the completion of the MDP checklist).
 * Robot - The STM codebase.
