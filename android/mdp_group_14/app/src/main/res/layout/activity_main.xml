@@ -36,10 +36,10 @@
                 android:src="@drawable/nav_icon2" />
 
             <ImageView
-                android:layout_width="460dp"
+                android:layout_width="430dp"
                 android:layout_height="100dp"
 
-                android:src="@drawable/group_name" />
+                android:src="@drawable/group_name2" />
 
 <!--            <TextView-->
 <!--                android:id="@+id/title"-->
