@@ -1,8 +1,0 @@
-
-pybluez
-pyserial
-picamera
-pip3
-flask
-flask-cors
-flask-swagger
